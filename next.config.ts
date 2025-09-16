@@ -1,11 +1,18 @@
 import type { NextConfig } from 'next';
+import createMDX from '@next/mdx';
 
 const nextConfig: NextConfig = {
-  output: 'export', // 정적 사이트 생성
+  output: 'export',
   images: {
-    unoptimized: true, // 이미지 최적화 끄기
+    unoptimized: true,
   },
+  pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
   basePath: process.env.NODE_ENV === 'production' ? '' : undefined,
 };
 
-export default nextConfig;
+const withMDX = createMDX({
+  // Add markdown plugins here, as desired
+});
+
+// Merge MDX config with Next.js config
+export default withMDX(nextConfig);
