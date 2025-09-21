@@ -1,4 +1,4 @@
-import { getPosts } from '@/entities/post/model/model';
+import getPosts from '@/entities/post/model/getPosts';
 import PostList from '@/features/postList/ui/postList';
 
 const PostsPage = async () => {

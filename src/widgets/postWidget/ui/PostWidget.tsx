@@ -1,11 +1,11 @@
-import type { Post } from '@/entities/post/model/types';
+import { MDXRemote } from 'next-mdx-remote/rsc';
 
-export default function PostWidget({ post }: { post: Post }) {
+const PostWidget = ({ content }: { content: string }) => {
   return (
     <article>
-      <h2>{post.title}</h2>
-      <p>{post.date}</p>
-      <div>{post.content}</div>
+      <MDXRemote source={content} />
     </article>
   );
-}
+};
+
+export default PostWidget;

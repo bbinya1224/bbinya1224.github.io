@@ -1,4 +1,5 @@
-import { getPostBySlug } from '@/entities/post/model/model';
+import getPostBySlug from '@/entities/post/model/getPostBySlug';
+import getPostSlugs from '@/entities/post/model/getPostSlugs';
 import PostWidget from '@/widgets/postWidget/ui/PostWidget';
 
 const PostDetailPage = async ({ params }: { params: { slug: string } }) => {
@@ -8,9 +9,14 @@ const PostDetailPage = async ({ params }: { params: { slug: string } }) => {
 
   return (
     <section>
-      <PostWidget post={post} />
+      <PostWidget content={post.content} />
     </section>
   );
 };
 
 export default PostDetailPage;
+
+export const generateStaticParams = async () => {
+  const slugs = getPostSlugs();
+  return slugs.map((slug) => ({ slug }));
+};
