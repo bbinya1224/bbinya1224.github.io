@@ -1,10 +1,7 @@
+import EntryPage from '@/page/ui/EntryPage';
+
 const HomePage = () => {
-  return (
-    <section>
-      <h1>Github Blog Project</h1>
-      <p>example code~</p>
-    </section>
-  );
+  return <EntryPage />;
 };
 
 export default HomePage;
