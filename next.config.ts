@@ -1,5 +1,5 @@
-import type { NextConfig } from 'next';
-import createMDX from '@next/mdx';
+import type { NextConfig } from 'next'
+import createMDX from '@next/mdx'
 
 const nextConfig: NextConfig = {
   output: 'export',
@@ -7,12 +7,11 @@ const nextConfig: NextConfig = {
     unoptimized: true,
   },
   pageExtensions: ['js', 'jsx', 'md', 'mdx', 'ts', 'tsx'],
-  basePath: process.env.NODE_ENV === 'production' ? '' : undefined,
-};
+}
 
 const withMDX = createMDX({
   // Add markdown plugins here, as desired
-});
+})
 
 // Merge MDX config with Next.js config
-export default withMDX(nextConfig);
+export default withMDX(nextConfig)

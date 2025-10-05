@@ -1,15 +1,12 @@
 {
-  "homepage": "https://bbinya1224.github.io",
   "name": "my-blog",
   "version": "0.1.0",
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack && next export",
+    "build": "next build",
     "start": "next start",
-    "lint": "eslint",
-    "predeploy": "npm run build",
-    "deploy": "touch out/.nojekyll && gh-pages -d out --dotfiles"
+    "lint": "eslint"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
