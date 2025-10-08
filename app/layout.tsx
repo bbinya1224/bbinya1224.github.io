@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import '@/app/globals.css';
+import '@/app/style/globals.css';
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (

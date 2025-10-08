@@ -1,4 +1,4 @@
-import Header from '@/shared/ui/Header';
+import Header from '@/widgets/header/ui/Header';
 import type { ReactNode } from 'react';
 
 const Layout = ({ children }: { children: ReactNode }) => {
