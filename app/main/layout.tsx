@@ -6,10 +6,10 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <section className="relative mx-auto max-w-[var(--page-width)]">
       <Header />
-      <article className="mx-4 flex flex-row">
+      <article className="mx-4 flex flex-row gap-8">
         <Sidebar className="hidden md:block" />
 
-        <main className="w-full">{children}</main>
+        {children}
       </article>
     </section>
   );

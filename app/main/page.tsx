@@ -1,7 +1,11 @@
-import EntryPage from '@/page/ui/EntryPage';
+import PostList from "@/widgets/postList/ui/PostList";
 
 const MainPage = () => {
-  return <EntryPage />;
+  return (
+    <main className="mt-4 w-full">
+      <PostList />
+    </main>
+  );
 };
 
 export default MainPage;
