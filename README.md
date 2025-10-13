@@ -1,36 +1,25 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# We have Today!
 
-## Getting Started
+> https://bbinya1224.github.io/
 
-First, run the development server:
+## 주인장의 사담
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+미루고 미루던 깃허브로 블로그 만들기를 이제서야 시작해보네요. <br /> UI 디자인은
+무엇을 봐도 제 마음에 들지 않아서 [fuwari](https://fuwari.vercel.app/) 템플릿의
+디자인을 참고하였습니다.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+[티스토리](https://bbinya.tistory.com/) 에서
+[벨로그](https://velog.io/@subin1224/posts) 그리고 지금 깃허브 블로그로 정착하여
+글을 열심히 써볼 예정인데요, <br />벨로그에 있는 글들을 먼저 옮기면서 그동안
+공부해 왔던부분(따로 노션에다가 간략히 정리했던..)들을 다듬어서 포스팅하려고
+합니다. <br />그러면서 추가하고 싶은 기능들을 하나씩 feat 해볼까합니다.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+네이버 블로그를 이용하여 일상글 및 리뷰도 포스팅 하고 있는데 뭔가 느낌이 블로그
+덕후가 되어가고 있는것같아요. 😂
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## TODO LIST
 
-## Learn More
+> 포스팅외에 추가하고 싶은 기능들을 작성 했습니다.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- [ ] Category 및 Tag 기능 추가
+- [ ] 댓글 기능
