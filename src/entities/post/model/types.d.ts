@@ -1,7 +1,12 @@
-export type Post = {
-  id: string;
+export type PostFrontmatter = {
   title: string;
-  content: string;
   date: string;
   slug: string;
+  tag?: string;
+  category?: string;
+  description?: string;
 };
+
+export type Post = {
+  content: string;
+} & PostFrontmatter;

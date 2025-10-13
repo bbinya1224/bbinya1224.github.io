@@ -66,7 +66,7 @@ const EntryPage = () => {
 
     const tl = gsap.timeline({
       onComplete: () => {
-        router.push("/main");
+        router.push("/blog");
       },
     });
 

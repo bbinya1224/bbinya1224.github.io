@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
+    <channel>
+        <title><![CDATA[삔아's Blog]]></title>
+        <description><![CDATA[프론트엔드 개발자 삔아의 기술 블로그]]></description>
+        <link>https://bbinya1224.github.io</link>
+        <generator>RSS for Node</generator>
+        <lastBuildDate>Mon, 13 Oct 2025 12:56:49 GMT</lastBuildDate>
+        <atom:link href="https://bbinya1224.github.io/rss.xml" rel="self" type="application/rss+xml"/>
+        <language><![CDATA[ko]]></language>
+        <item>
+            <title><![CDATA[Hello MDX]]></title>
+            <description><![CDATA[이것은 MDX로 작성된 게시글입니다.]]></description>
+            <link>https://bbinya1224.github.io/blog/posts/hello-mdx</link>
+            <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/hello-mdx</guid>
+            <pubDate>Sun, 21 Sep 2025 00:00:00 GMT</pubDate>
+        </item>
+    </channel>
+</rss>
