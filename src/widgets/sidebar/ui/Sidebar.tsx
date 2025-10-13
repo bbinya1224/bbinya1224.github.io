@@ -1,9 +1,9 @@
 import cn from "@/shared/utils/cn";
 import Profile from "@/widgets/sidebar/ui/Profile";
 
-const Sidebar = ({ className }: { className?: string }) => {
+const Sidebar = () => {
   return (
-    <article className={cn("relative mt-4", className)}>
+    <article className={cn("relative mt-4 w-full lg:w-auto")}>
       <Profile />
     </article>
   );
