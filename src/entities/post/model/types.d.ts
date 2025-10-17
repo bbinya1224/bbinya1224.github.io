@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 export type PostFrontmatter = {
   title: string;
   date: string;
@@ -8,5 +10,5 @@ export type PostFrontmatter = {
 };
 
 export type Post = {
-  content: string;
+  content: ReactNode;
 } & PostFrontmatter;
