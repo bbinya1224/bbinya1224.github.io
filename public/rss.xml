@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?><rss xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom" version="2.0">
     <channel>
-        <title><![CDATA[Bell's Blog]]></title>
-        <description><![CDATA[프론트엔드 개발자 Bell의 기술 블로그]]></description>
+        <title><![CDATA[삔아's Blog]]></title>
+        <description><![CDATA[프론트엔드 개발자 삔아의 기술 블로그]]></description>
         <link>https://bbinya1224.github.io</link>
         <generator>RSS for Node</generator>
         <lastBuildDate>Mon, 13 Oct 2025 12:56:49 GMT</lastBuildDate>

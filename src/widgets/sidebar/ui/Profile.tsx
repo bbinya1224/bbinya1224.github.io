@@ -12,7 +12,7 @@ const Profile = () => {
         />
       </div>
       <div className="mt-3">
-        <span className="text-2xl">Bell</span>
+        <span className="text-2xl">삔아</span>
       </div>
       <div className="mx-auto my-2 h-1 w-5 rounded-full bg-amber-300 transition"></div>
 
