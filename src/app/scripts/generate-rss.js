@@ -8,8 +8,8 @@ const postsDirectory = path.join(process.cwd(), "posts");
 
 function generateRSSFeed() {
   const feed = new RSS({
-    title: "삔아's Blog",
-    description: "프론트엔드 개발자 삔아의 기술 블로그",
+    title: "Bell's Blog",
+    description: "프론트엔드 개발자 Bell의 기술 블로그",
     site_url,
     feed_url: `${site_url}/rss.xml`,
     language: "ko",

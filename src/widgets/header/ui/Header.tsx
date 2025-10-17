@@ -28,17 +28,13 @@ const Header = () => {
         </div>
 
         <div className="flex flex-row">
-          <div className="rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]">
-            <Link href="/">
-              <h1 className="text-base font-bold">About Me</h1>
-            </Link>
-          </div>
+          <div className="rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"></div>
 
           <button
             className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"
             onClick={() => setIsDark((prev) => !prev)}
           >
-            {!isDark ? (
+            {isDark ? (
               <LightModeIcon className="size-[24px]" />
             ) : (
               <DarkModeIcon className="size-[24px]" />

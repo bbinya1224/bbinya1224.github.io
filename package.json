@@ -13,6 +13,7 @@
     "@gsap/react": "^2.1.2",
     "@mdx-js/loader": "^3.1.1",
     "@mdx-js/react": "^3.1.1",
+    "@modelcontextprotocol/server-filesystem": "^2025.8.21",
     "@next/mdx": "^15.5.3",
     "@types/mdx": "^2.0.13",
     "clsx": "^2.1.1",

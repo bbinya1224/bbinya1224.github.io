@@ -1,0 +1,197 @@
+---
+title: "[Vue] Pinia 사용해보기"
+date: "2023-09-12"
+slug: "20230912"
+tag: "vue, pinia"
+category: "Frontend"
+description: "이제는 Pinia 사용해요."
+---
+
+# [Vue] Pinia 사용해보기
+
+![Pinia](https://velog.velcdn.com/images/subin1224/post/3c189402-8bdc-4471-b39d-f19444dc253a/image.png)
+
+> 이제는 Vuex 가 아닌 Pinia 를 사용해볼까요?
+
+# 개요
+
+Pinia 는 Vuex5 라고 할 수 있습니다. 최근에 리액트 공부만 하다가 좋은 기회를
+접하게 되어 Vue3 로 작은 프로젝트를 만들었었는데요. 그때 Pinia 를 사용해보면서
+느꼈던 점을 풀어보고자 합니다.
+
+> 이 글에서는 Vuex 에 대해 깊게 언급하지 않습니다. Vuex 는 이전에 따로 작성해둔
+> 포스팅 을 참고해주세요.
+
+# Pinia
+
+> Vue3에 필요한 최신 상태 관리 라이브러리입니다!
+
+[Pinia 공식사이트](https://pinia.vuejs.org/) 에 들어가게 되면 반겨주는 한마디
+입니다.
+
+기존 Vue.js 에서 쓰이던 상태 관리 라이브러리는 Vuex 를 사용했습니다. 하지만,
+Vuex 는 Vue3 로 넘어오면서 `Composition API` 라는 매력적인 특징을 제대로 살리지
+못했던 점이 아쉬웠죠. 이런 점을 보완해서 나온 것이 바로 Pinia 입니다.
+
+이런 Pinia 를 짧게 사용해보면서 가장 크게 느꼈던 차이점과 짧게 적용해본 후기를
+남기려고 합니다.
+
+> Pinia 에 대한 사용법은 공식사이트에도 잘 나와있습니다.
+
+## 구성요소 변경 (mutation 삭제)
+
+### 기존 Vuex
+
+```jsx
+import { createStore } from 'vuex'
+
+const store = createStore({
+  state: {
+    ...
+  },
+  mutations: {
+    ...
+  },
+  actions: {
+    ...
+  },
+  getters: {
+    ...
+  }
+})
+
+export default store
+
+```
+
+기본적으로 구성요소 로는 `state` , `mutations`, `actions`, `getters` 가
+있었는데요, Pinia 는 이 복잡한 구성요소가 줄어듭니다.
+
+### Pinia
+
+```jsx
+import { defineStore } from 'pinia'
+
+export const useCartStore = defineStore({
+  id: .. ,
+  state: () => ({
+    ...
+  }),
+  getters: {
+    ...
+  },
+  actions: {
+    ...
+  },
+})
+
+```
+
+바로 번거로운 `mutations` 가 사라졌습니다. 기존에는 `action` 에서 `state` 제어를
+위해 `mutations` 을 만들어 주는 번거로운 과정이 있었는데요. 해당 부분이 제거됨에
+따라 `action` 으로 `state` 관리가 가능합니다.
+
+## setup store
+
+그런데 아직은 위 코드만 보면 컴포저블 보다는 옵셔널 한 부분을 느낄 수 있습니다.
+Pinia 는 기존 옵셔널한 방식의 Vuex 보다 더 유연성이 뛰어난 setup 방식을 이용 할
+수 있습니다.
+
+```jsx
+import { ref, computed } from "vue";
+import { defineStore } from "pinia";
+
+export const useCounterStore = defineStore("counter", () => {
+  const count = ref(0);
+  const doubleCount = computed(() => count.value * 2);
+  function increment() {
+    count.value++;
+  }
+
+  return { count, doubleCount, increment };
+});
+```
+
+기존 방식 보다 더 깔끔해지고 유연성이 뛰어난 부분을 확인 하실 수 있습니다.
+
+# 적용해보기
+
+저는 store 에서 API 호출과 그 응답을 받아올 데이터, 그리고 isLoading 을
+넣었습니다. (이름은 제가 작성했던 기존 코드에서 임의로 수정하였습니다.)
+
+```jsx
+import { defineStore } from 'pinia';
+import { ref, computed } from 'vue';
+
+export const useDataStore = defineStore('data', () => {
+  const data = ref<resData[]>([]);
+  const isLoading = ref(false);
+
+  const fetchData = async () => {
+    isLoading.value = true;
+    try {
+      const res = await getDataAPI();
+      data.value = res;
+    } catch (error) {
+      console.log('API 호출 실패');
+    } finally {
+      isLoading.value = false;
+    }
+  };
+
+  const pData = computed(() =>
+    data.value.map((d) => ({
+      id: d.id,
+      content: d.url,
+      name: d.side,
+    }))
+  );
+
+  const nameData = computed(() => {
+    return [...new Set(data.value.map((d) => d.name))];
+  });
+
+  return { isLoading, pData, nameData, fetchPhotos };
+});
+
+```
+
+그 후 해당 스토어에 대한 데이터가 필요할 때 유연하게 꺼내올 수 있었습니다.
+
+```jsx
+...
+<script setup lang="ts">
+...
+const store = useDataStore();
+const { pData } = storeToRefs(store);
+...
+
+```
+
+이때, 그냥 store 에서 꺼내오는 것이 아닌 `storeToRefs` 사용을 해야 반응형을
+잃지않습니다.
+
+```jsx
+...
+const store = useDataStore();
+
+const { isLoading, nameData } = storeToRefs(store);
+const { fetchPhotos } = store;
+
+onMounted(async () => {
+  await fetchPhotos();
+});
+...
+
+```
+
+# 느낀점
+
+우선 전체적으로 컴포넌트를 만들고 Pinia 를 사용하였을 때 큰 문제 없이 잘 동작이
+되었습니다. 기존 Vuex 보다 좀 더 컴포저블 하여 Vue3 - Composition API 에
+어울린다는 점을 강하게 받았습니다. 또한 타입스크립트도 기본적으로 내장 지원 되니
+안 쓸 이유가 없을 것 같습니다. (이제는 Pinia를 권장하기도 하구요.)
+
+---
+
+[Pinia 공식사이트](https://pinia.vuejs.org/)

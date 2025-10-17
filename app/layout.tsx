@@ -13,8 +13,8 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
 };
 
 export const metadata: Metadata = {
-  title: "삔아의 블로그",
-  description: "프론트엔드 개발자 삔아의 기술 블로그",
+  title: "Bell's Blog",
+  description: "프론트엔드 개발자 Bell 기술 블로그",
 };
 
 export default RootLayout;
