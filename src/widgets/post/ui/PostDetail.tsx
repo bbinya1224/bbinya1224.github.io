@@ -18,7 +18,7 @@ const PostDetail = ({ post }: PostDetailProps) => {
   return (
     <article className="relative p-8">
       <header className="mb-8 border-b border-gray-200 pb-6 dark:border-gray-700">
-        <h1 className="relative mb-4 cursor-default text-5xl font-bold before:absolute before:top-[12px] before:left-[-10px] before:block before:h-7 before:w-1 before:rounded-md before:bg-amber-300 lg:text-4xl before:lg:top-[13px] before:lg:h-5">
+        <h1 className="relative mb-4 cursor-default text-5xl font-bold before:absolute before:top-[12px] before:left-[-10px] before:block before:h-7 before:w-1 before:rounded-md before:bg-amber-300 md:text-4xl before:md:top-[13px] before:md:h-5">
           {post.title}
         </h1>
 

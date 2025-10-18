@@ -139,7 +139,7 @@ const EntryPage = () => {
       <article className="absolute top-1/2 left-1/2 w-full -translate-x-1/2 -translate-y-1/2 text-center">
         <p
           ref={textRef}
-          className="Bitcount text-3xl whitespace-pre-line text-amber-300 md:text-5xl lg:text-6xl"
+          className="Bitcount text-3xl whitespace-pre-line text-amber-300 sm:text-5xl md:text-6xl"
         />
         <div className="relative mt-10">
           <div
@@ -149,7 +149,7 @@ const EntryPage = () => {
           >
             <span
               ref={buttonTextRef}
-              className="Bitcount mt-1 ml-1 text-xl font-bold text-black lg:text-2xl"
+              className="Bitcount mt-1 ml-1 text-xl font-bold text-black md:text-2xl"
             />
           </div>
         </div>

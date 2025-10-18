@@ -1,7 +1,7 @@
 "use client";
 
-import GithubIcon from "@/widgets/sidebar/icons/ic_github.svg";
-import MailIcon from "@/widgets/sidebar/icons/ic_mail.svg";
+import GithubIcon from "@/shared/icons/ic_github.svg";
+import MailIcon from "@/shared/icons/ic_mail.svg";
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { useState } from "react";
 

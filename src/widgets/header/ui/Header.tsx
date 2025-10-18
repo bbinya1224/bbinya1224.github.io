@@ -51,7 +51,9 @@ const Header = () => {
         </div>
 
         <div className="flex flex-row">
-          <div className="rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"></div>
+          <div className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]">
+            <Link href="/blog/about-me">About Me</Link>
+          </div>
 
           <button
             className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"

@@ -6,7 +6,7 @@ const Footer = () => {
           © 2025 <span className="font-semibold">삔아 </span> All Rights
           Reserved.
         </p>
-        <p className="flex justify-center gap-3 text-xs md:text-sm">
+        <p className="flex justify-center gap-3 text-xs sm:text-sm">
           <a href="/rss.xml" className="transition-colors hover:text-amber-400">
             RSS
           </a>

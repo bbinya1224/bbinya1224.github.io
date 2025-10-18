@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import "@/app/style/globals.css";
+import Header from "@/widgets/header/ui/Header";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html>
       <body>
-        <main>{children}</main>
+        <Header />
+        <main className="mx-4 mt-[7rem] mb-4">{children}</main>
       </body>
     </html>
   );

@@ -24,13 +24,13 @@ const PostWidget = ({
   });
 
   return (
-    <article className="card-base relative flex h-48 w-full flex-row justify-between px-6 py-6 shadow-lg md:py-4 md:pr-2 md:pl-9">
+    <article className="card-base relative flex h-48 w-full flex-row justify-between gap-4 px-6 py-6 shadow-lg sm:py-4 sm:pr-2 sm:pl-9 lg:gap-0">
       <div className="flex-1">
         <Link href={`/blog/posts/${slug}`}>
-          <h2 className="group mb-3 flex w-full cursor-pointer items-center gap-2 text-3xl font-bold transition duration-0 before:absolute before:top-[26px] before:hidden before:h-5 before:w-1 before:rounded-md before:bg-amber-300 hover:text-amber-400 before:md:left-[18px] md:before:block dark:hover:text-amber-400">
+          <h2 className="group mb-3 flex w-full cursor-pointer items-center gap-2 text-3xl font-bold transition duration-0 before:absolute before:top-[26px] before:hidden before:h-5 before:w-1 before:rounded-md before:bg-amber-300 hover:text-amber-400 before:sm:left-[18px] sm:before:block dark:hover:text-amber-400">
             {title}
             <ArrowIcon
-              className="mt-1 size-6 -translate-x-2 text-amber-300 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 md:opacity-0"
+              className="mt-1 size-6 -translate-x-2 text-amber-300 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 sm:opacity-0"
               aria-hidden="true"
             />
           </h2>
@@ -50,7 +50,7 @@ const PostWidget = ({
           )}
 
           {tags.length > 0 && (
-            <p className="hidden flex-row items-center gap-1 md:flex">
+            <p className="hidden flex-row items-center gap-1 sm:flex">
               <TagIcon className="size-5 text-amber-300 dark:text-amber-300" />
               <span className="text-sm">{tags.join(", ")}</span>
             </p>
@@ -66,7 +66,7 @@ const PostWidget = ({
         )}
       </div>
 
-      <div className="relative hidden h-full w-1/10 md:block">
+      <div className="relative hidden h-full w-1/10 sm:block">
         <Link href={`/blog/posts/${slug}`}>
           <div className="h-full rounded-md bg-slate-100 transition-all hover:bg-slate-200 dark:bg-[#11161b] dark:hover:bg-[#222933]">
             <ArrowIcon

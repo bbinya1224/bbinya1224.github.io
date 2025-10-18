@@ -4,10 +4,6 @@ module.exports = {
   darkMode: "class",
   content: ["./app/**/*.{js,ts,jsx,tsx}", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
-    screens: {
-      md: "768px",
-      lg: "1024px",
-    },
     extend: {
       colors: {
         primary: "#171e23",
@@ -49,8 +45,12 @@ module.exports = {
 
             // 단락
             p: {
-              marginTop: "1em",
-              marginBottom: "1em",
+              fontSize: "1rem",
+              lineHeight: "1.6",
+              letterSpacing: "-0.01em",
+              marginTop: "0.5em",
+              marginBottom: "0.5em",
+              wordSpacing: "0.05em",
             },
 
             // 링크

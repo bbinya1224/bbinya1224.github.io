@@ -3,7 +3,7 @@ import Profile from "@/widgets/sidebar/ui/profile/Profile";
 
 const Sidebar = () => {
   return (
-    <article className={cn("relative w-full lg:w-auto")}>
+    <article className={cn("relative w-full md:w-auto")}>
       <Profile />
     </article>
   );
