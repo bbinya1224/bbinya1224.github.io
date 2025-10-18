@@ -1,5 +1,5 @@
 import cn from "@/shared/utils/cn";
-import Profile from "@/widgets/sidebar/ui/Profile";
+import Profile from "@/widgets/sidebar/ui/profile/Profile";
 
 const Sidebar = () => {
   return (

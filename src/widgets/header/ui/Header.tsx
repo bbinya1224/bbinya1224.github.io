@@ -55,6 +55,8 @@ const Header = () => {
 
           <button
             className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"
+            aria-label={isDark ? "라이트 모드로 변경" : "다크 모드로 변경"}
+            title={isDark ? "라이트 모드" : "다크 모드"}
             onClick={() => setIsDark((prev) => !prev)}
           >
             {isDark ? (
