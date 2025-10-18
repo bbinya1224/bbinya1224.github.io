@@ -9,6 +9,8 @@ import { useEffect, useState } from "react";
 
 const Header = () => {
   const [isDark, setIsDark] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
 
   useEffect(() => {
     if (isDark) {
@@ -18,8 +20,29 @@ const Header = () => {
     }
   }, [isDark]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+
+      if (currentScrollY < lastScrollY) {
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        setIsVisible(false);
+      }
+
+      setLastScrollY(currentScrollY);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, [lastScrollY]);
+
   return (
-    <header className="dark:bg-primary relative mx-4 h-[4.5rem] rounded-2xl rounded-t-none bg-white px-8 py-2 text-black shadow-lg dark:text-white">
+    <header
+      className={`dark:bg-primary fixed top-0 right-0 left-0 z-50 mx-4 h-[4.5rem] rounded-2xl rounded-t-none bg-white px-8 py-2 text-black shadow-lg transition-transform duration-300 ease-out dark:text-white ${
+        isVisible ? "translate-y-0" : "-translate-y-full"
+      }`}
+    >
       <div className="relative top-1/2 mx-auto flex -translate-y-1/2 items-center justify-between">
         <div className="rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]">
           <Link href="/blog">

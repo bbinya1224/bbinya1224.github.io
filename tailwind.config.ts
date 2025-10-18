@@ -160,6 +160,71 @@ module.exports = {
               padding: "0",
             },
 
+            aside: {
+              backgroundColor: "#F5F4F3",
+              borderRadius: "0.5em",
+              padding: "1em",
+              marginTop: "1.5em",
+              marginBottom: "1.5em",
+              fontSize: "0.95em",
+            },
+            // 경고 (빨간색 계열)
+            "aside[data-type='warning']": {
+              borderLeftColor: "#E03B8D",
+              backgroundColor: "#FFE5E0",
+              color: "#921A1A",
+            },
+            "aside[data-type='warning'] strong": {
+              color: "#921A1A",
+            },
+            "aside[data-type='warning']::before": {
+              content: '"⚠️ "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
+            },
+            // 정보 (파란색 계열)
+            "aside[data-type='info']": {
+              borderLeftColor: "#0084E8",
+              backgroundColor: "#E5F1FF",
+              color: "#004199",
+            },
+            "aside[data-type='info'] strong": {
+              color: "#004199",
+            },
+            "aside[data-type='info']::before": {
+              content: '"💡 "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
+            },
+            // 주의 (노란색 계열)
+            "aside[data-type='note']": {
+              borderLeftColor: "#F4A640",
+              backgroundColor: "#FFF7E5",
+              color: "#805D0C",
+            },
+            "aside[data-type='note'] strong": {
+              color: "#805D0C",
+            },
+            "aside[data-type='note']::before": {
+              content: '"📝 "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
+            },
+            // 성공 (녹색 계열)
+            "aside[data-type='success']": {
+              borderLeftColor: "#46A758",
+              backgroundColor: "#E5FDE5",
+              color: "#0E5F1E",
+            },
+            "aside[data-type='success'] strong": {
+              color: "#0E5F1E",
+            },
+            "aside[data-type='success']::before": {
+              content: '"✅ "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
+            },
+
             // 이미지
             img: {
               borderRadius: "0.5em",
@@ -240,6 +305,74 @@ module.exports = {
             code: {
               color: "#FF7B9F",
               backgroundColor: "#2D2D2D",
+            },
+
+            // Aside - 기본 스타일 (다크 모드)
+            aside: {
+              backgroundColor: "#2D2D2D",
+              borderRadius: "0.5em",
+              padding: "1em",
+              marginTop: "1.5em",
+              marginBottom: "1.5em",
+              fontSize: "0.95em",
+              color: "#EBEBEB",
+            },
+
+            // 경고 (빨간색 계열)
+            "aside[data-type='warning']": {
+              borderLeftColor: "#E03B8D",
+              backgroundColor: "#3D1F1F",
+              color: "#FFB3A3",
+            },
+            "aside[data-type='warning'] strong": {
+              color: "#FFB3A3",
+            },
+            "aside[data-type='warning']::before": {
+              content: '"⚠️ "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
+            },
+            // 정보 (파란색 계열)
+            "aside[data-type='info']": {
+              borderLeftColor: "#0084E8",
+              backgroundColor: "#1A2F4A",
+              color: "#98C9FF",
+            },
+            "aside[data-type='info'] strong": {
+              color: "#98C9FF",
+            },
+            "aside[data-type='info']::before": {
+              content: '"ℹ️ "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
+            },
+            // 주의 (노란색 계열)
+            "aside[data-type='note']": {
+              borderLeftColor: "#F4A640",
+              backgroundColor: "#3D2F1F",
+              color: "#FFD79D",
+            },
+            "aside[data-type='note'] strong": {
+              color: "#FFD79D",
+            },
+            "aside[data-type='note']::before": {
+              content: '"📝 "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
+            },
+            // 성공 (녹색 계열)
+            "aside[data-type='success']": {
+              borderLeftColor: "#46A758",
+              backgroundColor: "#1F3D1F",
+              color: "#98FF98",
+            },
+            "aside[data-type='success'] strong": {
+              color: "#98FF98",
+            },
+            "aside[data-type='success']::before": {
+              content: '"✅ "',
+              fontWeight: "bold",
+              marginRight: "0.5em",
             },
 
             pre: {

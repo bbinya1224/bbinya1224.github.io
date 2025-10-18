@@ -7,7 +7,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <section className="relative mx-auto max-w-[var(--page-width)] px-4 pb-8">
       <Header />
-      <article className="m-4 flex flex-col-reverse gap-8 lg:flex-row">
+      <article className="mx-4 mt-[7rem] mb-4 flex flex-col-reverse gap-8 lg:flex-row">
         <Sidebar />
 
         {children}
