@@ -6,9 +6,10 @@ import type { ReactNode } from "react";
 const Layout = ({ children }: { children: ReactNode }) => {
   return (
     <section className="relative mx-auto max-w-[var(--page-width)] px-4 pb-8">
-      <article className="flex flex-col-reverse gap-8 lg:flex-row">
+      <Header />
+      <article className="mx-4 mt-[7rem] mb-4 flex flex-col-reverse gap-8 lg:flex-row">
         <Sidebar />
-        <Header />
+
         {children}
       </article>
       <Footer />

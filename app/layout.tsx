@@ -6,7 +6,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html>
       <body>
-        <main className="mx-4 mt-[7rem] mb-4">{children}</main>
+        <main>{children}</main>
       </body>
     </html>
   );

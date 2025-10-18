@@ -24,7 +24,7 @@ const PostWidget = ({
   });
 
   return (
-    <article className="card-base relative flex h-full w-full flex-row justify-between gap-4 px-6 py-6 shadow-lg sm:h-48 sm:py-4 sm:pr-2 sm:pl-9 lg:gap-0">
+    <article className="card-base relative flex h-full w-full flex-row justify-between gap-4 px-6 py-6 shadow-lg sm:h-48 sm:py-4 sm:pr-2 sm:pl-7 lg:gap-0">
       <div className="flex-1">
         <Link href={`/blog/posts/${slug}`}>
           <h2 className="group mb-3 flex w-full cursor-pointer items-center gap-2 text-3xl font-bold transition duration-0 before:absolute before:top-[26px] before:hidden before:h-5 before:w-1 before:rounded-md before:bg-amber-300 hover:text-amber-400 before:sm:left-[18px] sm:before:block dark:hover:text-amber-400">
