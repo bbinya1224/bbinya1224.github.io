@@ -102,25 +102,25 @@ const AboutMePage = () => {
         <h1 className="relative mb-1 ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
           About Me
         </h1>
-        <div className="prose dark:prose-invert mt-2 text-base">
+        <div className="prose dark:prose-invert mt-2 max-w-full text-base break-keep">
           <p>
             안녕하세요! 사용자 경험의 디테일에서 가치를 찾는 3년차 프론트엔드
             개발자 이수빈입니다.
           </p>
           <p>
             사용자에게는 풍부하고 재미있는 경험을, 개발자들에게는 읽기 쉽고
-            이해하기 좋은 코드를 제공하는 것을 중요하게 생각하고 있어요.
+            이해하기 좋은 코드를 제공하는 것을 중요하게 생각하고 있습니다.
           </p>
           <p>
-            저는 주로 React와 TypeScript를 사용하여 유지보수성과 확장성이 뛰어난
-            웹 애플리케이션을 개발하기 위해 노력하고 있어요. 컴포넌트 기반
+            주로 React와 TypeScript를 사용하여 유지보수성과 확장성이 뛰어난 웹
+            애플리케이션을 개발하기 위해 노력하고 있습니다. 컴포넌트 기반
             아키텍처를 활용하여 재사용 가능한 UI 요소를 설계하고 스토리북을
-            이용하여 커뮤니케이션을 좀 더 효율적으로 만들고 있어요.
+            이용하여 커뮤니케이션을 좀 더 효율적으로 만들고 있습니다.
           </p>
           <p>
             뿐만아니라, 인터랙티브한 UI 구현 및 성능 최적화 및 최신 프론트엔드
             기술 스택에 관심이 많으며, 협업과 소통을 통해 더 나은 결과물을
-            만들어가기 위해 노력하는중 입니다.
+            만들어가기 위해 노력 하는중 입니다.
           </p>
           <p>어제보다 더 나은 오늘을 위해 꾸준히 성장하고 있어요. 🌱</p>
           <p className="text-gray-400">
