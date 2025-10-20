@@ -1,0 +1,332 @@
+---
+title: "Favicon 적용하기"
+date: "2025-10-19"
+slug: "20251019"
+tag: "Web"
+category: "Frontend"
+description: "Favicon 을 적용하기전 초라한(?) 나의 홈페이지 아이콘. 아직 미완성인 사이트 인것 같아보이네요.
+그래서, 지금 사용중인 깃허브 블로그에 Favicon 을 적용해보았습니다."
+---
+
+![Before Favicon](/img/posts/20251019/before_favicon.png)
+
+> Favicon 을 적용하기전 초라한(?) 나의 홈페이지 아이콘. 아직 미완성인 사이트 인것 같아보이네요.  
+> 그래서, 지금 사용중인 깃허브 블로그에 Favicon 을 적용해보았습니다.
+
+
+## 1. Favicon에 대한 간단 설명
+
+Favicon은 "Favorite Icon"의 약자로, 웹 브라우저의 탭, 즐겨찾기, 주소창 등에 표시되는 작은 아이콘입니다.
+사용자가 여러 탭을 열어둘 때 해당 웹사이트를 시각적으로 구분할 수 있게 해주는 요소입니다.
+
+이전의 favicon은 단순히 하나의 `.ico` 파일이었지만, 현대의 웹은 훨씬 더 복잡해졌습니다.
+다양한 해상도의 디바이스, 모바일 앱 환경, 다크 모드 지원 등 여러 상황에서 다른 형태의 아이콘이 필요하게 되었습니다. 
+따라서 개발자는 단순한 favicon뿐 아니라 Apple 디바이스용 아이콘, Android용 아이콘, 웹 앱 매니페스트 등을 모두 고려해야 합니다.
+
+## 2. Favicon을 사용하는 이유
+
+1. **브랜드 인식 강화**: 사용자가 수십 개의 탭을 열어둔 상태에서 보여주고자 하는 웹사이트를 빠르게 찾을 수 있습니다. 아이콘만으로도 "아, 저 사이트다"라고 인지할 수 있습니다.
+2. **전문성 인상**: 앞서 말씀드렸듯이, favicon이 없는 사이트는 개발이 덜 진행된 것처럼 보입니다.
+반면 favicon을 제대로 설정한 사이트는 신뢰감을 줍니다.
+3. **다양한 맥락에서의 표시**: 북마크, 히스토리, PWA(Progressive Web App), 모바일 홈 화면, 검색 엔진 결과 등 다양한 곳에서 보여주고자 하는 웹사이트 아이콘이 표시될 수 있습니다.
+
+## 3. Favicon을 사용함에 따른 이점 및 원리
+
+### 이점
+
+- **일관된 브랜딩**: 모든 터치포인트에서 같은 아이콘을 사용함으로써 일관된 브랜드 경험을 만들어냅니다.
+- **사용자 편의성**: 사용자가 사이트를 더 쉽게 찾고 기억합니다.
+- **SEO에 미미한 도움**: 검색 엔진이 favicon을 활용하지는 않지만, 결과 페이지에 favicon을 표시함으로써 클릭률을 높일 수 있습니다.
+- **PWA 기능 강화**: 모바일 홈 화면에 추가될 때 favicon이 아이콘으로 사용되므로, 마치 네이티브 앱처럼 보이게 할 수 있습니다.
+
+### 작동 원리
+
+브라우저가 웹사이트를 방문하면 다음과 같은 과정을 거칩니다:
+
+1. HTML의 `<link>` 태그나 `manifest.json` 파일을 읽습니다.
+2. 현재 환경에 맞는 아이콘을 찾습니다 (디바이스 종류 등을 고려).
+3. 찾은 아이콘을 다양한 UI 요소(탭, 주소창, 북마크 등)에 표시합니다.
+
+- iOS 기기: `<link rel="apple-touch-icon">`을 찾음
+- Android 브라우저: `<link rel="icon">`을 찾아 탭, 주소창, 북마크에 표시
+- Android 홈 화면에 추가 (PWA): `manifest.json`의 `icons` 배열 사용
+- 데스크톱 브라우저: 일반적인 favicon (`<link rel="icon">`) 사용
+
+<aside>
+💡
+즉, favicon은 **기기나 상황별로 다른 아이콘 링크를 제공**해야 한다는 것이 핵심입니다.  
+따라서 단일 이미지가 아닌 **여러 크기와 형식의 이미지를 준비**해야 합니다.
+
+</aside>
+
+### 🤔 **`manifest.json` 필요할까요?**
+
+`manifest.json`은 웹사이트를 **앱처럼** 설치할 수 있게 해주는 설정 파일입니다.  
+모바일의 크롬이나 사파리에서 어떤 웹사이트를 방문했을 때 **홈 화면에 추가** 옵션이 뜰때 관련 정보를 제공합니다.
+
+PWA(Progressive Web App) 기능 자체가 필수가 아니기 때문에 **manifest.json은 선택사항**입니다. 
+
+**manifest.json이 필요 없는 경우**:
+
+- 단순한 블로그나 뉴스 사이트: 사용자가 홈 화면에 추가할 이유가 없음
+- 일회성으로 방문하는 사이트: 오프라인 기능이나 네이티브 앱 경험이 필요 없음
+- 주로 데스크톱에서 사용되는 사이트: PWA는 모바일 중심 기술
+
+**manifest.json이 유용한 경우**:
+
+- 사용자가 자주 방문하는 서비스 (예: Gmail, Slack)
+- 모바일에서 네이티브 앱처럼 동작해야 하는 경우
+- 오프라인 기능을 지원하려는 경우
+- 소셜 미디어나 생산성 앱처럼 설치형 경험을 제공하고 싶을 때
+
+제 블로그의 경우에는 단순한 블로그로 일회성 으로 방문 하는 경우라 생각하여,  `manifest.json` 을 추가하지 않았습니다!
+
+<aside>
+💡 [favicon.io](https://favicon.io/) 혹은 [favicon-generator.org](https://www.favicon-generator.org/) 를 이용하여 favicon 을 빠르게 생성 할 수 있어요.  
+→ 한 번에 모든 크기와 포맷을 생성합니다.
+</aside>
+
+## 4. 각 프레임워크나 기기마다 다른 적용법 정리
+
+### 1. Next.js 적용
+
+Next.js 13 이상의 App Router를 사용한다면, `layout.tsx`의 `metadata` 객체에서 favicon을 설정합니다. 
+
+```jsx
+export const metadata: Metadata = {
+  title: "삔아's Blog",
+  description: "프론트엔드 개발자 삔아 기술 블로그",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+  },
+};
+```
+
+이보다 더 나아가서 `favicon.ico` + `manifest.json` 병행을 하는 방법도 있습니다.
+
+```jsx
+// app/layout.tsx
+export const metadata: Metadata = {
+  title: "삔아's Blog",
+  description: "프론트엔드 개발자 삔아 기술 블로그",
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
+  },
+  manifest: '/manifest.json', // PWA 설정
+};
+```
+
+```json
+// manifest.json
+{
+  "name": "삔아's Blog",
+  "short_name": "삔아",
+  "description": "프론트엔드 개발자 삔아 기술 블로그",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon-192x192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    ...
+  ]
+}
+```
+
+### 2. React 적용 (Pages Router나 Vite 등)
+
+React만 사용하거나 Vite 같은 빌드 도구를 쓴다면, HTML의 `<head>` 태그에 직접 링크를 추가해야 합니다.
+
+1. **React Helemt 사용하기** [https://github.com/staylor/react-helmet-async#readme](https://github.com/staylor/react-helmet-async#readme)
+
+```jsx
+import { Helmet } from 'react-helmet-async';
+
+function App() {
+  return (
+    <Helmet>
+      <title>삔아's Blog</title>
+      <meta 
+        name="description" 
+        content="프론트엔드 개발자 삔아 기술 블로그" 
+      />
+      
+      {/* 기본 favicon */}
+      <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+      <link rel="icon" type="image/png" href="/favicon-16x16.png" sizes="16x16" />
+      <link rel="icon" type="image/png" href="/favicon-32x32.png" sizes="32x32" />
+      
+      {/* Apple 디바이스 */}
+      <link 
+        rel="apple-touch-icon" 
+        sizes="180x180"
+        href="/apple-touch-icon.png" 
+      />
+      
+      {/* PWA Manifest */}
+      <link rel="manifest" href="/manifest.json" />
+      
+      {/* Theme Color (모바일 주소창 색상) */}
+      <meta name="theme-color" content="#000000" />
+    </Helmet>
+  );
+}
+
+export default App;
+```
+
+b. **Helmet 없이 직접 HTML에 추가**:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>삔아's Blog</title>
+    <meta 
+      name="description" 
+      content="프론트엔드 개발자 삔아 기술 블로그" 
+    />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" type="image/svg+xml" href="%PUBLIC_URL%/favicon.svg" />
+    
+    <!-- Apple Touch Icon -->
+    <link 
+      rel="apple-touch-icon" 
+      sizes="180x180"
+      href="%PUBLIC_URL%/apple-touch-icon.png" 
+    />
+    
+    <!-- Manifest -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    
+    <!-- Theme Color -->
+    <meta name="theme-color" content="#000000" />
+  </head>
+  <body>
+    <div id="root"></div>
+  </body>
+</html>
+```
+
+### 3. 바닐라 JavaScript 적용
+
+프레임워크를 사용하지 않는다면, 단순 HTML `<head>` 태그에 직접 작성합니다.
+
+```html
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>삔아's Blog</title>
+  <meta 
+    name="description" 
+    content="프론트엔드 개발자 삔아 기술 블로그" 
+  />
+    
+  <!-- 기본 favicon (데스크톱 브라우저) -->
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  
+  <!-- SVG favicon (확장성 있는 벡터 형식) -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  
+  <!-- Apple 디바이스 (iPhone, iPad) -->
+  <link 
+    rel="apple-touch-icon" 
+    sizes="180x180"
+    href="/apple-touch-icon.png" 
+  />
+  <link 
+    rel="apple-touch-icon" 
+    sizes="152x152"
+    href="/apple-touch-icon-152.png" 
+  />
+  <link 
+    rel="apple-touch-icon" 
+    sizes="144x144"
+    href="/apple-touch-icon-144.png" 
+  />
+  <link 
+    rel="apple-touch-icon" 
+    sizes="120x120"
+    href="/apple-touch-icon-120.png" 
+  />
+  
+  <!-- PWA 매니페스트 -->
+  <link rel="manifest" href="/manifest.json" />
+  
+  <!-- 모바일 브라우저 주소창 색상 -->
+  <meta name="theme-color" content="#000000" />
+  
+  <!-- Windows 11 태스크바 아이콘 (선택사항) -->
+  <meta name="msapplication-TileImage" content="/ms-icon-144x144.png" />
+  <meta name="msapplication-TileColor" content="#000000" />
+  
+  <!-- ======================================== -->
+</head>
+<body>
+  <h1>삔아's Blog</h1>
+</body>
+</html>
+```
+
+<aside>
+💡 `favicon.ico`, `favicon.svg`, `apple-touch-icon.png` 3개만 있어도 대부분의 상황을 커버합니다.
+</aside>
+
+## 5. 적용해보기
+
+### Before
+
+```jsx
+export const metadata: Metadata = {
+  title: "삔아's Blog",
+  description: "프론트엔드 개발자 삔아 기술 블로그",
+};
+```
+
+### After
+
+```jsx
+export const metadata: Metadata = {
+  title: "삔아's Blog",
+  description: "프론트엔드 개발자 삔아 기술 블로그",
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+    ],
+    apple: { url: "/apple-touch-icon.png", sizes: "180x180" },
+  },
+};
+```
+
+![After Favicon](/img/posts/20251019/after_favicon.png)
+
+favicon 하나로 블로그가 좀 더 완성도가 있어보이지요? 아직 추가하고 싶은 기능이 정말정말 많지만요! 😆

@@ -227,9 +227,8 @@ module.exports = {
 
             // 이미지
             img: {
+              margin: "1.5em auto",
               borderRadius: "0.5em",
-              marginTop: "1.5em",
-              marginBottom: "1.5em",
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             },
 

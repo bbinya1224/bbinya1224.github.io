@@ -6,9 +6,18 @@
 @config "../../../tailwind.config.ts";
 
 @theme {
-  --font-family-apple: "AppleSDGothicNeo", "Noto Sans", sans-serif;
+  --font-family-apple:
+    "Pretendard", "AppleSDGothicNeo", "Noto Sans", sans-serif;
   --font-family-bitcount:
     "Bitcount", "AppleSDGothicNeo", "Noto Sans", sans-serif;
+  --font-family-Pretnendard: "Pretendard", "Noto Sans", sans-serif;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
 }
 
 @font-face {
