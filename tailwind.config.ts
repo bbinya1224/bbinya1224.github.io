@@ -43,6 +43,12 @@ module.exports = {
               fontSize: "1.1rem",
             },
 
+            // 기울기
+            em: {
+              color: "#333",
+              fontStyle: "italic",
+            },
+
             // 단락
             p: {
               fontSize: "1rem",
@@ -69,10 +75,6 @@ module.exports = {
             strong: {
               color: "#000000",
               fontWeight: "600",
-            },
-            em: {
-              color: "#37352F",
-              fontStyle: "italic",
             },
 
             // 리스트
@@ -167,6 +169,9 @@ module.exports = {
               marginTop: "1.5em",
               marginBottom: "1.5em",
               fontSize: "0.95em",
+              borderLeftWidth: "8px",
+              borderBottomLeftRadius: "0",
+              borderTopLeftRadius: "0",
             },
             // 경고 (빨간색 계열)
             "aside[data-type='warning']": {
@@ -177,11 +182,7 @@ module.exports = {
             "aside[data-type='warning'] strong": {
               color: "#921A1A",
             },
-            "aside[data-type='warning']::before": {
-              content: '"⚠️ "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
-            },
+
             // 정보 (파란색 계열)
             "aside[data-type='info']": {
               borderLeftColor: "#0084E8",
@@ -191,11 +192,7 @@ module.exports = {
             "aside[data-type='info'] strong": {
               color: "#004199",
             },
-            "aside[data-type='info']::before": {
-              content: '"💡 "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
-            },
+
             // 주의 (노란색 계열)
             "aside[data-type='note']": {
               borderLeftColor: "#F4A640",
@@ -205,11 +202,7 @@ module.exports = {
             "aside[data-type='note'] strong": {
               color: "#805D0C",
             },
-            "aside[data-type='note']::before": {
-              content: '"📝 "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
-            },
+
             // 성공 (녹색 계열)
             "aside[data-type='success']": {
               borderLeftColor: "#46A758",
@@ -218,11 +211,6 @@ module.exports = {
             },
             "aside[data-type='success'] strong": {
               color: "#0E5F1E",
-            },
-            "aside[data-type='success']::before": {
-              content: '"✅ "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
             },
 
             // 이미지
@@ -301,6 +289,11 @@ module.exports = {
               marginBottom: "0",
             },
 
+            em: {
+              color: "#e5f5fd",
+              fontStyle: "italic",
+            },
+
             code: {
               color: "#FF7B9F",
               backgroundColor: "#2D2D2D",
@@ -315,36 +308,23 @@ module.exports = {
               marginBottom: "1.5em",
               fontSize: "0.95em",
               color: "#EBEBEB",
+              borderLeftWidth: "8px",
+              borderBottomLeftRadius: "0",
+              borderTopLeftRadius: "0",
             },
 
             // 경고 (빨간색 계열)
             "aside[data-type='warning']": {
               borderLeftColor: "#E03B8D",
               backgroundColor: "#3D1F1F",
-              color: "#FFB3A3",
             },
-            "aside[data-type='warning'] strong": {
-              color: "#FFB3A3",
-            },
-            "aside[data-type='warning']::before": {
-              content: '"⚠️ "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
-            },
+
             // 정보 (파란색 계열)
             "aside[data-type='info']": {
               borderLeftColor: "#0084E8",
               backgroundColor: "#1A2F4A",
-              color: "#98C9FF",
             },
-            "aside[data-type='info'] strong": {
-              color: "#98C9FF",
-            },
-            "aside[data-type='info']::before": {
-              content: '"ℹ️ "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
-            },
+
             // 주의 (노란색 계열)
             "aside[data-type='note']": {
               borderLeftColor: "#F4A640",
@@ -354,24 +334,12 @@ module.exports = {
             "aside[data-type='note'] strong": {
               color: "#FFD79D",
             },
-            "aside[data-type='note']::before": {
-              content: '"📝 "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
-            },
+
             // 성공 (녹색 계열)
             "aside[data-type='success']": {
               borderLeftColor: "#46A758",
               backgroundColor: "#1F3D1F",
               color: "#98FF98",
-            },
-            "aside[data-type='success'] strong": {
-              color: "#98FF98",
-            },
-            "aside[data-type='success']::before": {
-              content: '"✅ "',
-              fontWeight: "bold",
-              marginRight: "0.5em",
             },
 
             pre: {

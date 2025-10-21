@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import { ThemeProvider } from "next-themes";
 import "@/app/style/globals.css";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
-    <html>
+    <html suppressHydrationWarning>
       <head>
         {/* Google Site Verification */}
         <meta
@@ -14,7 +15,9 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       </head>
 
       <body>
-        <main>{children}</main>
+        <ThemeProvider attribute="class" enableSystem>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   );

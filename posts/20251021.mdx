@@ -1,0 +1,203 @@
+---
+title: "next-themes 를 이용하여 Dark Mode 적용하기"
+date: "2025-10-21"
+slug: "20251021"
+tag: "NextJs"
+category: "Frontend"
+description: "오늘은 TODO List 에 작성한 목록 중 하나인 시스템 모드에 따라 다크모드/라이트모드 전환 을 적용해보려고 합니다."
+---
+
+
+![My Blog Mode](/img/posts/20251021/myblog-mode.png)
+
+> 오늘은 TODO List 에 작성한 목록 중 하나인 **시스템 모드에 따라 다크모드/라이트모드 전환** 을 적용해보려고 합니다.
+
+현재 제 블로그는 다크/라이트 모드 토글 기능 및 Tailwind CSS class 방식 구현이 된 상태이나, **localStorage 저장** (새로고침 시 초기상태로 복원) 및 **시스템 설정 감지가 없는 상태입니다.** (OS 설정 무시)
+
+
+이에 따라 `next-themes` 를 이용하여 사용자의 OS에 설정한 다크모드를 자동으로 감지하여 보여주는 방식으로 진행하려고 합니다.
+
+
+> [next-themes](https://github.com/pacocoursey/next-themes)는 Next.js 전용으로 최적화된 테마 관리 라이브러리로,
+시스템 설정 감지, 다크/라이트 모드 전환, 페이지 로딩 시 깜빡임 방지 등을 자동으로 처리합니다.
+> 
+
+## 🤔 잠깐, next-themes 라이브러리, 정말 필요할까?
+
+**next-themes를 사용하면 좋은 경우:**
+
+1. **시스템 설정 감지가 필요한 경우** 
+    - 사용자가 OS에 설정한 다크모드를 자동으로 감지
+    - 처음 방문 시 사용자 시스템 설정 존중
+2. **UX 개선이 필요한 경우**
+    - 새로고침해도 사용자가 선택한 테마 유지
+    - 탭 간 테마 동기화 (여러 탭 열었을 때 모두 같은 테마)
+    - 플래시 없음 (페이지 로드 시 깜빡임 방지)
+3. **엔터프라이즈 애플리케이션**
+    - 복잡한 테마 전환 로직
+    - 다중 테마 지원
+    - SSR/SSG 호환성
+
+**직접 구현해도 되는 경우:**
+
+- 간단한 다크모드만 필요
+- 시스템 설정은 무시해도 괜찮음
+- 새로고침 후 초기값으로 돌아가도 괜찮음
+
+## next-themes 적용하기
+
+### 1. 설치하기
+
+```tsx
+npm install next-themes
+```
+
+혹은
+
+```tsx
+yarn add next-themes
+```
+
+### **2. 레이아웃에 ThemeProvider 설정**
+
+```tsx
+// app/layout.tsx
+import type { Metadata } from "next";
+import { ThemeProvider } from "next-themes";
+import "./globals.css";
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html suppressHydrationWarning>
+      <body>
+        <ThemeProvider attribute="class" enableSystem>
+          {children}
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+<aside data-type="warning">
+`<html>` 태그에 `suppressHydrationWarning`을 추가하지 않으면 hydration 경고가 발생합니다.
+
+next-themes가 이 요소를 수정하기 때문이에요.   
+참고로 이 속성은 한 단계 아래까지만 적용되기 때문에, 자식 요소들의 hydration 경고는 여전히 나타날 수 있습니다.
+
+(_**Note!** If you do not add [suppressHydrationWarning](https://reactjs.org/docs/dom-elements.html#suppresshydrationwarning:~:text=It%20only%20works%20one%20level%20deep) to your `<html>` you will get warnings because `next-themes` updates that element. This property only applies one level deep, so it won't block hydration warnings on other elements._)
+</aside>
+
+
+
+
+저는 tailwind 를 통해 class로 이미 구성하고 있었기에 `attribute="class"` 를 작성하였습니다.
+
+기본 값은 `<html data-theme="dark">` 로 구성되게 합니다.
+
+```tsx
+[data-theme='dark'] {
+  --background: black;
+  --foreground: white;
+}
+```
+
+이런식으로 CSS-in-JS 라이브러리 사용하거나 여러 테마를 지원할 때에는 기본값으로 작성해주시면 됩니다.
+
+<aside>
+attribute를 안 쓰면 = [data-theme='dark'] 선택자로 CSS 작성
+attribute="class"를 쓰면 = .dark 선택자로 CSS 작성
+</aside>
+
+### **3. Header.tsx 수정하기 (다크/라이트모드 토글기능)**
+
+```tsx
+// 기존 Header 코드
+const Header = () => {
+  const [isDark, setIsDark] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const [lastScrollY, setLastScrollY] = useState(0);
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, [isDark]);
+  
+  ...
+  return (
+	  ...
+	  <button
+	      className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"
+	      aria-label={isDark ? "라이트 모드로 변경" : "다크 모드로 변경"}
+	      title={isDark ? "라이트 모드" : "다크 모드"}
+	      onClick={() => setIsDark((prev) => !prev)}
+	    >
+	      {isDark ? (
+	        <LightModeIcon className="size-[24px]" />
+	      ) : (
+	        <DarkModeIcon className="size-[24px]" />
+	      )}
+     </button>
+     ...
+    );
+```
+
+기존에는 `useState` 와 `useEffect` 를 사용하여 직접 `dark` 클래스를 추가/제거 해주었습니다.
+
+`next-theme` 에서 `useTheme` 훅을 지원해주기 때문에 `useState` , `useEffect` 를 제거해주고 다음과 같이 작성해줍니다.
+
+```tsx
+const { resolvedTheme, setTheme } = useTheme();
+
+{resolvedTheme === 'dark' ? (
+  <LightModeIcon className="size-[24px]" />
+) : (
+  <DarkModeIcon className="size-[24px]" />
+)}
+```
+
+<aside>
+`useTheme()` 에는 theme 도 가져올 수 있습니다.  
+- theme: 사용자가 **선택한** 값    
+- resolvedTheme: 실제로 **적용되는** 테마
+</aside>
+
+### **Hydration 방지**
+
+<aside data-type='warning'>
+**⚠️** 위의 코드는 **hydration 측면에서 안전하지 않습니다.**   
+SSG나 SSR로 렌더링할 때 hydration 불일치 오류가 발생 합니다.  
+서버에서는 `theme`값을 알 수 없어서 클라이언트에서 마운트될 때까지 계속 `undefined`상태이기 때문입니다.  
+따라서 **테마 토글 버튼 같은 UI는 클라이언트 마운트 이후에만 렌더링** 해야 합니다.
+</aside>
+
+```tsx
+const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+// 서버와 클라이언트 렌더링이 일치할 때까지 기다리기
+if (!mounted) {
+  return null;
+} 
+```
+
+이제는 사용자의 시스템 설정에 맞추어 홈페이지가 자동으로 다크모드 / 라이트모드 토글이 가능해졌습니다.
+
+저는 원래 다크모드 / 라이트모드 같은 테마 전환에 대한 니즈가 있었어서 프로젝트 초반부터 dark 모드를 염두 해두었었기에 쉽게 적용 할 수 있었던것 같아요.
+
+다크모드를 진행하면서 어떻게 해야 사용자에게 위화감 없이 보여주게 될까 라는 생각도 듭니다.  
+아직 UX에 대한 지식이 부족한터라 다른 사이트들을 많이 참고하며 공부를 해보아야겠어요.
+
+---
+
+[https://github.com/pacocoursey/next-themes](https://github.com/pacocoursey/next-themes)

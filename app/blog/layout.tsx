@@ -11,11 +11,11 @@ const Layout = ({ children }: { children: ReactNode }) => {
           <Header />
         </div>
       </div>
-      <article className="mx-4 mt-[7rem] mb-4 flex flex-col-reverse gap-8 lg:flex-row">
+      <main className="mx-4 mt-[7rem] mb-4 flex flex-col-reverse gap-8 lg:flex-row">
         <Sidebar />
 
         {children}
-      </article>
+      </main>
       <Footer />
     </section>
   );

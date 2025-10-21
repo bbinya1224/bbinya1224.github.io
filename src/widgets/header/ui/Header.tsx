@@ -1,24 +1,19 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useTheme } from "next-themes";
 import DarkModeIcon from "@/widgets/header/icons/ic_darkMode.svg";
 import LightModeIcon from "@/widgets/header/icons/ic_lightMode.svg";
 import HomeIcon from "@/widgets/header/icons/ic_home.svg";
 
-import { useEffect, useState } from "react";
-
 const Header = () => {
-  const [isDark, setIsDark] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    if (isDark) {
-      document.documentElement.classList.add("dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-    }
-  }, [isDark]);
+  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -36,6 +31,14 @@ const Header = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <header
@@ -57,7 +60,7 @@ const Header = () => {
             className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"
             aria-label={isDark ? "라이트 모드로 변경" : "다크 모드로 변경"}
             title={isDark ? "라이트 모드" : "다크 모드"}
-            onClick={() => setIsDark((prev) => !prev)}
+            onClick={() => setTheme(!isDark ? "dark" : "light")}
           >
             {isDark ? (
               <LightModeIcon className="size-[24px]" />
