@@ -280,8 +280,8 @@ module.exports = {
               color: "#E0E0E0",
               fontWeight: "500",
               backgroundColor: "#1A2A3D",
-              paddingTop: "0.75em",
-              paddingBottom: "0.75em",
+              paddingTop: "0.5em",
+              paddingBottom: "0.5em",
               paddingRight: "1em",
             },
             "blockquote p": {
