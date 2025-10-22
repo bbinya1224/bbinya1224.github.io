@@ -27,7 +27,7 @@ const AboutMePage = () => {
   };
 
   return (
-    <section className="card-base relative mx-auto h-full w-full p-4 shadow-xl">
+    <section className="card-base relative mx-auto h-full w-full px-6 py-6 shadow-xl sm:py-4 sm:pr-2 sm:pl-7">
       <article className="mb-4 flex flex-row-reverse items-center justify-between gap-4 border-b border-gray-200 pb-5 dark:border-slate-700">
         <div className="flex size-full flex-col gap-4">
           <h1 className="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">

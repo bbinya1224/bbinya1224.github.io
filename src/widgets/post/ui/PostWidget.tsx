@@ -27,12 +27,12 @@ const PostWidget = ({
     <article className="card-base relative flex h-full w-full flex-row justify-between gap-4 px-6 py-6 shadow-lg sm:h-48 sm:py-4 sm:pr-2 sm:pl-7 lg:gap-0">
       <Link
         href={`/blog/posts/${slug}`}
-        className="absolute inset-0 sm:pointer-events-none sm:static"
+        className="absolute inset-0 sm:pointer-events-none sm:hidden"
       />
 
       <div className="flex-1">
         <Link href={`/blog/posts/${slug}`}>
-          <h2 className="group mb-3 flex w-full cursor-pointer items-center gap-2 text-3xl font-bold transition duration-0 before:absolute before:top-[22px] before:hidden before:h-6 before:w-1 before:rounded-md before:bg-amber-300 hover:text-amber-400 before:sm:left-[18px] sm:before:block dark:hover:text-amber-400">
+          <h2 className="group mb-3 flex w-full cursor-pointer items-center gap-2 text-3xl font-bold break-keep transition duration-0 before:absolute before:top-[22px] before:hidden before:h-6 before:w-1 before:rounded-md before:bg-amber-300 hover:text-amber-400 before:sm:left-[18px] sm:before:block dark:hover:text-amber-400">
             {title}
             <ArrowIcon
               className="mt-1 hidden size-6 -translate-x-2 text-amber-300 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100 sm:block sm:opacity-0"
@@ -64,7 +64,7 @@ const PostWidget = ({
 
         {description && (
           <div className="mt-4 pr-4">
-            <p className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
+            <p className="line-clamp-2 text-sm break-keep text-gray-600 dark:text-gray-400">
               {description}
             </p>
           </div>
