@@ -1,5 +1,6 @@
-import getPostBySlug from "@/entities/post/model/getPostBySlug";
-import getPostSlugs from "@/entities/post/model/getPostSlugs";
+import { Metadata } from "next";
+import getPostBySlug from "@/entities/post/lib/getPostBySlug";
+import getPostSlugs from "@/entities/post/lib/getPostSlugs";
 import PostDetail from "@/widgets/post/ui/PostDetail";
 
 type PageProps = {
@@ -26,13 +27,16 @@ export const generateStaticParams = () => {
   return slugs.map((slug) => ({ slug }));
 };
 
-export async function generateMetadata({ params }: PageProps) {
+export async function generateMetadata({
+  params,
+}: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
 
   if (!post) {
     return {
       title: "Post Not Found",
+      description: "Post Not Found",
     };
   }
 

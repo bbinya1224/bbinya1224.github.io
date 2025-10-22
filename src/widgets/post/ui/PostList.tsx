@@ -1,4 +1,4 @@
-import getAllPosts from "@/entities/post/model/getAllPosts";
+import getAllPosts from "@/entities/post/lib/getAllPosts";
 import PostWidget from "@/widgets/post/ui/PostWidget";
 
 const PostList = () => {

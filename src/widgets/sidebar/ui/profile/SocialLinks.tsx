@@ -1,9 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import GithubIcon from "@/shared/icons/ic_github.svg";
 import MailIcon from "@/shared/icons/ic_mail.svg";
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { useState } from "react";
 
 const MailTooltip = () => {
   const [open, setOpen] = useState(false);

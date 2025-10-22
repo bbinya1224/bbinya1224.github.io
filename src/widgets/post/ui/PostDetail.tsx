@@ -1,7 +1,7 @@
+import { type Post } from "@/entities/post/model/types";
 import CalendarIcon from "@/shared/icons/ic_calendar.svg";
 import CategoryIcon from "@/shared/icons/ic_category.svg";
 import TagIcon from "@/shared/icons/ic_tag.svg";
-import { type Post } from "@/entities/post/model/types";
 
 type PostDetailProps = {
   post: Post;
@@ -44,9 +44,7 @@ const PostDetail = ({ post }: PostDetailProps) => {
         </div>
       </header>
 
-      <div className="prose dark:prose-invert max-w-none">
-        {post.content}
-      </div>
+      <div className="prose dark:prose-invert max-w-none">{post.content}</div>
     </article>
   );
 };

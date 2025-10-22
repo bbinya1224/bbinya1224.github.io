@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Link from "next/link";
 import { useTheme } from "next-themes";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import DarkModeIcon from "@/widgets/header/icons/ic_darkMode.svg";
-import LightModeIcon from "@/widgets/header/icons/ic_lightMode.svg";
 import HomeIcon from "@/widgets/header/icons/ic_home.svg";
+import LightModeIcon from "@/widgets/header/icons/ic_lightMode.svg";
 
 const Header = () => {
   const { resolvedTheme, setTheme } = useTheme();

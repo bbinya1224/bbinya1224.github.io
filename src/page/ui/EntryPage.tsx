@@ -1,10 +1,10 @@
 "use client";
 
-import { useRef, useState } from "react";
 import gsap from "gsap";
 import { TextPlugin } from "gsap/TextPlugin";
-import { useGSAP } from "@gsap/react";
 import { useRouter } from "next/navigation";
+import { useRef, useState } from "react";
+import { useGSAP } from "@gsap/react";
 
 gsap.registerPlugin(TextPlugin);
 

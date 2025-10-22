@@ -1,5 +1,5 @@
-import type { Post } from "@/entities/post/model/types";
 import Link from "next/link";
+import type { Post } from "@/entities/post/model/types";
 
 export default function PostList({ posts }: { posts: Post[] }) {
   return (

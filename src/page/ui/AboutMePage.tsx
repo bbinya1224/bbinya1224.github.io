@@ -1,6 +1,6 @@
 import MailIcon from "@/shared/icons/ic_mail.svg";
-import VelogIcon from "@/shared/icons/ic_velog.svg";
 import TistoryIcon from "@/shared/icons/ic_tistory.svg";
+import VelogIcon from "@/shared/icons/ic_velog.svg";
 import Badge from "@/shared/ui/Badge";
 
 const AboutMePage = () => {

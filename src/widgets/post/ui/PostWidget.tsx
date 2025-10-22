@@ -1,9 +1,9 @@
+import Link from "next/link";
 import { type PostFrontmatter } from "@/entities/post/model/types";
 import ArrowIcon from "@/shared/icons/ic_arrow.svg";
 import CalendarIcon from "@/shared/icons/ic_calendar.svg";
 import CategoryIcon from "@/shared/icons/ic_category.svg";
 import TagIcon from "@/shared/icons/ic_tag.svg";
-import Link from "next/link";
 
 type PostWidgetProps = Omit<PostFrontmatter, "content">;
 

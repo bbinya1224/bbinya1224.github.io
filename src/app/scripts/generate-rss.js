@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
-import RSS from "rss";
 import matter from "gray-matter";
+import RSS from "rss";
 
 const site_url = "https://bbinya1224.github.io";
 const postsDirectory = path.join(process.cwd(), "posts");

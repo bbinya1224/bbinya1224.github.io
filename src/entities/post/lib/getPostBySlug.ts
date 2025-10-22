@@ -3,7 +3,7 @@ import path from "path";
 import matter from "gray-matter";
 import { compileMDX } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
-import type { Post } from "./types";
+import type { Post } from "@/entities/post/model/types";
 
 const postsDirectory = path.join(process.cwd(), "posts");
 
