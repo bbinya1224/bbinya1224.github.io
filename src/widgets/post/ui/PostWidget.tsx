@@ -43,20 +43,20 @@ const PostWidget = ({
 
         <div className="flex flex-row gap-9">
           <p className="flex flex-row items-center gap-1">
-            <CalendarIcon className="size-5 text-amber-300 dark:text-amber-300" />
+            <CalendarIcon className="size-5 text-amber-300" />
             <span className="text-sm">{formattedDate}</span>
           </p>
 
           {category && (
             <p className="flex flex-row items-center gap-1">
-              <CategoryIcon className="size-5 text-amber-300 dark:text-amber-300" />
+              <CategoryIcon className="size-5 text-amber-300" />
               <span className="text-sm">{category}</span>
             </p>
           )}
 
           {tags.length > 0 && (
             <p className="hidden flex-row items-center gap-1 sm:flex">
-              <TagIcon className="size-5 text-amber-300 dark:text-amber-300" />
+              <TagIcon className="size-5 text-amber-300" />
               <span className="text-sm">{tags.join(", ")}</span>
             </p>
           )}

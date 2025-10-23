@@ -1,8 +1,28 @@
-import getAllPosts from "@/entities/post/lib/getAllPosts";
+"use client";
+
+import { useAtom, useSetAtom } from "jotai";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+import {
+  filteredPostsAtom,
+  selectedCategoryAtom,
+  selectedTagsAtom,
+} from "@/entities/post/atoms/postAtom";
 import PostWidget from "@/widgets/post/ui/PostWidget";
 
 const PostList = () => {
-  const posts = getAllPosts();
+  const [posts] = useAtom(filteredPostsAtom);
+  const setCategoryAtom = useSetAtom(selectedCategoryAtom);
+  const setTagsAtom = useSetAtom(selectedTagsAtom);
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const category = searchParams.get("category");
+    const tagsParam = searchParams.getAll("tag");
+
+    setCategoryAtom(category);
+    setTagsAtom(tagsParam.length > 0 ? tagsParam : []);
+  }, [searchParams, setCategoryAtom, setTagsAtom]);
 
   return (
     <section className="mx-auto w-full">

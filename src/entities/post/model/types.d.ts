@@ -12,3 +12,8 @@ export type PostFrontmatter = {
 export type Post = {
   content: ReactNode;
 } & PostFrontmatter;
+
+export type PostFilter = {
+  tags?: string[] | string | null;
+  category?: string | null;
+};

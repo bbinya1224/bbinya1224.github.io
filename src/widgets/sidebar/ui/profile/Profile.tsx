@@ -10,6 +10,7 @@ const Profile = () => {
           alt="profile Image"
           fill
           className="object-cover"
+          priority={false}
         />
       </div>
       <div className="mt-3">
