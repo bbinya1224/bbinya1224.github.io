@@ -1,14 +1,11 @@
-import PostListProvider from "@/app/provider/PostListProvider";
-import getAllPosts from "@/entities/post/api/getAllPosts";
+import { Suspense } from "react";
 import PostList from "@/widgets/post/ui/PostList";
 
 const MainPage = async () => {
-  const posts = getAllPosts();
-
   return (
-    <PostListProvider initialPosts={posts}>
+    <Suspense fallback={<div>로딩 중...</div>}>
       <PostList />
-    </PostListProvider>
+    </Suspense>
   );
 };
 
