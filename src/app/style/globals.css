@@ -42,15 +42,8 @@
     --card-bg: #ffffff;
     --card-bg-dark: #171e23;
     --page-width: 75rem;
-    --skeleton-base-color: #1f2937;
-    --skeleton-highlight-color: #444;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --skeleton-base-color: #f1f5f9;
-      --skeleton-highlight-color: #e6e6e6;
-    }
+    --skeleton-base-color: #f1f5f9;
+    --skeleton-highlight-color: #e6e6e6;
   }
 
   .react-loading-skeleton {
@@ -63,6 +56,8 @@
     --foreground: #ededed;
     --primary: #171e23;
     --card-bg: #171e23;
+    --skeleton-base-color: #1f2937;
+    --skeleton-highlight-color: #444;
   }
 
   body {

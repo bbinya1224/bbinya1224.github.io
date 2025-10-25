@@ -1,16 +1,33 @@
+"use client";
+
 import Image from "next/image";
-import SocialLinks from "./SocialLinks";
+import { useState } from "react";
+import Skeleton from "react-loading-skeleton";
+import SocialLinks from "@/widgets/sidebar/ui/profile/SocialLinks";
 
 const Profile = () => {
+  const [isLoaded, setIsLoaded] = useState(false);
+
   return (
     <div className="card-base flex w-full flex-col items-center p-4 shadow-xl lg:w-2xs">
       <div className="relative aspect-square h-auto w-3xs overflow-hidden rounded-3xl lg:w-full">
+        {!isLoaded && (
+          <Skeleton
+            className="absolute inset-0"
+            borderRadius="1rem"
+            height="100%"
+            width="100%"
+          />
+        )}
         <Image
           src="/img/profile/profile-10-09-19-08-28.jpeg"
           alt="profile Image"
           fill
-          className="object-cover"
+          className={`object-cover transition-opacity duration-500 ${
+            isLoaded ? "opacity-100" : "opacity-0"
+          }`}
           priority
+          onLoadingComplete={() => setIsLoaded(true)}
         />
       </div>
       <div className="mt-3">
