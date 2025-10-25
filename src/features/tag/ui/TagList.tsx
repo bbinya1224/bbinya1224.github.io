@@ -5,7 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import { selectedTagsAtom, tagsAtom } from "@/entities/post/atoms/postAtom";
 import Badge from "@/shared/ui/Badge";
-import TagSkeleton from "./skeleton/TagSkeleton";
 
 const TagList = () => {
   const [tags] = useAtom(tagsAtom);
@@ -13,8 +12,6 @@ const TagList = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
-
-  const isLoading = tags.length === 0;
 
   useEffect(() => {
     const tagsParam = searchParams.getAll("tag");
@@ -44,10 +41,6 @@ const TagList = () => {
 
     router.push(url);
   };
-
-  if (isLoading) {
-    return <TagSkeleton />;
-  }
 
   return (
     <>
