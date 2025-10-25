@@ -3,12 +3,8 @@ import "react-loading-skeleton/dist/skeleton.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
-import PostListProvider from "@/app/provider/PostListProvider";
-import getAllPosts from "@/entities/post/api/getAllPosts";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
-  const posts = getAllPosts();
-
   return (
     <html suppressHydrationWarning>
       <head>
@@ -21,7 +17,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
 
       <body>
         <ThemeProvider attribute="class" enableSystem>
-          <PostListProvider initialPosts={posts}>{children}</PostListProvider>
+          {children}
         </ThemeProvider>
       </body>
     </html>
