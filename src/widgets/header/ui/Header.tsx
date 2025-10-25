@@ -11,7 +11,6 @@ const Header = () => {
   const { resolvedTheme, setTheme } = useTheme();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
-  const [mounted, setMounted] = useState(false);
 
   const isDark = resolvedTheme === "dark";
 
@@ -31,14 +30,6 @@ const Header = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, [lastScrollY]);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return null;
-  }
 
   return (
     <header

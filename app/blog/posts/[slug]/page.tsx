@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import { Suspense } from "react";
 import getPostBySlug from "@/entities/post/lib/getPostBySlug";
 import getPostSlugs from "@/entities/post/lib/getPostSlugs";
 import PostDetail from "@/widgets/post/ui/PostDetail";
@@ -15,7 +16,9 @@ const PostDetailPage = async ({ params }: PageProps) => {
 
   return (
     <section className="card-base mx-auto h-full w-full max-w-4xl shadow-xl">
-      <PostDetail post={post} />
+      <Suspense fallback={<div>Loading...</div>}>
+        <PostDetail post={post} />
+      </Suspense>
     </section>
   );
 };

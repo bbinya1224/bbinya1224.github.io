@@ -4,7 +4,7 @@
         <description><![CDATA[프론트엔드 개발자 삔아의 기술 블로그]]></description>
         <link>https://bbinya1224.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Thu, 23 Oct 2025 14:21:34 GMT</lastBuildDate>
+        <lastBuildDate>Sat, 25 Oct 2025 10:44:00 GMT</lastBuildDate>
         <atom:link href="https://bbinya1224.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[ko]]></language>
         <item>
@@ -34,6 +34,13 @@
             <link>https://bbinya1224.github.io/blog/posts/20251021</link>
             <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251021</guid>
             <pubDate>Tue, 21 Oct 2025 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Nextjs의 실험 기능 맛보기 - PPR 전략]]></title>
+            <description><![CDATA[Nextjs 앞으로 나올 기능중 하나인 PPR 전략을 간략하게 소개합니다.]]></description>
+            <link>https://bbinya1224.github.io/blog/posts/20251024</link>
+            <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251024</guid>
+            <pubDate>Fri, 24 Oct 2025 00:00:00 GMT</pubDate>
         </item>
     </channel>
 </rss>

@@ -1,7 +1,8 @@
+import "@/app/style/globals.css";
+import "react-loading-skeleton/dist/skeleton.css";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
-import "@/app/style/globals.css";
 import PostListProvider from "@/app/provider/PostListProvider";
 import getAllPosts from "@/entities/post/api/getAllPosts";
 

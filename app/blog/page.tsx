@@ -1,9 +1,10 @@
 import { Suspense } from "react";
 import PostList from "@/widgets/post/ui/PostList";
+import PostWidgetSkeleton from "@/widgets/post/ui/skeleton/PostWidgetSkeleton";
 
-const MainPage = async () => {
+const MainPage = () => {
   return (
-    <Suspense fallback={<div>로딩 중...</div>}>
+    <Suspense fallback={<PostWidgetSkeleton />}>
       <PostList />
     </Suspense>
   );

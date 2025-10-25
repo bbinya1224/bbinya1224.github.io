@@ -1,6 +1,6 @@
 import type { NextConfig } from "next";
-import createMDX from "@next/mdx";
 import rehypePrettyCode from "rehype-pretty-code";
+import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
   output: "export",
