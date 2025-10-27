@@ -25,4 +25,5 @@
 - [x] Category 및 Tag 기능 추가
 - [ ] 댓글 기능
 - [x] 시스템 모드에 따라 다크모드/라이트모드 전환
-- [ ] Skeleton UI 적용하기
+- [x] Skeleton UI 적용하기
+- [ ] PostList 페이징 처리하기
