@@ -4,7 +4,7 @@
         <description><![CDATA[프론트엔드 개발자 삔아의 기술 블로그]]></description>
         <link>https://bbinya1224.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 25 Oct 2025 10:44:00 GMT</lastBuildDate>
+        <lastBuildDate>Wed, 29 Oct 2025 12:39:41 GMT</lastBuildDate>
         <atom:link href="https://bbinya1224.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[ko]]></language>
         <item>
@@ -41,6 +41,13 @@
             <link>https://bbinya1224.github.io/blog/posts/20251024</link>
             <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251024</guid>
             <pubDate>Fri, 24 Oct 2025 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Suspense, React Loading Skeleton 이용하기]]></title>
+            <description><![CDATA[Suspense, React Loading Skeleton 이용하여 사용자 경험 향상시켜봅시다.]]></description>
+            <link>https://bbinya1224.github.io/blog/posts/20251025</link>
+            <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251025</guid>
+            <pubDate>Sat, 25 Oct 2025 00:00:00 GMT</pubDate>
         </item>
     </channel>
 </rss>
