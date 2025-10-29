@@ -11,8 +11,13 @@ const Header = () => {
   const { resolvedTheme, setTheme } = useTheme();
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
+  const [mounted, setMounted] = useState(false);
 
   const isDark = resolvedTheme === "dark";
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -49,14 +54,24 @@ const Header = () => {
 
           <button
             className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"
-            aria-label={isDark ? "라이트 모드로 변경" : "다크 모드로 변경"}
-            title={isDark ? "라이트 모드" : "다크 모드"}
+            aria-label={
+              mounted
+                ? isDark
+                  ? "라이트 모드로 변경"
+                  : "다크 모드로 변경"
+                : "테마 변경"
+            }
+            title={mounted ? (isDark ? "라이트 모드" : "다크 모드") : "테마"}
             onClick={() => setTheme(!isDark ? "dark" : "light")}
           >
-            {isDark ? (
-              <LightModeIcon className="size-[24px]" />
+            {mounted ? (
+              isDark ? (
+                <LightModeIcon className="size-[24px]" />
+              ) : (
+                <DarkModeIcon className="size-[24px]" />
+              )
             ) : (
-              <DarkModeIcon className="size-[24px]" />
+              <div className="size-[24px]" />
             )}
           </button>
         </div>

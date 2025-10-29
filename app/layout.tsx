@@ -1,6 +1,7 @@
 import "@/app/style/globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
 import type { Metadata } from "next";
+import { Provider as JotaiProvider } from "jotai";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 
@@ -16,9 +17,11 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       </head>
 
       <body>
-        <ThemeProvider attribute="class" enableSystem>
-          {children}
-        </ThemeProvider>
+        <JotaiProvider>
+          <ThemeProvider attribute="class" enableSystem>
+            {children}
+          </ThemeProvider>
+        </JotaiProvider>
       </body>
     </html>
   );

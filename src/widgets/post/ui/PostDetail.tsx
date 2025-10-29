@@ -1,4 +1,5 @@
 import { type Post } from "@/entities/post/model/types";
+import Comment from "@/features/comment/ui/Comment";
 import CalendarIcon from "@/shared/icons/ic_calendar.svg";
 import CategoryIcon from "@/shared/icons/ic_category.svg";
 import TagIcon from "@/shared/icons/ic_tag.svg";
@@ -45,6 +46,8 @@ const PostDetail = ({ post }: PostDetailProps) => {
       </header>
 
       <div className="prose dark:prose-invert max-w-none">{post.content}</div>
+
+      <Comment />
     </article>
   );
 };

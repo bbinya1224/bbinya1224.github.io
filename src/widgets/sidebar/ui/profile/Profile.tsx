@@ -27,7 +27,7 @@ const Profile = () => {
             isLoaded ? "opacity-100" : "opacity-0"
           }`}
           priority
-          onLoadingComplete={() => setIsLoaded(true)}
+          onLoad={() => setIsLoaded(true)}
         />
       </div>
       <div className="mt-3">
