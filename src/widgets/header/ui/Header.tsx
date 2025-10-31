@@ -3,6 +3,7 @@
 import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import Skeleton from "react-loading-skeleton";
 import DarkModeIcon from "@/widgets/header/icons/ic_darkMode.svg";
 import HomeIcon from "@/widgets/header/icons/ic_home.svg";
 import LightModeIcon from "@/widgets/header/icons/ic_lightMode.svg";
@@ -49,7 +50,11 @@ const Header = () => {
 
         <div className="flex flex-row">
           <div className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]">
-            <Link href="/blog/about-me">About Me</Link>
+            {mounted ? (
+              <Link href="/blog/about-me">About Me</Link>
+            ) : (
+              <Skeleton width={80} height={24} />
+            )}
           </div>
 
           <button
@@ -71,7 +76,7 @@ const Header = () => {
                 <DarkModeIcon className="size-[24px]" />
               )
             ) : (
-              <div className="size-[24px]" />
+              <Skeleton circle width={24} height={24} />
             )}
           </button>
         </div>

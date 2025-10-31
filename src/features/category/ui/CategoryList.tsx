@@ -2,18 +2,24 @@
 
 import { useAtom } from "jotai";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   categoriesAtom,
   selectedCategoryAtom,
 } from "@/entities/post/atoms/postAtom";
-import CategoryItem from "./CategoryItem";
+import CategoryItem from "@/features/category/ui/CategoryItem";
+import CategorySkeleton from "@/features/category/ui/skeleton/CategorySkeleton";
 
 const CategoryList = () => {
   const [categories] = useAtom(categoriesAtom);
   const [selectedCategory, setSelectedCategory] = useAtom(selectedCategoryAtom);
+  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const category = searchParams.get("category");
@@ -34,6 +40,10 @@ const CategoryList = () => {
       router.push(url);
     }
   };
+
+  if (!mounted) {
+    return <CategorySkeleton />;
+  }
 
   return (
     <>
