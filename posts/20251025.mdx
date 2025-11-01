@@ -301,26 +301,36 @@ const TagList = () => {
 
 이 패턴은 특히 **hydration 중 깜빡임을 방지**하는 데도 유용합니다.
 
-## 방법 2: 불필요한 Suspense 제거하기
+## 방법 2: Suspense + mounted 함께 사용하기
 
-만약 컴포넌트가 클라이언트 컴포넌트이고 비동기 작업이 없다면, **Suspense를 제거하는 것이 더 깔끔합니다.**
+<aside data-type="warning">
 
-**Before:**
+**중요: useSearchParams() 사용 시 Suspense 필수!**
+
+Next.js에서 `useSearchParams()`를 사용하는 클라이언트 컴포넌트는 **반드시 Suspense로 감싸야 합니다**.  
+그렇지 않으면 빌드 에러가 발생합니다.
+
+```
+⨯ useSearchParams() should be wrapped in a suspense boundary
+```
+
+</aside>
+
+따라서 `useSearchParams()`를 사용하는 컴포넌트는 **Suspense와 mounted 상태를 함께 사용**해야 합니다.
+
 ```tsx
-// Tag.tsx
+// Tag.tsx - Suspense는 Next.js 요구사항 충족용
 <Suspense fallback={<TagSkeleton />}>
   <TagList />
 </Suspense>
-```
 
-**After:**
-```tsx
-// Tag.tsx - Suspense 제거
-<TagList />
+// TagList.tsx - mounted는 클라이언트 사이드 스켈레톤 표시용
+"use client";
 
-// TagList.tsx - 내부에서 스켈레톤 처리
 const TagList = () => {
+  const [tags] = useAtom(tagsAtom);
   const [mounted, setMounted] = useState(false);
+  const searchParams = useSearchParams(); // 이것 때문에 Suspense 필요!
 
   useEffect(() => {
     setMounted(true);
@@ -328,16 +338,18 @@ const TagList = () => {
 
   if (!mounted) return <TagSkeleton />;
 
-  // ... 실제 콘텐츠
+  return (/* 실제 콘텐츠 */);
 };
 ```
 
-이렇게 하면,
-- 코드가 더 명확해집니다 (의미 없는 Suspense가 없음)
-- 스켈레톤 로직이 컴포넌트 내부에 응집됩니다
-- 디버깅이 쉬워집니다
+**왜 두 가지 모두 필요한가?**
 
-제 블로그의 경우 Tag, Category, Header 등의 컴포넌트에서 불필요한 Suspense를 제거하고 이 방법을 적용했습니다.
+- **Suspense**: Next.js 빌드 요구사항 충족 + SSR 중 스켈레톤 표시
+- **mounted 상태**: 클라이언트 사이드 hydration 중 스켈레톤 표시 + hydration 불일치 방지
+
+`useSearchParams()`**를 사용하지 않는 컴포넌트라면?**
+
+Header처럼 `useSearchParams()`를 사용하지 않는 컴포넌트는 Suspense 없이 mounted 상태만 사용해도 됩니다.
 
 ## 방법 3: React.lazy() 사용하기
 
@@ -449,46 +461,58 @@ const PostList = () => {
 - **서버 컴포넌트 + async 데이터 fetching**
   → `Suspense` 사용
 
-- **클라이언트 컴포넌트 + hooks만 사용**
-  → `mounted` 상태로 스켈레톤 처리
+- **클라이언트 컴포넌트 + useSearchParams() 사용**
+  → `Suspense` + `mounted` 상태 **함께 사용** (Next.js 필수 요구사항)
+
+- **클라이언트 컴포넌트 + 일반 hooks만 사용**
+  → `mounted` 상태로 스켈레톤 처리 (Suspense 불필요)
 
 - **큰 클라이언트 컴포넌트 (코드 스플리팅 필요)**
   → `React.lazy()` + `Suspense`
 
-- **작은 클라이언트 컴포넌트**
-  → `mounted` 상태 (Suspense 제거)
+<aside data-type="info">
+1. **Suspense 단독으로는 클라이언트 컴포넌트의 스켈레톤을 보여줄 수 없습니다**
+   - 클라이언트 컴포넌트는 동기적으로 실행되어 fallback이 트리거되지 않음
 
-<aside data-type="note">
+2. **useSearchParams()를 사용하면 Suspense는 필수입니다**
+   - Next.js 빌드 요구사항
+   - 하지만 클라이언트 사이드 스켈레톤을 위해 mounted 상태도 필요
 
-Suspense는 "비동기 작업을 기다리는" 컴포넌트입니다.  
-클라이언트 컴포넌트에 비동기 작업이 없다면, Suspense는 의미가 없습니다.
-
-대신 `mounted` 상태를 활용하면 동일한 UX를 제공할 수 있습니다.
-
+3. **mounted 상태는 hydration 문제도 해결합니다**
+   - 서버/클라이언트 렌더링 불일치 방지
+   - 클라이언트 전용 기능(테마, 검색 파라미터) 처리
 </aside>
 
 ## 최종 코드 구조
 
 ```tsx
-// app/blog/layout.tsx - Suspense 제거
-const Layout = ({ children }: { children: ReactNode }) => {
+// Tag.tsx - useSearchParams 사용하므로 Suspense 필수
+import { Suspense } from "react";
+
+const Tag = () => {
   return (
-    <>
-      <Header />
-      <Sidebar />
-      {children}
-    </>
+    <div className="card-base">
+      <SidebarCardHeader contentType="Tag" />
+      <Suspense fallback={<TagSkeleton />}>
+        <TagList />
+      </Suspense>
+    </div>
   );
 };
 
-// TagList.tsx - 내부에서 스켈레톤 처리
+// TagList.tsx - Suspense + mounted 상태 함께 사용
+"use client";
+
 const TagList = () => {
+  const [tags] = useAtom(tagsAtom);
   const [mounted, setMounted] = useState(false);
+  const searchParams = useSearchParams(); // Suspense 필수!
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // 클라이언트 사이드 스켈레톤 표시
   if (!mounted) return <TagSkeleton />;
 
   return (/* 실제 콘텐츠 */);
