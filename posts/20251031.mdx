@@ -1,0 +1,308 @@
+---
+title: "Giscus 이용하여 내 깃허브 블로그에 댓글 기능 추가하기"
+date: "2025-10-31"
+slug: "20251031"
+tag: "NextJs,React"
+category: "Frontend"
+description: "Giscus 를 이용하여 깃허브 블로그에 댓글 기능을 추가해봅시다."
+---
+
+<aside>
+저의 블로그에 추가하였으면 하는 기능 중 하나인 댓글 기능을 추가해보고자 합니다.
+</aside>
+
+보통 댓글 기능을 구현할 때에 `Utterances`와 `Giscus` 를 많이 사용하고 계시고, 혹은 직접 구현하는 경우도  보였는데요, 제 블로그 같은 경우에는 `Giscus` 를 사용하려고 합니다.
+
+# Giscus란?
+
+```tsx
+GitHub Discussions로 작동하는 댓글 시스템입니다.
+방문자가 GitHub를 통해 웹사이트에 댓글과 반응을 남기게 해보세요!
+utterances에서 큰 영감을 받았습니다.
+
+오픈 소스입니다. 🌏
+사용자 추적도, 광고도 없습니다. 항상 무료입니다. 📡 🚫
+데이터베이스가 필요 없습니다. 모든 데이터는 GitHub Discussions에 저장됩니다. :octocat:
+커스텀 테마 제작을 지원합니다! 🌗
+여러 언어를 지원합니다. 🌐
+여러 설정을 제공합니다. 🔧
+자동으로 GitHub에서 새로운 댓글과 수정 사항을 반영합니다. 🔃
+셀프 호스팅이 가능합니다! 🤳
+
+-Giscus 공식 소개
+```
+
+## Giscus vs Utterances
+
+둘 다 GitHub 기반 댓글 시스템이지만, 몇 가지 중요한 차이점이 있습니다.
+
+**Utterances**
+- GitHub Issues 사용
+- 댓글 = Issue
+- 심플하고 가벼움
+- 테마 옵션 제한적
+
+💫 **Giscus**
+- GitHub Discussions 사용
+- 댓글 전용 공간 (Issues와 분리)
+- 대댓글 지원
+- 반응(이모지) 기능
+- 더 많은 테마와 커스터마이징
+- 다국어 지원 강화
+
+<aside data-type="info">
+
+Discussions는 Issues보다 댓글에 더 적합한 구조입니다.  
+Issues는 버그 추적용이지만, Discussions는 커뮤니티 대화를 위해 설계되었습니다.
+
+</aside>
+
+# 1. GitHub 저장소 설정
+
+### 1-1. Discussions 활성화
+
+먼저, 내 블로그의 repo 설정을 바꾸어줍시다.
+`https://github.com/YOUR-USERNAME/REPOSITORY/settings`
+
+![github repo setting](/img/posts/20251031/blog_discussion.png)
+
+깃허브 레포의 **Settings** 페이지 접속 하여 **Features** 섹션에서 `Discussions` 기능을 활성화 시켜줍니다.
+
+> 기본으로 제공되는 "Announcements" 카테고리 그대로 사용하여도 됩니다.
+
+Comments 카테고리를 따로 만드는 건 "저장소를 좀 더 깔끔하게 정리하고 싶을 때" 하는 거예요.
+
+**왜 별도 카테고리를 만드나요?**
+- 댓글과 일반 Discussion 분리
+- Discussion 목록이 깔끔해짐
+- 권한 관리 용이
+
+![github repo create cateogry](/img/posts/20251031/create-category.png)
+
+Create Category 로 Comment 용 카테고리를 생성하고 `Announcement` 로 format 을 지정해줍니다.
+
+<aside data-type="warning">
+
+**Format은 반드시 "Announcement"로!**
+
+"Announcement" 형식을 선택하면 해당 Discussion에 댓글만 달 수 있고, 새로운 Discussion 생성이 제한됩니다.  
+이렇게 하면 사용자가 임의로 Discussion을 만들지 못하고, 오직 블로그 포스트에만 댓글을 달 수 있습니다.
+
+</aside>
+
+# 2. Giscus GitHub App 설치
+
+- [**https://github.com/apps/giscus**](https://github.com/apps/giscus) 접속
+- **"Install"** 클릭
+
+![github giscus install](/img/posts/20251031/giscus-install.png)
+
+Only select repositories 선택 → Permissions 확인해주어 Install 을 완료해줍니다.
+
+**권한 확인사항:**
+- Read access to Discussions
+- Write access to Discussions
+- Read access to metadata
+
+
+# 3. Giscus 설정 및 스크립트 생성
+
+- [**https://giscus.app**](https://giscus.app/) 접속
+- **Configuration** 섹션에서 입력:
+
+![giscus_Configuration](/img/posts/20251031/giscus_Configuration.png)
+
+## 주요 설정 옵션 설명
+
+### Page ↔ Discussions Mapping
+
+이 옵션은 블로그 포스트와 Discussion을 어떻게 연결할지 결정합니다.
+
+- **pathname (권장)** - URL 경로 기반
+  - `/blog/posts/hello` → Discussion 제목: `hello`
+  - 가장 깔끔하고 직관적
+
+- **URL** - 전체 URL 기반
+  - 도메인 변경 시 모든 댓글 연결 끊김
+
+- **title** - 페이지 제목 기반
+  - 제목 변경 시 댓글 연결 끊김
+
+- **og:title** - Open Graph 제목
+  - SEO 메타태그 사용
+
+<aside data-type="note">
+**pathname** 선택!
+
+URL 경로가 변경될 일은 거의 없고, 제목은 수정할 수 있으니 pathname이 가장 안전합니다.
+</aside>
+
+![giscus_discussion-category](/img/posts/20251031/giscus_discussion-category.png)
+
+원하는 기능을 추가하면 아래와 같이 스크립트가 생성됩니다.
+
+![giscus_script](/img/posts/20251031/giscus_script.png)
+
+# 4. Next.js 프로젝트에 적용하기
+
+저는 NextJS 를 사용하고 있기에 `@giscus/react` 를 이용하여 댓글 컴포넌트를 만들겠습니다.
+
+## 4-1. 패키지 설치
+
+```bash
+npm install @giscus/react
+# or
+yarn add @giscus/react
+```
+
+## 4-2. Comment 컴포넌트 생성
+
+```tsx
+"use client";
+
+import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
+import GiscusComponent from "@giscus/react";
+
+const Comment = () => {
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
+  return (
+    <div className="mt-8">
+      <GiscusComponent
+        repo={process.env.NEXT_PUBLIC_GISCUS_REPO as `${string}/${string}`}
+        repoId={process.env.NEXT_PUBLIC_GISCUS_REPO_ID as string}
+        category={process.env.NEXT_PUBLIC_GISCUS_CATEGORY as string}
+        categoryId={process.env.NEXT_PUBLIC_GISCUS_CATEGORY_ID as string}
+        mapping="pathname"
+        strict="0"
+        reactionsEnabled="1"
+        emitMetadata="1"
+        inputPosition="bottom"
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
+        lang="ko"
+        loading="lazy"
+      />
+    </div>
+  );
+};
+
+export default Comment;
+```
+
+## 4-3. 환경변수 설정
+
+### .env.local 파일 생성
+
+```bash
+NEXT_PUBLIC_GISCUS_REPO=bbinya1224/bbinya1224.github.io
+NEXT_PUBLIC_GISCUS_REPO_ID=여기에_repo_id
+NEXT_PUBLIC_GISCUS_CATEGORY=Comment
+NEXT_PUBLIC_GISCUS_CATEGORY_ID=여기에_category_id
+```
+
+<aside data-type="warning">
+**NEXT_PUBLIC_ 접두사 필수!**
+
+Next.js에서 클라이언트 컴포넌트에서 사용할 환경변수는 반드시 `NEXT_PUBLIC_`으로 시작해야 합니다. 이 접두사가 없으면 클라이언트에서 접근할 수 없습니다.
+</aside>
+
+**환경변수를 사용하는 이유:**
+
+1. **보안** - ID 값을 코드에 하드코딩하지 않음
+2. **유연성** - 로컬/스테이징/프로덕션 환경별로 다른 값 사용 가능
+3. **유지보수** - 값 변경 시 코드 수정 불필요
+
+## 4-4. GitHub Actions 설정
+
+GitHub Pages로 배포하는 경우, `.github/workflows/deploy.yml` 파일을 수정합니다.
+
+```yaml
+//deploy.yml
+  - name: Build
+    env:
+      NEXT_PUBLIC_GISCUS_REPO: ${{ secrets.GISCUS_REPO }}
+      NEXT_PUBLIC_GISCUS_REPO_ID: ${{ secrets.GISCUS_REPO_ID }}
+      NEXT_PUBLIC_GISCUS_CATEGORY: ${{ secrets.GISCUS_CATEGORY }}
+      NEXT_PUBLIC_GISCUS_CATEGORY_ID: ${{ secrets.GISCUS_CATEGORY_ID }}
+    run: npm run build
+```
+
+## 4-5. GitHub Secrets 등록
+
+```tsx
+https://github.com/bbinya1224/bbinya1224.github.io/settings/secrets/actions
+```
+
+![github_secrets](/img/posts/20251031/github_secrets.png)
+
+`Repository secrets`에 4개의 `secret`을 추가합니다:
+
+
+```tsx
+
+Name: GISCUS_REPO
+Value: bbinya1224/bbinya1224.github.io
+
+Name: GISCUS_REPO_ID
+Value: (Giscus 사이트에서 복사한 data-repo-id 값)
+
+Name: GISCUS_CATEGORY
+Value: Comment
+
+Name: GISCUS_CATEGORY_ID
+Value: (Giscus 사이트에서 복사한 data-category-id 값)
+```
+
+<aside data-type="note">
+repo-id와 category-id는 Giscus 설정 페이지에서 생성된 스크립트를 확인하세요.  
+`data-repo-id`와 `data-category-id` 값이 필요합니다.
+</aside>
+
+# 5. 배포 및 확인
+
+변경사항을 커밋하고 푸시합니다:
+
+```bash
+git commit "feat: Add Giscus comment system"
+git push
+```
+
+GitHub Actions가 자동으로 빌드하고 배포합니다.
+
+![comment_result](/img/posts/20251031/comment_result.png)
+
+다크모드/라이트모드 테마에 맞추어 잘 보여지는것을 확인하실 수 있습니다!
+
+
+# 6. 정리
+
+**Giscus의 장점:**
+- 무료이고 오픈소스
+- 별도 백엔드 불필요
+- GitHub 계정만 있으면 댓글 가능
+- 다크모드 자동 지원
+- 대댓글과 반응 기능
+- 마크다운 지원
+
+**⚠️ 주의사항:**
+- GitHub 계정이 없는 사용자는 댓글 불가
+- 클라이언트 컴포넌트이므로 hydration 주의
+- GitHub API 제한 (시간당 5000 요청)
+
+---
+
+생각보다 간단하고 빠르게 추가할 수 있었습니다!
+
+댓글 기능까지 붙이니 서서히 블로그 같은 모습이 보이기 시작하네요. 😁
+
+---
+
+[Giscus](https://github.com/giscus/giscus)
