@@ -4,7 +4,7 @@
         <description><![CDATA[프론트엔드 개발자 삔아의 기술 블로그]]></description>
         <link>https://bbinya1224.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sat, 01 Nov 2025 01:56:20 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 02 Nov 2025 10:19:54 GMT</lastBuildDate>
         <atom:link href="https://bbinya1224.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[ko]]></language>
         <item>
@@ -48,6 +48,20 @@
             <link>https://bbinya1224.github.io/blog/posts/20251025</link>
             <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251025</guid>
             <pubDate>Sat, 25 Oct 2025 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[Giscus 이용하여 내 깃허브 블로그에 댓글 기능 추가하기]]></title>
+            <description><![CDATA[Giscus 를 이용하여 깃허브 블로그에 댓글 기능을 추가해봅시다.]]></description>
+            <link>https://bbinya1224.github.io/blog/posts/20251031</link>
+            <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251031</guid>
+            <pubDate>Fri, 31 Oct 2025 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[atomWithHash로 URL 기반 페이지네이션 구현하기]]></title>
+            <description><![CDATA[Jotai의 atomWithHash를 활용한 청크 기반 페이지네이션 설계]]></description>
+            <link>https://bbinya1224.github.io/blog/posts/20251102</link>
+            <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251102</guid>
+            <pubDate>Sun, 02 Nov 2025 00:00:00 GMT</pubDate>
         </item>
     </channel>
 </rss>
