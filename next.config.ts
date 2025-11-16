@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import rehypePrettyCode from "rehype-pretty-code";
+import remarkGfm from "remark-gfm";
 import createMDX from "@next/mdx";
 
 const nextConfig: NextConfig = {
@@ -21,6 +22,7 @@ const nextConfig: NextConfig = {
 const withMDX = createMDX({
   // Markdown plugins
   options: {
+    remarkPlugins: [remarkGfm],
     rehypePlugins: [
       [
         rehypePrettyCode,

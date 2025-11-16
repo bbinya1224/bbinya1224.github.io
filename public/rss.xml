@@ -4,7 +4,7 @@
         <description><![CDATA[프론트엔드 개발자 삔아의 기술 블로그]]></description>
         <link>https://bbinya1224.github.io</link>
         <generator>RSS for Node</generator>
-        <lastBuildDate>Sun, 02 Nov 2025 10:19:54 GMT</lastBuildDate>
+        <lastBuildDate>Sun, 16 Nov 2025 05:17:33 GMT</lastBuildDate>
         <atom:link href="https://bbinya1224.github.io/rss.xml" rel="self" type="application/rss+xml"/>
         <language><![CDATA[ko]]></language>
         <item>
@@ -58,10 +58,17 @@
         </item>
         <item>
             <title><![CDATA[atomWithHash로 URL 기반 페이지네이션 구현하기]]></title>
-            <description><![CDATA[Jotai의 atomWithHash를 활용한 청크 기반 페이지네이션 설계]]></description>
+            <description><![CDATA[Jotai의 atomWithHash를 이용하여 페이지네이션을 구현해봅시다.]]></description>
             <link>https://bbinya1224.github.io/blog/posts/20251102</link>
             <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251102</guid>
             <pubDate>Sun, 02 Nov 2025 00:00:00 GMT</pubDate>
+        </item>
+        <item>
+            <title><![CDATA[React 18 함수형 생명주기]]></title>
+            <description><![CDATA[React 18 공식 문서를 바탕으로 함수형 컴포넌트 생명주기와 훅 타이밍을 정리합니다.]]></description>
+            <link>https://bbinya1224.github.io/blog/posts/20251108</link>
+            <guid isPermaLink="true">https://bbinya1224.github.io/blog/posts/20251108</guid>
+            <pubDate>Sat, 08 Nov 2025 00:00:00 GMT</pubDate>
         </item>
     </channel>
 </rss>

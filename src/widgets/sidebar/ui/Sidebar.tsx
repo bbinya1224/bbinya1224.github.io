@@ -4,7 +4,7 @@ import Tag from "@/widgets/sidebar/ui/tag/Tag";
 
 const Sidebar = () => {
   return (
-    <article className="relative flex w-full flex-col gap-4 md:w-auto">
+    <article className="relative flex w-full flex-col gap-4 md:w-auto lg:max-w-72">
       <Profile />
       <Category />
       <Tag />
