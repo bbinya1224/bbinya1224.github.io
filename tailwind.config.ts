@@ -233,7 +233,6 @@ module.exports = {
               fontWeight: "600",
               padding: "0.75em",
               border: "1px solid #E5E5E5",
-              textAlign: "left",
             },
             "tbody td": {
               padding: "0.75em",
@@ -372,7 +371,18 @@ module.exports = {
               color: "inherit !important",
               padding: "0 !important",
             },
-
+            "thead th:first-child": {
+              paddingLeft: "0.75em",
+            },
+            "thead th:last-child": {
+              paddingRight: "0.75em",
+            },
+            "tbody td:first-child": {
+              paddingLeft: "0.75em",
+            },
+            "tbody td:last-child": {
+              paddingRight: "0.75em",
+            },
             "thead th": {
               backgroundColor: "#404040",
               color: "#EBEBEB",

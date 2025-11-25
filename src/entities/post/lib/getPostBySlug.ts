@@ -5,7 +5,7 @@ import { compileMDX } from "next-mdx-remote/rsc";
 import rehypePrettyCode from "rehype-pretty-code";
 import remarkGfm from "remark-gfm";
 import type { Post } from "@/entities/post/model/types";
-import LifecycleLab from "@/widgets/lab/ui/lifecycle-lab/LifecycleLab";
+import { mdxComponents } from "@/mdx-components";
 
 const postsDirectory = path.join(process.cwd(), "posts");
 
@@ -33,9 +33,7 @@ const getPostBySlug = async (slug: string): Promise<Post> => {
         ],
       },
     },
-    components: {
-      LifecycleLab,
-    },
+    components: mdxComponents,
   });
 
   return {
