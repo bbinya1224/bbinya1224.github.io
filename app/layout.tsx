@@ -1,7 +1,7 @@
 import "@/app/style/globals.css";
 import "react-loading-skeleton/dist/skeleton.css";
-import type { Metadata } from "next";
 import { Provider as JotaiProvider } from "jotai";
+import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
 
@@ -28,8 +28,28 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
 };
 
 export const metadata: Metadata = {
-  title: "삔아's Blog",
+  metadataBase: new URL("https://bbinya1224.github.io"),
+  title: {
+    default: "삔아's Blog",
+    template: "%s | 삔아's Blog",
+  },
   description: "프론트엔드 개발자 삔아 기술 블로그",
+  openGraph: {
+    type: "website",
+    locale: "ko_KR",
+    url: "https://bbinya1224.github.io",
+    siteName: "삔아's Blog",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
   verification: {
     google: "lmWHNnNVPVnXS1B-FC4sGMw-0mI1J4yb10kl4OZxTOY",
   },

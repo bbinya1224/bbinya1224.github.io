@@ -20,5 +20,11 @@
     }
   },
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "pasteImage.basePath": "${projectRoot}",
+  "pasteImage.path": "public/img/posts/${currentFileNameWithoutExt}",
+  "pasteImage.insertPattern": "![](/img/posts/${currentFileNameWithoutExt}/${imageFileName})",
+  "pasteImage.forceUnixStyleSeparator": true,
+  "pasteImage.namePrefix": "",
+  "pasteImage.defaultName": "image"
 }
