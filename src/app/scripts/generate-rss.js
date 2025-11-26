@@ -33,7 +33,7 @@ function generateRSSFeed() {
   });
 
   const xml = feed.xml({ indent: true });
-  fs.writeFileSync(path.join(process.cwd(), "public/rss.xml"), xml);
+  fs.writeFileSync(path.join(process.cwd(), "out/rss.xml"), xml);
   console.log("RSS feed generated!");
 }
 
