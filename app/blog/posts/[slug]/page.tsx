@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Script from "next/script";
 import getPostBySlug from "@/entities/post/lib/getPostBySlug";
-import getPostSlugs from "@/entities/post/lib/getPostSlugs";
+
 import PostDetail from "@/widgets/post/ui/PostDetail";
 
 type PageProps = {
@@ -51,9 +51,11 @@ const PostDetailPage = async ({ params }: PageProps) => {
 
 export default PostDetailPage;
 
+import getAllPosts from "@/entities/post/api/getAllPosts";
+
 export const generateStaticParams = () => {
-  const slugs = getPostSlugs();
-  return slugs.map((slug) => ({ slug }));
+  const posts = getAllPosts();
+  return posts.map((post) => ({ slug: post.slug }));
 };
 
 export async function generateMetadata({

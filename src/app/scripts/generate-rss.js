@@ -22,7 +22,7 @@ function generateRSSFeed() {
     const fileContents = fs.readFileSync(filePath, "utf-8");
     const { data } = matter(fileContents);
 
-    if (data.slug && data.title) {
+    if (data.slug && data.title && data.published !== false) {
       feed.item({
         title: data.title,
         url: `${site_url}/blog/posts/${data.slug}`,

@@ -24,8 +24,10 @@ const getAllPosts = (): Post[] => {
         category: data.category,
         description: data.description,
         content,
+        published: data.published !== false, // Default to true
       } as Post;
-    });
+    })
+    .filter((post) => post.published);
 
   return posts.sort((a, b) => {
     return new Date(b.date).getTime() - new Date(a.date).getTime();

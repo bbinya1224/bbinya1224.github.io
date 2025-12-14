@@ -20,7 +20,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/mdx-components": ["./mdx-components.tsx"]
+      "@/mdx-components": ["./src/mdx-components.tsx"]
     }
   },
   "include": [

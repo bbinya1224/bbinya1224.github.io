@@ -7,6 +7,7 @@ export type PostFrontmatter = {
   tag?: string;
   category?: string;
   description?: string;
+  published?: boolean;
 };
 
 export type Post = {
