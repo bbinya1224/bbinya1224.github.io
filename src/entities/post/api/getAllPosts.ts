@@ -24,7 +24,7 @@ const getAllPosts = (): Post[] => {
         category: data.category,
         description: data.description,
         content,
-        published: data.published !== false, // Default to true
+        published: data.published !== false,
       } as Post;
     })
     .filter((post) => post.published);
