@@ -2,6 +2,7 @@
 module.exports = {
   siteUrl: "https://bbinya1224.github.io",
   generateRobotsTxt: true,
+  generateIndexSitemap: false,
   outDir: "out",
   sitemapSize: 7000,
   changefreq: "daily",
