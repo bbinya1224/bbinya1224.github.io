@@ -37,7 +37,7 @@ const Profile = () => {
 
       <p className="mb-4 text-center text-base">
         이것저것 글을 쓰려고 노력하는 <br />
-        3년차 프론트엔드 개발자 입니다.
+        프론트엔드 개발자 입니다.
       </p>
 
       <SocialLinks />
