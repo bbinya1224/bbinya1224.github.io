@@ -9,4 +9,5 @@ export interface Project {
   demoUrl?: string;
   repoUrl?: string;
   content: ReactNode;
+  period?: string;
 }

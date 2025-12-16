@@ -1,7 +1,7 @@
-import { ExternalLink, Github } from "lucide-react";
+import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Project } from "@/entities/project/model/types";
-import Badge from "@/shared/ui/Badge";
+import GithubIcon from "@/shared/icons/ic_github.svg";
 import { Button } from "@/shared/ui/button";
 import {
   Dialog,
@@ -27,49 +27,52 @@ export const ProjectDetailDialog = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] overflow-y-auto bg-white shadow-2xl sm:max-w-4xl dark:bg-[#1a1a1a]">
-        <DialogHeader>
-          <DialogTitle>{project.title}</DialogTitle>
-          <DialogDescription>{project.description}</DialogDescription>
+      <DialogContent className="max-h-[90vh] overflow-y-auto border-none bg-white/95 shadow-2xl backdrop-blur-xl sm:max-w-4xl dark:bg-[#1a1a1a]/95">
+        <DialogHeader className="mb-4 space-y-3">
+          <DialogTitle className="bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-3xl font-extrabold text-transparent dark:from-white dark:to-gray-400">
+            {project.title}
+          </DialogTitle>
+          <DialogDescription className="text-lg font-medium text-gray-500 dark:text-gray-400">
+            기간: {project.period}
+          </DialogDescription>
+          <DialogDescription className="text-lg font-medium text-gray-500 dark:text-gray-400">
+            {project.description}
+          </DialogDescription>
         </DialogHeader>
 
-        <div className="my-2 flex flex-wrap gap-2">
-          {project.techStack.map((tech) => (
-            <Badge
-              key={tech}
-              className="bg-secondary text-secondary-foreground"
-            >
-              {tech}
-            </Badge>
-          ))}
-        </div>
-
-        <div className="prose prose-sm dark:prose-invert max-w-none">
+        <div className="prose prose-lg dark:prose-invert max-w-none leading-relaxed text-gray-700 dark:text-gray-300">
           {project.content}
         </div>
 
-        <DialogFooter className="mt-4 flex flex-col gap-2 sm:flex-row">
+        <DialogFooter className="mt-8 flex flex-col gap-3 border-t pt-6 sm:flex-row dark:border-gray-800">
           {project.repoUrl && (
-            <Button asChild variant="outline" className="w-full sm:w-auto">
+            <Button
+              asChild
+              variant="outline"
+              className="h-11 w-full gap-2 border-gray-300 transition-colors hover:bg-gray-100 sm:w-auto dark:border-gray-700 dark:hover:bg-gray-800"
+            >
               <Link
                 href={project.repoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <Github className="mr-2 h-4 w-4" />
-                GitHub
+                <GithubIcon className="h-5 w-5 fill-current" />
+                GitHub 저장소
               </Link>
             </Button>
           )}
           {project.demoUrl && (
-            <Button asChild className="w-full sm:w-auto">
+            <Button
+              asChild
+              className="h-11 w-full gap-2 bg-blue-600 text-white shadow-lg transition-all hover:bg-blue-700 hover:shadow-blue-500/30 sm:w-auto"
+            >
               <Link
                 href={project.demoUrl}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                Live Demo
+                <ExternalLink className="h-4 w-4" />
+                라이브 데모
               </Link>
             </Button>
           )}

@@ -36,6 +36,7 @@ export const getProjects = async (): Promise<Project[]> => {
       repoUrl: frontmatter.repoUrl as string,
       demoUrl: frontmatter.demoUrl as string,
       imageUrl: frontmatter.imageUrl as string,
+      period: frontmatter.period as string,
       content: compiledContent,
     });
   }

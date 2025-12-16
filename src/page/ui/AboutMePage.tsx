@@ -1,9 +1,15 @@
+import { Project } from "@/entities/project/model/types";
 import MailIcon from "@/shared/icons/ic_mail.svg";
 import TistoryIcon from "@/shared/icons/ic_tistory.svg";
 import VelogIcon from "@/shared/icons/ic_velog.svg";
 import Badge from "@/shared/ui/Badge";
+import { ProjectList } from "@/widgets/project-list/ui/ProjectList";
 
-const AboutMePage = () => {
+interface AboutMePageProps {
+  projects: Project[];
+}
+
+const AboutMePage = ({ projects }: AboutMePageProps) => {
   const myTechStacks = [
     "React",
     "Next.js",
@@ -98,14 +104,15 @@ const AboutMePage = () => {
           </div>
         </div>
       </article>
+
       <article className="relative mb-4 border-b border-gray-200 pb-5 dark:border-slate-700">
         <h1 className="relative mb-1 ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
           About Me
         </h1>
         <div className="prose dark:prose-invert mt-2 max-w-full text-base break-keep">
           <p>
-            안녕하세요! 사용자 경험의 디테일에서 가치를 찾는 3년차 프론트엔드
-            개발자 이수빈입니다.
+            안녕하세요! 사용자 경험의 디테일에서 가치를 찾는 프론트엔드 개발자
+            이수빈입니다.
           </p>
           <p>
             사용자에게 즐거움과 편리함을 주는 인터페이스를 만드는 것이 저의
@@ -124,7 +131,8 @@ const AboutMePage = () => {
           </p>
         </div>
       </article>
-      <article>
+
+      <article className="relative mb-4 border-b border-gray-200 pb-5 dark:border-slate-700">
         <h1 className="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
           Tech Stacks
         </h1>
@@ -146,6 +154,16 @@ const AboutMePage = () => {
               </li>
             ))}
           </ul>
+        </div>
+      </article>
+
+      <article>
+        <h1 className="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
+          Side Projects
+        </h1>
+
+        <div className="mt-4">
+          <ProjectList projects={projects} />
         </div>
       </article>
     </section>

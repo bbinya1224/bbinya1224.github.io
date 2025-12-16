@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Project } from "@/entities/project/model/types";
+import { type Project } from "@/entities/project/model/types";
 import { ProjectCard } from "@/entities/project/ui/ProjectCard";
 import { ProjectDetailDialog } from "@/features/view-project-details/ui/ProjectDetailDialog";
 
@@ -20,7 +20,6 @@ export const ProjectList = ({ projects }: ProjectListProps) => {
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
-    setTimeout(() => setSelectedProject(null), 300); // Clear after animation
   };
 
   return (
