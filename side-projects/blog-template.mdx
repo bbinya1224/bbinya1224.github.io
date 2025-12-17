@@ -1,26 +1,70 @@
 ---
-title: AI 기반 개인화 블로그 에디터 (Blog Ghostwriter)
+title: Blog Ghostwriter
 period: 2025.11.16 ~ (진행중)
-description: 사용자의 과거 게시글을 학습해 고유의 문체를 모방하고, 실시간 정보 검색(RAG)을 통해 사실 기반의 글쓰기를 돕는 Next.js 16 기반의 웹 애플리케이션입니다.
+description: AI 기반 개인화 블로그 에디터
 techStack: [Next.js, Tailwind CSS, TypeScript]
 repoUrl: https://github.com/bbinya1224/blog-template
+imageUrl: /img/sideProject/blog-template/blog-template_main.png
 ---
 
-### Frontend Engineering Experience
-- Next.js 16 & React 19 활용:
-  - App Router 아키텍처: 페이지(app)와 기능(features)을 분리하여 응집도 높은 디렉토리 구조를 설계했습니다.
-  - Tailwind CSS 4: 차세대 CSS 엔진을 적용하여 런타임 오버헤드 없는 고성능 스타일링 시스템을 구축했습니다.
-- 지속 가능한 아키텍처 설계 (FSD): 복잡한 AI 로직을 효율적으로 관리하기 위해 FSD(Feature-Sliced Design) 패턴을 도입, 비즈니스 로직(Entity)과 UI(Widget) 간의 의존성을 30% 이상 낮췄습니다.
-- AI Native UI/UX 구현:
-  - Interactive Review Wizard: 사용자가 AI와 대화하듯 단계별로 입력을 완료하는 Wizard UI를 직접 구현하여 복잡한 입력 과정을 단순화했습니다.
-  - Optimized Data Fetching: 무거운 라이브러리 없이 Native Fetch API와 React Hooks(useEffect) 만으로 비동기 상태 관리 로직을 최적화하여 번들 사이즈를 최소화했습니다.
+![](/img/sideProject/blog-template/blog-template_main.png)
 
-### Product Solving
 
-- RAG 기반 신뢰성 확보:  
-  Tavily Search API를 통해 가게 정보를 실시간 검증, AI의 환각(Hallucination) 현상을 방지하고 콘텐츠 신뢰도를 높였습니다.
-- Personalization Engine:  
-  Cheerio로 기존 블로그를 분석하여 이모지와 말투를 학습, 정형화된 AI 톤을 벗어난 "나만의 글쓰기" 경험을 제공했습니다.
+> 사용자의 과거 게시글을 학습해 고유의 문체를 모방하고,  
+실시간 정보 검색(RAG)을 통해 사실 기반의 글쓰기를 돕는 Next.js 16 기반의 웹 애플리케이션입니다.
 
-### Tech Stack 
-Next.js 16, TypeScript, React 19, Tailwind CSS 4, FSD Architecture, Claude API
+
+## 🚀 프로젝트 배경
+체험단 활동이나 정기 블로그 포스팅이 부담스러운 사용자를 위한 AI 에디터입니다.  
+- **핵심 가치**: "내 말투로, 거짓말 없이, 누구나 쉽게"
+
+
+## ✨ 핵심 기능 구현
+
+**1. 스타일 학습 (Hyper-Personalization)**
+- Cheerio로 네이버 블로그 RSS 피드 크롤링 및 HTML 파싱
+- Claude Sonnet 4.5로 사용자의 어조, 이모지 사용 패턴, 문단 구조 분석
+- Few-shot Learning: 작성한 이전 글 들을 참조하여 문체 재현
+
+**2. 사실 기반 글쓰기 (RAG)**
+- Tavily Search API로 메뉴, 영업시간, 주차 정보 등 실시간 수집
+- 검증된 정보만 활용하여 AI Hallucination 방지
+- 1,500자 이상의 사실 기반 리뷰 생성
+
+**3. 대화형 UI (Flow-Based UX)**
+- Wizard 패턴으로 단계별 정보 입력 유도
+- 자연어 명령("좀 더 신나게 바꿔줘")으로 특정 문단 수정
+- 실시간 프리뷰 및 편집 기능
+
+**4. 로컬 우선 프라이버시 (Local-First)**
+- 모든 분석 데이터 및 생성된 리뷰는 로컬 파일 시스템에만 저장
+- 외부 서버로의 개인 데이터 전송 없음
+
+---
+
+## ⚙️ 기술 구현
+
+![](/img/sideProject/blog-template/i54pmg3.png)
+
+
+### 🏗️ **아키텍처 설계**
+- FSD (Feature-Sliced Design) 패턴으로 비즈니스 로직(Features)과 UI(Widgets) 레이어 분리
+- App Router 구조로 페이지 라우팅과 기능 모듈 분리
+
+### 🤖 **AI Pipeline**  
+```
+RSS Crawling → Style Analysis → RAG Context → Text Generation
+```
+- Analysis: Claude Sonnet 4.5 (스타일 분석)
+- Generation: Claude Haiku 3.0 (리뷰 생성)
+- Search: Tavily AI Search API (실시간 정보)
+
+### 🛠️ **Tech Stack**
+- Next.js 16 App Router, React 19, TypeScript
+- Tailwind CSS 4로 반응형 UI 구현
+- Native Fetch API 기반 비동기 상태 관리
+- Claude API 사용
+
+---
+
+### 🎬 Scenario

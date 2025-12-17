@@ -2,7 +2,7 @@ import { ExternalLink } from "lucide-react";
 import Link from "next/link";
 import { Project } from "@/entities/project/model/types";
 import GithubIcon from "@/shared/icons/ic_github.svg";
-import { Button } from "@/shared/ui/button";
+import { Button } from "@/shared/ui/Button";
 import {
   Dialog,
   DialogContent,
@@ -10,7 +10,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/ui/dialog";
+} from "@/shared/ui/Dialog";
 
 interface ProjectDetailDialogProps {
   project: Project | null;
@@ -28,7 +28,7 @@ export const ProjectDetailDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-h-[90vh] overflow-y-auto border-none bg-white/95 shadow-2xl backdrop-blur-xl sm:max-w-4xl dark:bg-[#1a1a1a]/95">
-        <DialogHeader className="mb-4 space-y-3">
+        <DialogHeader className="space-y-3">
           <DialogTitle className="bg-gradient-to-br from-gray-900 to-gray-600 bg-clip-text text-3xl font-extrabold text-transparent dark:from-white dark:to-gray-400">
             {project.title}
           </DialogTitle>

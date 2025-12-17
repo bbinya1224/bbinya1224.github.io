@@ -1,12 +1,6 @@
+import Image from "next/image";
 import { Project } from "@/entities/project/model/types";
-import Badge from "@/shared/ui/Badge";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/shared/ui/card";
+import { Card, CardDescription, CardHeader, CardTitle } from "@/shared/ui/Card";
 
 interface ProjectCardProps {
   project: Project;
@@ -16,27 +10,35 @@ interface ProjectCardProps {
 export const ProjectCard = ({ project, onClick }: ProjectCardProps) => {
   return (
     <Card
-      className="dark:hover:shadow-primary/20 w-full cursor-pointer transition-all hover:scale-105 hover:shadow-lg"
+      className="group dark:hover:shadow-primary/10 w-full cursor-pointer overflow-hidden transition-all duration-300 hover:scale-[1.02] hover:shadow-xl dark:border-gray-800 dark:bg-gray-900/50 dark:hover:border-gray-700 dark:hover:shadow-2xl"
       onClick={() => onClick(project)}
     >
-      <CardHeader>
-        <CardTitle>{project.title}</CardTitle>
-        <CardDescription className="line-clamp-2">
+      <div className="relative aspect-video w-full overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900">
+        {project.imageUrl ? (
+          <Image
+            src={project.imageUrl}
+            alt={project.title}
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+            fill
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <span className="text-4xl font-bold text-gray-300 dark:text-gray-700">
+              {project.title.charAt(0)}
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Content Section */}
+      <CardHeader className="space-y-2">
+        <CardTitle className="group-hover:text-primary text-lg font-semibold transition-colors dark:text-gray-100">
+          {project.title}
+        </CardTitle>
+        <CardDescription className="line-clamp-2 text-sm text-gray-600 dark:text-gray-400">
           {project.description}
         </CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex flex-wrap gap-2">
-          {project.techStack.map((tech) => (
-            <Badge
-              key={tech}
-              className="bg-secondary text-secondary-foreground hover:bg-secondary/80"
-            >
-              {tech}
-            </Badge>
-          ))}
-        </div>
-      </CardContent>
     </Card>
   );
 };
