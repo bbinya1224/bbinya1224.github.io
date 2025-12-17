@@ -93,4 +93,19 @@
     transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
     transition-duration: 0.15s;
   }
+
+  /* Prose 내 이미지 스타일 고정 */
+  .prose img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 2rem auto;
+    border-radius: 0.5rem;
+  }
+
+  .prose :where(img):not(:where([class~="not-prose"] *)) {
+    max-width: 100% !important;
+    height: auto !important;
+    width: auto !important;
+  }
 }
