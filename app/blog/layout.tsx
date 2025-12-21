@@ -3,6 +3,7 @@ import PostListProvider from "@/app/provider/PostListProvider";
 import getAllPosts from "@/entities/post/api/getAllPosts";
 import Footer from "@/widgets/footer/ui/Footer";
 import Header from "@/widgets/header/ui/Header";
+import Nav from "@/widgets/header/ui/Nav";
 import Sidebar from "@/widgets/sidebar/ui/Sidebar";
 
 const Layout = ({ children }: { children: ReactNode }) => {
@@ -10,15 +11,19 @@ const Layout = ({ children }: { children: ReactNode }) => {
 
   return (
     <PostListProvider initialPosts={posts}>
-      <section className="relative mx-auto max-w-[var(--page-width)] pb-8">
-        <div className="fixed top-0 left-1/2 z-50 w-full max-w-[var(--page-width)] -translate-x-1/2">
-          <div className="mx-4">
-            <Header />
+      <section className="relative mx-auto max-w-[var(--page-width)] px-4 pb-8 sm:px-8">
+        <Header />
+
+        <main className="mt-20 flex flex-col gap-12 lg:flex-row lg:gap-24">
+          <div className="flex-1">
+            <Nav />
+            {children}
           </div>
-        </div>
-        <main className="mx-4 mt-[7rem] mb-4 flex flex-col-reverse gap-8 lg:flex-row">
-          <Sidebar />
-          {children}
+          <aside className="w-full shrink-0 border-l border-[#e8e8e8] lg:w-[320px]">
+            <div className="sticky top-20">
+              <Sidebar />
+            </div>
+          </aside>
         </main>
         <Footer />
       </section>

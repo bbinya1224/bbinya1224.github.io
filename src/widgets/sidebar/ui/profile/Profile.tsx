@@ -9,7 +9,7 @@ const Profile = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <div className="card-base flex w-full flex-col items-center p-4 shadow-xl lg:w-2xs">
+    <div className="flex w-full flex-col items-center p-4">
       <div className="relative aspect-square h-auto w-3xs overflow-hidden rounded-3xl lg:w-full">
         {!isLoaded && (
           <Skeleton
@@ -20,7 +20,7 @@ const Profile = () => {
           />
         )}
         <Image
-          src="/img/profile/profile-10-09-19-08-28.jpeg"
+          src="/img/main/img_profile.png"
           alt="profile Image"
           fill
           className={`object-cover transition-opacity duration-500 ${

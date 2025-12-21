@@ -4,9 +4,11 @@ import PostWidgetSkeleton from "@/widgets/post/ui/skeleton/PostWidgetSkeleton";
 
 const MainPage = () => {
   return (
-    <Suspense fallback={<PostWidgetSkeleton />}>
-      <PostList />
-    </Suspense>
+    <>
+      <Suspense fallback={<PostWidgetSkeleton />}>
+        <PostList />
+      </Suspense>
+    </>
   );
 };
 

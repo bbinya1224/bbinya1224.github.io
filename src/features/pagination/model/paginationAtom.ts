@@ -2,7 +2,7 @@ import { atom } from "jotai";
 import { atomWithHash } from "jotai-location";
 import { filteredPostsAtom } from "@/entities/post/atoms/postAtom";
 
-export const POSTS_PER_PAGE = 5;
+export const POSTS_PER_PAGE = 7;
 
 export const currentPageAtom = atomWithHash("page", 1);
 

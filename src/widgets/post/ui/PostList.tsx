@@ -42,7 +42,7 @@ const PostList = () => {
 
   return (
     <section className="mx-auto w-full">
-      <div className="space-y-6">
+      <div className="space-y-8">
         {posts.length > 0 ? (
           posts.map((post) => (
             <PostWidget
@@ -53,6 +53,7 @@ const PostList = () => {
               tag={post.tag}
               description={post.description}
               slug={post.slug}
+              thumbnail={post.thumbnail}
             />
           ))
         ) : (
