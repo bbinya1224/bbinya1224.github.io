@@ -36,8 +36,10 @@ const Profile = () => {
       <div className="mx-auto my-2 h-1 w-5 rounded-full bg-amber-300 transition"></div>
 
       <p className="mb-4 text-center text-base">
-        이것저것 글을 쓰려고 노력하는 <br />
-        프론트엔드 개발자 입니다.
+        코드와 커뮤니케이션을 함께 설계하려고 노력하는 4년차 프론트엔드 개발자
+        입니다.
+        <br />
+        이것저것 글을 쓰는걸 좋아해요.
       </p>
 
       <SocialLinks />

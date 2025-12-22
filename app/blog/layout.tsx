@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import PostListProvider from "@/app/provider/PostListProvider";
 import getAllPosts from "@/entities/post/api/getAllPosts";
-import Footer from "@/widgets/footer/ui/Footer";
 import Header from "@/widgets/header/ui/Header";
 import Nav from "@/widgets/header/ui/Nav";
 import Sidebar from "@/widgets/sidebar/ui/Sidebar";
@@ -14,7 +13,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <section className="relative mx-auto max-w-[var(--page-width)] px-4 pb-8 sm:px-8">
         <Header />
 
-        <main className="mt-20 flex flex-col gap-12 lg:flex-row lg:gap-24">
+        <main className="mt-16 flex flex-col gap-12 lg:flex-row lg:gap-24">
           <div className="flex-1">
             <Nav />
             {children}
@@ -25,7 +24,6 @@ const Layout = ({ children }: { children: ReactNode }) => {
             </div>
           </aside>
         </main>
-        <Footer />
       </section>
     </PostListProvider>
   );

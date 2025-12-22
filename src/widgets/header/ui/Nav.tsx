@@ -34,7 +34,7 @@ const Nav = () => {
   ];
 
   return (
-    <nav className="mt-2 flex gap-8">
+    <nav className="mt-5 flex gap-8">
       {navItems.map((item) => (
         <Link
           key={item.label}

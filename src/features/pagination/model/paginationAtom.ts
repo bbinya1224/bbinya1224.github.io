@@ -18,3 +18,10 @@ export const paginatedPostsAtom = atom((get) => {
   const endIndex = startIndex + POSTS_PER_PAGE;
   return posts.slice(startIndex, endIndex);
 });
+
+export const infinitePostsAtom = atom((get) => {
+  const posts = get(filteredPostsAtom);
+  const currentPage = get(currentPageAtom);
+  const endIndex = currentPage * POSTS_PER_PAGE;
+  return posts.slice(0, endIndex);
+});
