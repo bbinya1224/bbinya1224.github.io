@@ -21,10 +21,10 @@ const SidebarFooter = () => {
 
       <div className="flex flex-col gap-1 text-center">
         <p>
-          © 2025 <span className="font-semibold">삔아</span> All Rights
+          © 2025 <span className="font-semibold">삔야</span> All Rights
           Reserved.
         </p>
-        <p>Powered by 삔아</p>
+        <p>Powered by 삔야</p>
       </div>
     </div>
   );

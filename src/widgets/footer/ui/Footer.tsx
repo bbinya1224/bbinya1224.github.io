@@ -3,7 +3,7 @@ const Footer = () => {
     <footer className="border-t border-slate-200 py-8 text-center text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
       <div className="mb-1 flex flex-row items-center justify-center gap-3">
         <p>
-          © 2025 <span className="font-semibold">삔아 </span> All Rights
+          © 2025 <span className="font-semibold">삔야 </span> All Rights
           Reserved.
         </p>
         <p className="flex justify-center gap-3 text-xs sm:text-sm">
@@ -21,7 +21,7 @@ const Footer = () => {
       </div>
 
       <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">
-        Powered by 삔아
+        Powered by 삔야
       </p>
     </footer>
   );

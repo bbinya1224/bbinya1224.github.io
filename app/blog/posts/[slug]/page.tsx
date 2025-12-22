@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Script from "next/script";
+import getAllPosts from "@/entities/post/api/getAllPosts";
 import getPostBySlug from "@/entities/post/lib/getPostBySlug";
-
 import PostDetail from "@/widgets/post/ui/PostDetail";
 
 type PageProps = {
@@ -22,12 +22,12 @@ const PostDetailPage = async ({ params }: PageProps) => {
     datePublished: post.date,
     author: {
       "@type": "Person",
-      name: "삔아",
+      name: "삔야",
       url: "https://bbinya1224.github.io/blog/about-me",
     },
     publisher: {
       "@type": "Person",
-      name: "삔아",
+      name: "삔야",
     },
     mainEntityOfPage: {
       "@type": "WebPage",
@@ -50,8 +50,6 @@ const PostDetailPage = async ({ params }: PageProps) => {
 };
 
 export default PostDetailPage;
-
-import getAllPosts from "@/entities/post/api/getAllPosts";
 
 export const generateStaticParams = () => {
   const posts = getAllPosts();
@@ -77,15 +75,15 @@ export async function generateMetadata({
     title: post.title,
     description: post.description || post.title,
     keywords: post.tag || [],
-    authors: [{ name: "삔아" }],
+    authors: [{ name: "삔야" }],
     openGraph: {
       title: post.title,
       description: post.description || post.title,
       url,
-      siteName: "삔아's Blog",
+      siteName: "삔야's Blog",
       type: "article",
       publishedTime: post.date,
-      authors: ["삔아"],
+      authors: ["삔야"],
       locale: "ko_KR",
     },
     alternates: {

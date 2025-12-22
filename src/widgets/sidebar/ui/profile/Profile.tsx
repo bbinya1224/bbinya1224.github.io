@@ -9,7 +9,7 @@ const Profile = () => {
   const [isLoaded, setIsLoaded] = useState(false);
 
   return (
-    <div className="flex w-full flex-col items-center p-4">
+    <div className="flex w-full flex-col items-center">
       <div className="relative aspect-square h-auto w-3xs overflow-hidden rounded-3xl lg:w-full">
         {!isLoaded && (
           <Skeleton
@@ -31,13 +31,13 @@ const Profile = () => {
         />
       </div>
       <div className="mt-3">
-        <span className="text-2xl">삔아</span>
+        <span className="text-2xl">삔야</span>
       </div>
       <div className="mx-auto my-2 h-1 w-5 rounded-full bg-amber-300 transition"></div>
 
       <p className="mb-4 text-center text-base">
         코드와 커뮤니케이션을 함께 설계하려고 노력하는 4년차 프론트엔드 개발자
-        입니다.
+        삔야 입니다.
         <br />
         이것저것 글을 쓰는걸 좋아해요.
       </p>

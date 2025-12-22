@@ -3,7 +3,7 @@ import SidebarFooter from "@/widgets/sidebar/ui/SidebarFooter";
 
 const Sidebar = () => {
   return (
-    <article className="relative flex w-full flex-col gap-4">
+    <article className="relative flex w-full flex-col gap-4 p-5">
       <Profile />
       <SidebarFooter />
     </article>

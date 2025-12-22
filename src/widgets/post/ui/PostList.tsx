@@ -53,7 +53,7 @@ const PostList = () => {
 
   return (
     <section className="mx-auto w-full">
-      <div className="space-y-8 [&>article:last-of-type]:border-b-0">
+      <div className="lg:[&>article:last-of-type]:border-b-0">
         {posts.length > 0 ? (
           <>
             {posts.map((post) => (

@@ -94,8 +94,8 @@ Next.js 13 이상의 App Router를 사용한다면, `layout.tsx`의 `metadata` �
 
 ```jsx
 export const metadata: Metadata = {
-  title: "삔아's Blog",
-  description: "프론트엔드 개발자 삔아 기술 블로그",
+  title: "삔야's Blog",
+  description: "프론트엔드 개발자 삔야 기술 블로그",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },
@@ -112,8 +112,8 @@ export const metadata: Metadata = {
 ```jsx
 // app/layout.tsx
 export const metadata: Metadata = {
-  title: "삔아's Blog",
-  description: "프론트엔드 개발자 삔아 기술 블로그",
+  title: "삔야's Blog",
+  description: "프론트엔드 개발자 삔야 기술 블로그",
   icons: {
     icon: '/favicon.ico',
     apple: '/apple-touch-icon.png',
@@ -125,9 +125,9 @@ export const metadata: Metadata = {
 ```json
 // manifest.json
 {
-  "name": "삔아's Blog",
-  "short_name": "삔아",
-  "description": "프론트엔드 개발자 삔아 기술 블로그",
+  "name": "삔야's Blog",
+  "short_name": "삔야",
+  "description": "프론트엔드 개발자 삔야 기술 블로그",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -168,10 +168,10 @@ import { Helmet } from 'react-helmet-async';
 function App() {
   return (
     <Helmet>
-      <title>삔아's Blog</title>
+      <title>삔야's Blog</title>
       <meta 
         name="description" 
-        content="프론트엔드 개발자 삔아 기술 블로그" 
+        content="프론트엔드 개발자 삔야 기술 블로그" 
       />
       
       {/* 기본 favicon */}
@@ -204,10 +204,10 @@ b. **Helmet 없이 직접 HTML에 추가**:
 <!DOCTYPE html>
 <html>
   <head>
-    <title>삔아's Blog</title>
+    <title>삔야's Blog</title>
     <meta 
       name="description" 
-      content="프론트엔드 개발자 삔아 기술 블로그" 
+      content="프론트엔드 개발자 삔야 기술 블로그" 
     />
     
     <!-- Favicon -->
@@ -243,10 +243,10 @@ b. **Helmet 없이 직접 HTML에 추가**:
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>삔아's Blog</title>
+  <title>삔야's Blog</title>
   <meta 
     name="description" 
-    content="프론트엔드 개발자 삔아 기술 블로그" 
+    content="프론트엔드 개발자 삔야 기술 블로그" 
   />
     
   <!-- 기본 favicon (데스크톱 브라우저) -->
@@ -290,7 +290,7 @@ b. **Helmet 없이 직접 HTML에 추가**:
   <!-- ======================================== -->
 </head>
 <body>
-  <h1>삔아's Blog</h1>
+  <h1>삔야's Blog</h1>
 </body>
 </html>
 ```
@@ -305,8 +305,8 @@ b. **Helmet 없이 직접 HTML에 추가**:
 
 ```jsx
 export const metadata: Metadata = {
-  title: "삔아's Blog",
-  description: "프론트엔드 개발자 삔아 기술 블로그",
+  title: "삔야's Blog",
+  description: "프론트엔드 개발자 삔야 기술 블로그",
 };
 ```
 
@@ -314,8 +314,8 @@ export const metadata: Metadata = {
 
 ```jsx
 export const metadata: Metadata = {
-  title: "삔아's Blog",
-  description: "프론트엔드 개발자 삔아 기술 블로그",
+  title: "삔야's Blog",
+  description: "프론트엔드 개발자 삔야 기술 블로그",
   icons: {
     icon: [
       { url: "/favicon.ico", sizes: "any" },

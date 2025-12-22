@@ -13,12 +13,12 @@ const Layout = ({ children }: { children: ReactNode }) => {
       <section className="relative mx-auto max-w-[var(--page-width)] px-4 pb-8 sm:px-8">
         <Header />
 
-        <main className="mt-16 flex flex-col gap-12 lg:flex-row lg:gap-24">
+        <main className="mt-16 flex flex-col gap-6 lg:flex-row lg:gap-24">
           <div className="flex-1">
             <Nav />
             {children}
           </div>
-          <aside className="w-full shrink-0 border-l border-[#e8e8e8] lg:w-[320px]">
+          <aside className="w-full shrink-0 border-gray-100 lg:w-[320px] lg:border-l dark:border-gray-800">
             <div className="sticky top-20">
               <Sidebar />
             </div>
