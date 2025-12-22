@@ -4,6 +4,7 @@ import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
+import NextTopLoader from "nextjs-toploader";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
@@ -17,6 +18,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       </head>
 
       <body>
+        <NextTopLoader showSpinner={false} color="#fbbf24" />
         <JotaiProvider>
           <ThemeProvider attribute="class" enableSystem>
             {children}
