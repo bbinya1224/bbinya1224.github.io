@@ -4,6 +4,7 @@ import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
 import type { ReactNode } from "react";
+import NextTopLoader from "nextjs-toploader";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
@@ -17,6 +18,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
       </head>
 
       <body>
+        <NextTopLoader showSpinner={false} color="#fbbf24" />
         <JotaiProvider>
           <ThemeProvider attribute="class" enableSystem>
             {children}
@@ -30,15 +32,15 @@ const RootLayout = ({ children }: { children: ReactNode }) => {
 export const metadata: Metadata = {
   metadataBase: new URL("https://bbinya1224.github.io"),
   title: {
-    default: "삔아's Blog",
-    template: "%s | 삔아's Blog",
+    default: "삔야's Blog",
+    template: "%s | 삔야's Blog",
   },
-  description: "프론트엔드 개발자 삔아 기술 블로그",
+  description: "프론트엔드 개발자 삔야 기술 블로그",
   openGraph: {
     type: "website",
     locale: "ko_KR",
     url: "https://bbinya1224.github.io",
-    siteName: "삔아's Blog",
+    siteName: "삔야's Blog",
   },
   robots: {
     index: true,

@@ -1,4 +1,6 @@
+import Link from "next/link";
 import { Project } from "@/entities/project/model/types";
+import LinkedInIcon from "@/shared/icons/ic_linkedin.svg";
 import MailIcon from "@/shared/icons/ic_mail.svg";
 import TistoryIcon from "@/shared/icons/ic_tistory.svg";
 import VelogIcon from "@/shared/icons/ic_velog.svg";
@@ -18,6 +20,8 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
     "GSAP",
     "Storybook",
     "Jotai",
+    "FSD",
+    "Sentry",
     "Vue3",
   ];
 
@@ -29,11 +33,13 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
     GSAP: "bg-purple-100 dark:bg-purple-900",
     Storybook: "bg-pink-100 dark:bg-pink-900",
     Jotai: "bg-orange-100 dark:bg-orange-900",
+    FSD: "bg-yellow-100 dark:bg-yellow-900",
+    Sentry: "bg-red-100 dark:bg-red-900",
     Vue3: "bg-green-100 dark:bg-green-900",
   };
 
   return (
-    <section className="card-base relative mx-auto h-full w-full px-6 py-6 shadow-xl sm:py-4 sm:pr-2 sm:pl-7">
+    <section className="relative mx-auto h-full w-full py-6 sm:py-4 sm:pr-2 sm:pl-7 lg:px-0">
       <article className="mb-4 flex flex-row-reverse items-center justify-between gap-4 border-b border-gray-200 pb-5 dark:border-slate-700">
         <div className="flex size-full flex-col gap-4">
           <h1 className="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
@@ -54,11 +60,12 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
           <div className="flex flex-row flex-wrap justify-between gap-4">
             <div className="flex flex-1 flex-col flex-wrap gap-1">
               <h3 className="text-primary text-2xl font-bold dark:text-gray-300">
-                My Blog
+                My Blog History
               </h3>
               <p className="transition-opacity hover:opacity-50">
-                <a
+                <Link
                   href="https://bbinya.tistory.com"
+                  target="_blank"
                   className="relative inline-flex items-center gap-2"
                   aria-label="go to my tistory blog"
                 >
@@ -67,11 +74,12 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
                   <span className="font-bold text-[#333] dark:text-[#ededed]">
                     https://bbinya.tistory.com/
                   </span>
-                </a>
+                </Link>
               </p>
               <p className="transition-opacity hover:opacity-50">
-                <a
+                <Link
                   href="https://velog.io/@subin1224/posts"
+                  target="_blank"
                   className="relative inline-flex items-center gap-2"
                   aria-label="go to my Velog"
                 >
@@ -80,7 +88,7 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
                   <span className="font-bold text-[#333] dark:text-[#ededed]">
                     https://velog.io/@subin1224
                   </span>
-                </a>
+                </Link>
               </p>
             </div>
             <div className="flex flex-1 flex-col gap-1">
@@ -100,6 +108,20 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
                   </span>
                 </a>
               </p>
+              <p className="transition-opacity hover:opacity-50">
+                <Link
+                  href="https://www.linkedin.com/in/bbinya"
+                  target="_blank"
+                  className="relative inline-flex items-center gap-2"
+                  aria-label="go to my LinkedIn"
+                >
+                  <LinkedInIcon className="size-5" />
+
+                  <span className="font-bold text-[#333] dark:text-[#ededed]">
+                    Linked In
+                  </span>
+                </Link>
+              </p>
             </div>
           </div>
         </div>
@@ -111,21 +133,20 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
         </h1>
         <div className="prose dark:prose-invert mt-2 max-w-full text-base break-keep">
           <p>
-            안녕하세요! 사용자 경험의 디테일에서 가치를 찾는 프론트엔드 개발자
-            이수빈입니다.
+            프론트엔드 개발은 화면을 그리는 일을 넘어, 팀과 서비스의 흐름을
+            연결하는 역할이라고 생각합니다.
           </p>
           <p>
-            사용자에게 즐거움과 편리함을 주는 인터페이스를 만드는 것이 저의
-            목표입니다.
+            저는 혼자 빠르게 구현하는 개발자보다, 팀 전체의 생산성과 결과를
+            끌어올리는 개발자가 되기 위해 고민해 왔습니다.
           </p>
-          <p></p>Vue와 React, Next.js를 중심으로 프론트엔드 개발을 해왔으며
-          디자이너, 백엔드, 동료 개발자들과의 협업을 통해 제품을 발전시키는
-          과정에서 큰 보람을 느낍니다.
           <p>
-            최근에는 AI 기술과 웹을 결합한 새로운 사용자 경험에 도전하며, 꾸준히
-            배우고 실험하는 프론트엔드 개발자로 성장하고 있습니다.
+            단순한 기능 구현이 아니라 “왜 이 구조가 필요한지”를 설명하고
+            합의하는 과정 자체를 중요하게 여깁니다. 앞으로도 저는 코드의 품질뿐
+            아니라, 협업 방식과 개발 문화까지 함께 개선하는 프론트엔드 개발자로
+            성장하고자 합니다.
           </p>
-          <p>어제보다 더 나은 오늘을 위해 꾸준히 성장하고 있어요. 🌱</p>
+
           <p className="text-gray-400">
             저에 대해 자세하게 알고싶으시다면 이메일 주세요!
           </p>
@@ -157,7 +178,7 @@ const AboutMePage = ({ projects }: AboutMePageProps) => {
         </div>
       </article>
 
-      <article>
+      <article className="border-b border-gray-200 pb-5 lg:border-b-0 lg:pb-0 dark:border-slate-700">
         <h1 className="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
           Side Projects
         </h1>

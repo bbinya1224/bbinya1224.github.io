@@ -2,7 +2,7 @@ import Skeleton from "react-loading-skeleton";
 
 const PostWidgetSkeleton = () => {
   return (
-    <article className="card-base relative flex h-full w-full flex-row justify-between gap-4 px-6 py-6 shadow-lg sm:h-48 sm:py-4 sm:pr-2 sm:pl-7 lg:gap-0">
+    <article className="relative flex h-full w-full flex-row justify-between gap-4 px-6 py-6 sm:h-48 sm:py-4 sm:pr-2 sm:pl-7 lg:gap-0">
       <div className="flex-1">
         <div className="mb-3 w-full gap-2">
           <Skeleton width="70%" height={32} borderRadius={6} />

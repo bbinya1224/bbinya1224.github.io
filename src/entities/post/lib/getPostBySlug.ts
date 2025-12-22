@@ -50,6 +50,7 @@ const getPostBySlug = async (slug: string): Promise<Post | null> => {
       tag: frontmatter.tag,
       category: frontmatter.category,
       description: frontmatter.description,
+      thumbnail: frontmatter.thumbnail,
       content: compiledContent,
       published: true,
     };

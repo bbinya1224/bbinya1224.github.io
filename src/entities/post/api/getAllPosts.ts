@@ -23,6 +23,7 @@ const getAllPosts = (): Post[] => {
         tag: data.tag,
         category: data.category,
         description: data.description,
+        thumbnail: data.thumbnail,
         content,
         published: data.published !== false,
       } as Post;

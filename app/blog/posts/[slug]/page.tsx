@@ -1,7 +1,7 @@
 import { Metadata } from "next";
 import Script from "next/script";
+import getAllPosts from "@/entities/post/api/getAllPosts";
 import getPostBySlug from "@/entities/post/lib/getPostBySlug";
-
 import PostDetail from "@/widgets/post/ui/PostDetail";
 
 type PageProps = {
@@ -22,13 +22,16 @@ const PostDetailPage = async ({ params }: PageProps) => {
     datePublished: post.date,
     author: {
       "@type": "Person",
-      name: "삔아",
+      name: "삔야",
       url: "https://bbinya1224.github.io/blog/about-me",
     },
     publisher: {
       "@type": "Person",
-      name: "삔아",
+      name: "삔야",
     },
+    image: post.thumbnail
+      ? `https://bbinya1224.github.io${post.thumbnail}`
+      : undefined,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `https://bbinya1224.github.io/blog/posts/${slug}`,
@@ -42,7 +45,7 @@ const PostDetailPage = async ({ params }: PageProps) => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="card-base mx-auto h-full w-full max-w-4xl shadow-xl">
+      <section className="mx-auto h-full w-full max-w-4xl">
         <PostDetail post={post} />
       </section>
     </>
@@ -50,8 +53,6 @@ const PostDetailPage = async ({ params }: PageProps) => {
 };
 
 export default PostDetailPage;
-
-import getAllPosts from "@/entities/post/api/getAllPosts";
 
 export const generateStaticParams = () => {
   const posts = getAllPosts();
@@ -77,16 +78,24 @@ export async function generateMetadata({
     title: post.title,
     description: post.description || post.title,
     keywords: post.tag || [],
-    authors: [{ name: "삔아" }],
+    authors: [{ name: "삔야" }],
     openGraph: {
       title: post.title,
       description: post.description || post.title,
       url,
-      siteName: "삔아's Blog",
+      siteName: "삔야's Blog",
       type: "article",
       publishedTime: post.date,
-      authors: ["삔아"],
+      authors: ["삔야"],
       locale: "ko_KR",
+      images: post.thumbnail
+        ? [
+            {
+              url: post.thumbnail,
+              alt: post.title,
+            },
+          ]
+        : undefined,
     },
     alternates: {
       canonical: url,

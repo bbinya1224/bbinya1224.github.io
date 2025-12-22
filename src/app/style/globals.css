@@ -108,4 +108,16 @@
     height: auto !important;
     width: auto !important;
   }
+
+  .prose pre {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .prose code {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
 }
