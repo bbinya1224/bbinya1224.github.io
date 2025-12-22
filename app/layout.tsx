@@ -41,6 +41,7 @@ export const metadata: Metadata = {
     locale: "ko_KR",
     url: "https://bbinya1224.github.io",
     siteName: "삔야's Blog",
+    images: ["/img/main/img_cover.png"],
   },
   robots: {
     index: true,
