@@ -42,7 +42,7 @@ const PostDetailPage = async ({ params }: PageProps) => {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <section className="card-base mx-auto h-full w-full max-w-4xl shadow-xl">
+      <section className="mx-auto h-full w-full max-w-4xl">
         <PostDetail post={post} />
       </section>
     </>
