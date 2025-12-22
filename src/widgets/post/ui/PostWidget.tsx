@@ -19,7 +19,7 @@ const PostWidget = ({
   });
 
   return (
-    <article className="group flex w-full flex-row justify-between gap-1 border-b border-gray-100 py-8 lg:max-w-[680px] dark:border-gray-800">
+    <article className="group flex w-full flex-row justify-between gap-4 border-b border-gray-100 py-8 lg:max-w-[680px] dark:border-gray-800">
       <div className="flex flex-1 flex-col justify-center">
         <Link href={`/blog/posts/${slug}`}>
           <h2 className="mb-2 text-xl font-bold break-keep text-gray-900 transition-colors group-hover:text-amber-400 sm:text-2xl dark:text-gray-100 dark:group-hover:text-amber-400">
@@ -48,13 +48,13 @@ const PostWidget = ({
       {thumbnail && (
         <Link
           href={`/blog/posts/${slug}`}
-          className="relative hidden h-[112px] w-[112px] shrink-0 overflow-hidden sm:block"
+          className="relative hidden h-[166px] w-[160px] shrink-0 overflow-hidden sm:block"
         >
           <Image
             src={thumbnail}
             alt={title}
             fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            className="object-contain"
             sizes="112px"
           />
         </Link>

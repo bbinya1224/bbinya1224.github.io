@@ -29,6 +29,9 @@ const PostDetailPage = async ({ params }: PageProps) => {
       "@type": "Person",
       name: "삔야",
     },
+    image: post.thumbnail
+      ? `https://bbinya1224.github.io${post.thumbnail}`
+      : undefined,
     mainEntityOfPage: {
       "@type": "WebPage",
       "@id": `https://bbinya1224.github.io/blog/posts/${slug}`,
@@ -85,6 +88,14 @@ export async function generateMetadata({
       publishedTime: post.date,
       authors: ["삔야"],
       locale: "ko_KR",
+      images: post.thumbnail
+        ? [
+            {
+              url: post.thumbnail,
+              alt: post.title,
+            },
+          ]
+        : undefined,
     },
     alternates: {
       canonical: url,
