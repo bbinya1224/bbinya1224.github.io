@@ -20,6 +20,21 @@ export const categoriesAtom = atom((get) => {
   return Array.from(categories).sort();
 });
 
+export const categoriesWithCountAtom = atom((get) => {
+  const posts = get(allPostsAtom);
+  const counts: Record<string, number> = {};
+
+  posts.forEach((post) => {
+    if (post.category) {
+      counts[post.category] = (counts[post.category] || 0) + 1;
+    }
+  });
+
+  return Object.entries(counts)
+    .map(([name, count]) => ({ name, count }))
+    .sort((a, b) => b.count - a.count); // Sort by count descending
+});
+
 export const tagsAtom = atom((get) => {
   const posts = get(allPostsAtom);
   const tags = posts.reduce((acc, { tag }) => {

@@ -17,11 +17,15 @@ const PostDetail = ({ post }: PostDetailProps) => {
   });
 
   return (
-    <article className="relative p-8">
-      <header className="mb-8 border-b border-gray-200 pb-6 dark:border-gray-700">
-        <h1 className="relative mb-4 cursor-default text-5xl font-bold before:absolute before:top-[12px] before:left-[-10px] before:block before:h-7 before:w-1 before:rounded-md before:bg-amber-300 md:text-4xl before:md:top-[13px] before:md:h-5">
+    <article className="relative p-4 sm:p-8">
+      <header className="mb-6 border-b border-gray-200 pb-4 sm:mb-8 sm:pb-6 dark:border-gray-700">
+        <h1 className="relative mb-2 cursor-default text-3xl font-bold before:absolute sm:mb-4 sm:text-4xl md:text-5xl">
           {post.title}
         </h1>
+
+        {post.description && (
+          <p className="mb-2 text-lg text-gray-400">{post.description}</p>
+        )}
 
         <div className="flex cursor-default flex-wrap gap-4 text-sm text-gray-600 dark:text-gray-400">
           <div className="flex items-center gap-1">

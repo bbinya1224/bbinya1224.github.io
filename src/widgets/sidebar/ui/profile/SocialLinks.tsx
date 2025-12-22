@@ -1,32 +1,35 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import GithubIcon from "@/shared/icons/ic_github.svg";
+import LinkedInIcon from "@/shared/icons/ic_linkedin.svg";
 import MailIcon from "@/shared/icons/ic_mail.svg";
 import * as Tooltip from "@radix-ui/react-tooltip";
 
-const MailTooltip = () => {
+const SocialLinks = () => {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="flex flex-row gap-4">
-      <a
+      <Link
         href="https://github.com/bbinya1224"
         target="_blank"
         rel="noopener noreferrer"
       >
         <GithubIcon className="size-7 hover:opacity-50" />
-      </a>
+      </Link>
+
       <Tooltip.Provider delayDuration={0}>
         <Tooltip.Root open={open} onOpenChange={setOpen}>
           <Tooltip.Trigger asChild>
-            <a
+            <Link
               href="mailto:bbinya1224@gmail.com"
               className="group relative"
               aria-label="Send email to bbinya1224@gmail.com"
             >
               <MailIcon className="size-7 transition-opacity hover:opacity-50" />
-            </a>
+            </Link>
           </Tooltip.Trigger>
 
           <Tooltip.Portal>
@@ -45,8 +48,15 @@ const MailTooltip = () => {
           </Tooltip.Portal>
         </Tooltip.Root>
       </Tooltip.Provider>
+      <Link
+        href="https://www.linkedin.com/in/bbinya"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <LinkedInIcon className="size-7 hover:opacity-50" />
+      </Link>
     </div>
   );
 };
 
-export default MailTooltip;
+export default SocialLinks;

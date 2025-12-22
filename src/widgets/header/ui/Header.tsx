@@ -4,8 +4,8 @@ import { useTheme } from "next-themes";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import Skeleton from "react-loading-skeleton";
+import Logo from "@/widgets/header/icons/ic_bbinya-logo.svg";
 import DarkModeIcon from "@/widgets/header/icons/ic_darkMode.svg";
-import HomeIcon from "@/widgets/header/icons/ic_home.svg";
 import LightModeIcon from "@/widgets/header/icons/ic_lightMode.svg";
 
 const Header = () => {
@@ -39,47 +39,35 @@ const Header = () => {
 
   return (
     <header
-      className={`dark:bg-primary h-[4.5rem] max-w-[var(--page-width)] rounded-2xl rounded-t-none bg-white px-8 py-2 text-black shadow-lg transition-transform duration-300 ease-out dark:text-white ${isVisible ? "translate-y-0" : "-translate-y-full"} `}
+      className={`fixed top-0 left-1/2 z-50 flex w-full max-w-[var(--page-width)] -translate-x-1/2 flex-col border-b border-gray-100 bg-white px-4 transition-all duration-300 ease-out sm:px-8 dark:border-gray-800 dark:bg-[#171717] dark:text-white ${isVisible ? "translate-y-0" : "-translate-y-full"} `}
     >
-      <div className="relative top-1/2 mx-auto flex -translate-y-1/2 items-center justify-between">
-        <div className="rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]">
-          <Link href="/blog">
-            <HomeIcon className="size-[24px]" />
-          </Link>
-        </div>
+      <div className="flex h-16 items-center justify-between">
+        <Link href="/blog">
+          <Logo className="h-8 w-auto sm:h-10" />
+        </Link>
 
-        <div className="flex flex-row">
-          <div className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]">
-            {mounted ? (
-              <Link href="/blog/about-me">About Me</Link>
+        <button
+          className="cursor-pointer rounded-full p-2 hover:bg-slate-100 dark:hover:bg-[#11161b]"
+          aria-label={
+            mounted
+              ? isDark
+                ? "라이트 모드로 변경"
+                : "다크 모드로 변경"
+              : "테마 변경"
+          }
+          title={mounted ? (isDark ? "라이트 모드" : "다크 모드") : "테마"}
+          onClick={() => setTheme(!isDark ? "dark" : "light")}
+        >
+          {mounted ? (
+            isDark ? (
+              <LightModeIcon className="size-[24px]" />
             ) : (
-              <Skeleton width={80} height={24} />
-            )}
-          </div>
-
-          <button
-            className="cursor-pointer rounded-full px-4 py-[10px] hover:bg-slate-100 dark:hover:bg-[#11161b]"
-            aria-label={
-              mounted
-                ? isDark
-                  ? "라이트 모드로 변경"
-                  : "다크 모드로 변경"
-                : "테마 변경"
-            }
-            title={mounted ? (isDark ? "라이트 모드" : "다크 모드") : "테마"}
-            onClick={() => setTheme(!isDark ? "dark" : "light")}
-          >
-            {mounted ? (
-              isDark ? (
-                <LightModeIcon className="size-[24px]" />
-              ) : (
-                <DarkModeIcon className="size-[24px]" />
-              )
-            ) : (
-              <Skeleton circle width={24} height={24} />
-            )}
-          </button>
-        </div>
+              <DarkModeIcon className="size-[24px]" />
+            )
+          ) : (
+            <Skeleton circle width={24} height={24} />
+          )}
+        </button>
       </div>
     </header>
   );

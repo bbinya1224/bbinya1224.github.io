@@ -2,7 +2,7 @@ import Skeleton from "react-loading-skeleton";
 
 const SidebarSkeleton = () => {
   return (
-    <article className="relative flex w-full flex-col gap-4 md:w-auto lg:max-w-72">
+    <article className="relative flex w-full flex-col gap-4 p-5 md:w-auto lg:max-w-72">
       <div className="card-base relative flex w-full flex-col gap-2 px-6 py-6 shadow-xl sm:p-4">
         <Skeleton height={20} width="80%" />
         <div className="mt-2 flex flex-col gap-2">
