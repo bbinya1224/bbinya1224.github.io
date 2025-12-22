@@ -3,6 +3,7 @@
 import { useAtom, useSetAtom } from "jotai";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { InView } from "react-intersection-observer";
 import {
   selectedCategoryAtom,
   selectedTagsAtom,
@@ -12,7 +13,6 @@ import {
   infinitePostsAtom,
   totalPagesAtom,
 } from "@/features/pagination/model/paginationAtom";
-import { useInfiniteScroll } from "@/shared/lib/useInfiniteScroll";
 import PostWidget from "@/widgets/post/ui/PostWidget";
 import PostListSkeleton from "@/widgets/post/ui/skeleton/PostListSkeleton";
 
@@ -28,11 +28,6 @@ const PostList = () => {
   const loadMore = () => {
     setCurrentPage((prev) => prev + 1);
   };
-
-  const observerRef = useInfiniteScroll({
-    onLoadMore: loadMore,
-    hasMore: currentPage < totalPages,
-  });
 
   useEffect(() => {
     setMounted(true);
@@ -68,7 +63,17 @@ const PostList = () => {
                 thumbnail={post.thumbnail}
               />
             ))}
-            <div ref={observerRef} className="h-4 w-full" />
+            {currentPage < totalPages && (
+              <InView
+                as="div"
+                className="h-4 w-full"
+                onChange={(inView) => {
+                  if (inView) {
+                    loadMore();
+                  }
+                }}
+              />
+            )}
           </>
         ) : (
           <div className="flex min-h-[200px] items-center justify-center text-gray-500 dark:text-gray-400">

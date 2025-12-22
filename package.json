@@ -40,6 +40,7 @@
     "npm": "^11.6.2",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
+    "react-intersection-observer": "^10.0.0",
     "react-loading-skeleton": "^3.5.0",
     "rehype-pretty-code": "^0.14.1",
     "remark": "^15.0.1",
