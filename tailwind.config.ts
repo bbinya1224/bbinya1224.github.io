@@ -51,11 +51,11 @@ module.exports = {
 
             // 단락
             p: {
-              fontSize: "1rem",
-              lineHeight: "1.6",
+              fontSize: "1.125rem", // 18px
+              lineHeight: "1.8",
               letterSpacing: "-0.01em",
-              marginTop: "0.5em",
-              marginBottom: "0.5em",
+              marginTop: "0.8em",
+              marginBottom: "0.8em",
               wordSpacing: "0.05em",
             },
 
@@ -87,6 +87,8 @@ module.exports = {
               marginTop: "0.5em",
               marginBottom: "0.5em",
               paddingLeft: "0.5em",
+              fontSize: "1.125rem", // Match p size
+              lineHeight: "1.8",
             },
             "li > p": {
               marginTop: "0.5em",
@@ -96,24 +98,26 @@ module.exports = {
             // 인용구
             blockquote: {
               borderLeftColor: "#0084E8",
-              borderLeftWidth: "8px",
+              borderLeftWidth: "4px", // Thinner border
               paddingLeft: "1.25em",
               color: "#37352F",
               fontStyle: "normal",
-              marginTop: "0.5em",
-              marginBottom: "0.5em",
+              marginTop: "1.5em",
+              marginBottom: "1.5em",
               fontWeight: "500",
-              backgroundColor: "#F5FAFF",
-              paddingTop: "0.5em",
-              paddingBottom: "0.5em",
-              paddingRight: "1em",
+              backgroundColor: "transparent", // Remove bg for cleaner look or keep light
+              paddingTop: "0",
+              paddingBottom: "0",
+              paddingRight: "0",
             },
             "blockquote p:first-of-type::before": {
               content: "none",
             },
             "blockquote p": {
-              marginTop: "0.5em",
-              marginBottom: "0.5em",
+              marginTop: "0",
+              marginBottom: "0",
+              fontSize: "1.125rem",
+              lineHeight: "1.8",
             },
 
             // 코드
@@ -123,6 +127,7 @@ module.exports = {
               padding: "0.2em 0.4em",
               borderRadius: "0.3em",
               fontWeight: "400",
+              fontSize: "0.9em",
             },
             "code::before": {
               content: '""',
@@ -139,8 +144,8 @@ module.exports = {
               paddingInline: "1.5em !important",
               paddingTop: "2.75em !important",
               overflow: "auto !important",
-              marginTop: "1.5em !important",
-              marginBottom: "1.5em !important",
+              marginTop: "2em !important",
+              marginBottom: "2em !important",
               border: "none !important",
               boxShadow: "0 10px 30px rgba(0, 0, 0, 0.3) !important",
               position: "relative !important",
@@ -168,8 +173,8 @@ module.exports = {
               padding: "1em",
               marginTop: "1.5em",
               marginBottom: "1.5em",
-              fontSize: "0.95em",
-              borderLeftWidth: "8px",
+              fontSize: "1rem", // Slightly smaller than body
+              borderLeftWidth: "4px", // Thinner
               borderBottomLeftRadius: "0",
               borderTopLeftRadius: "0",
             },
@@ -215,7 +220,7 @@ module.exports = {
 
             // 이미지
             img: {
-              margin: "1.5em auto",
+              margin: "2em auto",
               borderRadius: "0.5em",
               boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
             },
@@ -243,11 +248,26 @@ module.exports = {
               backgroundColor: "#FAFAF9",
             },
 
-            // 수평선
+            // 수평선 (Medium Style)
             hr: {
-              borderColor: "#E5E5E5",
-              marginTop: "2em",
-              marginBottom: "2em",
+              borderColor: "transparent",
+              marginTop: "3em",
+              marginBottom: "3em",
+              borderTopWidth: "0",
+              position: "relative",
+              height: "2em",
+              textAlign: "center",
+            },
+            "hr::after": {
+              content: '"· · ·"',
+              fontSize: "2rem",
+              fontWeight: "bold",
+              color: "#E5E5E5",
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              letterSpacing: "0.6em",
             },
           },
         },
@@ -399,7 +419,10 @@ module.exports = {
             },
 
             hr: {
-              borderColor: "#404040",
+              borderColor: "transparent",
+            },
+            "hr::after": {
+              color: "#404040",
             },
           },
         },
