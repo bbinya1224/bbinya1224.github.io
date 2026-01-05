@@ -1,44 +1,37 @@
 ---
-title: Blog Ghostwriter
+title: Blog Tone Lab
 period: 2025.11.16 ~ (진행중)
-description: AI 기반 개인화 블로그 에디터
-techStack: [Next.js, Tailwind CSS, TypeScript]
+description: AI 기반 개인화 블로그 고스트라이터
+techStack: [Next.js, TypeScript, Supabase, Tailwind CSS]
 repoUrl: https://github.com/bbinya1224/blog-template
 imageUrl: /img/sideProject/blog-template/blog-template_main.png
 ---
 
 ![](/img/sideProject/blog-template/blog-template_main.png)
 
-
-> 사용자의 과거 게시글을 학습해 고유의 문체를 모방하고,  
-실시간 정보 검색(RAG)을 통해 사실 기반의 글쓰기를 돕는 Next.js 16 기반의 웹 애플리케이션입니다.
-
+> **"지루한 글쓰기 노동은 AI에게, 당신은 경험에만 집중하세요."**
+> 
+> 사용자의 과거 게시글을 심층 분석하여 고유의 '문체(Persona)'를 재현하고,  
+> 간략하게 작성한 문장들을 1,500자 이상의 완성된 포스팅으로 확장해주는 **AI 고스트라이터 서비스** 입니다.
 
 ## 🚀 프로젝트 배경
-체험단 활동이나 정기 블로그 포스팅이 부담스러운 사용자를 위한 AI 에디터입니다.  
-- **핵심 가치**: "내 말투로, 거짓말 없이, 누구나 쉽게"
-
+단순한 "키워드 기반 자동 생성"이 아닙니다.  
+많은 블로거들이 겪는 **"경험은 있는데 글로 풀어내기 귀찮은"** 문제에 집중했습니다.  
+내 말투를 그대로 흉내 내는 AI가 초안을 이어받아 작성함으로써, **생산성을 10배 이상** 높이는 것을 목표로 합니다.
 
 ## ✨ 핵심 기능 구현
 
-**1. 스타일 학습 (Hyper-Personalization)**
-- Cheerio로 네이버 블로그 RSS 피드 크롤링 및 HTML 파싱
-- Claude Sonnet 4.5로 사용자의 어조, 이모지 사용 패턴, 문단 구조 분석
-- Few-shot Learning: 작성한 이전 글 들을 참조하여 문체 재현
+**1. 초개인화 스타일 엔진**
+- **Style DNA 분석**: Cheerio로 기존 블로그 글을 크롤링하고, Claude Sonnet 4.5로 문체, 감정선, 문단 호흡 등을 정밀 분석하여 JSON 프로필로 추출
+- **Few-shot Prompting**: 추출된 스타일 데이터를 기반으로 블로거 고유의 말투를 완벽하게 모방
 
-**2. 사실 기반 글쓰기 (RAG)**
-- Tavily Search API로 메뉴, 영업시간, 주차 정보 등 실시간 수집
-- 검증된 정보만 활용하여 AI Hallucination 방지
-- 1,500자 이상의 사실 기반 리뷰 생성
+**2. 사실 기반 증강 작문**
+- **Draft Expansion**: 사용자가 입력한 짧은 경험(메모)을 바탕으로 내용을 확장하여, Hallucination 없는 진정성 있는 글 작성
+- **Real-time RAG**: Tavily API를 통해 가게 위치, 영업시간, 메뉴 가격 등 최신 정보를 실시간으로 검색해 내용 보강
 
-**3. 대화형 UI (Flow-Based UX)**
-- Wizard 패턴으로 단계별 정보 입력 유도
-- 자연어 명령("좀 더 신나게 바꿔줘")으로 특정 문단 수정
-- 실시간 프리뷰 및 편집 기능
-
-**4. 로컬 우선 프라이버시 (Local-First)**
-- 모든 분석 데이터 및 생성된 리뷰는 로컬 파일 시스템에만 저장
-- 외부 서버로의 개인 데이터 전송 없음
+**3. 몰입형 UX**
+- "누구와 갔나요?", "어떤 메뉴를 드셨나요?" 등 대화하듯 자연스러운 단계별 입력
+- Next.js Server Actions와 `useFormStatus`를 활용한 부드러운 인터랙션
 
 ---
 
@@ -46,10 +39,11 @@ imageUrl: /img/sideProject/blog-template/blog-template_main.png
 
 ![](/img/sideProject/blog-template/i54pmg3.png)
 
-
-### 🏗️ **아키텍처 설계**
-- FSD (Feature-Sliced Design) 패턴으로 비즈니스 로직(Features)과 UI(Widgets) 레이어 분리
-- App Router 구조로 페이지 라우팅과 기능 모듈 분리
+### 🏗️ **아키텍처 (Architecture)**
+- **Framework**: Next.js 16 (App Router) 기반의 최신 React 아키텍처
+- **State Management**: Zustand 및 React Query 없이, Server Components와 Native Fetch만으로 간결한 상태 관리 구현
+- **Database**: Supabase (PostgreSQL)를 도입하여 사용자 데이터 영속성 및 확장성 확보 (Local-First에서 마이그레이션)
+- **Design Pattern**: FSD (Feature-Sliced Design)를 적용하여 유지보수성과 모듈 간 결합도 최적화
 
 ### 🤖 **AI Pipeline**  
 ```
@@ -59,11 +53,10 @@ RSS Crawling → Style Analysis → RAG Context → Text Generation
 - Generation: Claude Haiku 3.0 (리뷰 생성)
 - Search: Tavily AI Search API (실시간 정보)
 
-### 🛠️ **Tech Stack**
-- Next.js 16 App Router, React 19, TypeScript
-- Tailwind CSS 4로 반응형 UI 구현
-- Native Fetch API 기반 비동기 상태 관리
-- Claude API 사용
+### 🛠️ Tech Stack
+- **Frontend** : Next.js 16, TypeScript, Tailwind CSS 4
+- **Backend/DB**: Supabase (Auth, Database), NextAuth.js
+- **AI/Data**: Anthropic Claude API, Tavily Search API, Cheerio
 
 ---
 
