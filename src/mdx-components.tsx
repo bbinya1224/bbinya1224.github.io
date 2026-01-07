@@ -2,11 +2,30 @@ import type { MDXComponents } from "mdx/types";
 import { ImageCarousel } from "@/widgets/lab/ui/ImageCarousel/ImageCarousel";
 import LifecycleLab from "@/widgets/lab/ui/lifecycle-lab/LifecycleLab";
 import Mermaid from "@/widgets/lab/ui/Mermaid/Mermaid";
+import RaceConditionDemo from "@/widgets/lab/ui/race-condition/RaceConditionDemo";
+import FlickeringDemo from "@/widgets/lab/ui/flickering-demo/FlickeringDemo";
 
 export const mdxComponents: MDXComponents = {
   LifecycleLab,
   Mermaid,
   ImageCarousel,
+  RaceConditionDemo,
+  FlickeringDemo,
+
+  a: (props) => {
+    const href = props.href || "";
+    const isExternal = href.startsWith("http://") || href.startsWith("https://");
+
+    if (isExternal) {
+      return (
+        <a {...props} target="_blank" rel="noopener noreferrer">
+          {props.children}
+        </a>
+      );
+    }
+
+    return <a {...props}>{props.children}</a>;
+  },
 
   img: (props) => (
     // eslint-disable-next-line @next/next/no-img-element

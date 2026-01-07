@@ -97,27 +97,17 @@ module.exports = {
 
             // 인용구
             blockquote: {
-              borderLeftColor: "#0084E8",
-              borderLeftWidth: "4px", // Thinner border
-              paddingLeft: "1.25em",
-              color: "#37352F",
-              fontStyle: "normal",
-              marginTop: "1.5em",
-              marginBottom: "1.5em",
+              borderLeftColor: "#61AFFE",
+              color: "#333",
               fontWeight: "500",
-              backgroundColor: "transparent", // Remove bg for cleaner look or keep light
-              paddingTop: "0",
-              paddingBottom: "0",
-              paddingRight: "0",
-            },
-            "blockquote p:first-of-type::before": {
-              content: "none",
+              backgroundColor: "#F7FAFC",
+              paddingTop: "0.5em",
+              paddingBottom: "0.5em",
+              paddingRight: "1em",
             },
             "blockquote p": {
               marginTop: "0",
               marginBottom: "0",
-              fontSize: "1.125rem",
-              lineHeight: "1.8",
             },
 
             // 코드
