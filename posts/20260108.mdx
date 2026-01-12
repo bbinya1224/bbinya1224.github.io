@@ -1,0 +1,729 @@
+---
+title: "React useEffect의 오해: 초기화가 아닌 동기화 도구"
+date: "2026-01-08"
+slug: "20260108"
+description: "useEffect를 '초기화 도구'로 오해하면 불필요한 재렌더링이 발생합니다. React가 설계한 진짜 목적, 올바른 사용법, 그리고 실무에서 고려해야 할 트레이드오프를 알아봅니다."
+category: "Frontend"
+tag: "React"
+thumbnail: ""
+---
+
+> 많은 개발자들이 `useEffect`를 "컴포넌트가 처음 마운트될 때 실행되는 함수"라고 이해합니다.  
+하지만 이건 **useEffect의 부수 효과**일 뿐, 설계 목적이 아닙니다.
+
+> **React 공식 문서의 정의**  
+Effects let you run some code **after rendering** so that you can **synchronize** your component with some system outside of React.
+
+1. **"after rendering"** - 렌더링 **이후에** 실행
+2. **"synchronize"** - 외부 시스템과의 **동기화** 목적
+
+useEffect는 **초기화 도구가 아니라 동기화 도구**입니다.
+
+---
+
+## 초기화 vs 동기화: 근본적 차이
+
+### 초기화 (Initialization)
+**"한 번만 실행되어야 하는 설정"**
+
+```tsx
+// 예시: 인스턴스 생성, 전역 설정, Provider 준비
+const instance = createI18nInstance();
+const config = { locale: 'ko', namespaces: ['common'] };
+```
+
+- 한 번 실행되면 **끝**
+- 외부 시스템과 **무관**
+- 컴포넌트 생명주기와 **독립적**
+
+### 동기화 (Synchronization)
+**"외부 시스템 상태와 계속 일치시켜야 하는 작업"**
+
+```tsx
+// 예시: WebSocket 연결, 이벤트 리스너, 구독
+useEffect(() => {
+  const connection = chatRoom.connect(); // 연결
+  return () => connection.disconnect();   // 정리
+}, [chatRoom]); // chatRoom이 바뀌면 재연결
+```
+
+- 외부 상태가 변경되면 **재실행**
+- cleanup으로 **정리 필요**
+- 컴포넌트와 외부 시스템이 **동기화 상태 유지**
+
+---
+
+## 왜 useEffect로 초기화하면 문제일까?
+
+### 문제 1: 렌더링 타이밍 불일치
+
+**React의 실행 흐름**
+```
+┌─────────────────────────────────────┐
+│ 1. 렌더링 (함수 실행)                 │
+│    - JSX 생성                        │
+│    - useState, useRef 호출           │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 2. DOM 커밋                          │
+│    - 브라우저 화면에 반영              │
+└─────────────────────────────────────┘
+              ↓
+┌─────────────────────────────────────┐
+│ 3. useEffect 실행 ⚠️                 │
+│    - 렌더링 **이후**에 실행           │
+└─────────────────────────────────────┘
+```
+
+**useEffect로 초기화하면**,
+```tsx
+const TranslationProvider = ({ children, initialLocale }) => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    initTranslations(instance, { locale: initialLocale });
+    setIsReady(true); // ⚠️ 재렌더링 유발
+  }, []);
+
+  if (!isReady) return <Loading />; // 첫 렌더링: 로딩 화면
+
+  return <I18nextProvider i18n={instance}>{children}</I18nextProvider>;
+};
+```
+
+**실행 순서**
+1. 첫 렌더링: `isReady === false` → `<Loading />` 표시
+2. DOM 커밋: 화면에 "Loading..." 표시
+3. useEffect 실행 → `setIsReady(true)`
+4. **재렌더링**: 실제 콘텐츠 표시
+
+**문제점**
+- 불필요한 로딩 화면 깜빡임
+- 2번의 렌더링 (초기 + 재렌더링)
+- 첫 렌더링에서 초기화된 데이터를 사용 못함
+
+---
+
+### 문제 2: "한 번만 실행"의 오해
+
+많은 개발자가 `useEffect(() => {}, [])`를 "한 번만 실행"으로 이해하지만, **Strict Mode에서는 다르게 동작합니다**.
+
+```tsx
+useEffect(() => {
+  console.log('초기화');
+}, []); // ⚠️ Strict Mode에서 2번 실행됨
+```
+
+**React 18 Strict Mode 동작**
+```
+첫 마운트 → Effect 실행 → Cleanup → 언마운트
+→ 재마운트 → Effect 재실행
+```
+
+결과:
+```
+콘솔: "초기화"
+콘솔: "초기화" (2번째)
+```
+
+**왜 이렇게 설계됐을까?**
+
+React는 useEffect가 **"순수하지 않은 동기화 작업"**을 한다고 가정합니다.
+- 개발 환경에서 컴포넌트를 의도적으로 remount하여 cleanup 로직이 제대로 작동하는지 검증
+- 외부 시스템 연결/해제가 올바른지 테스트
+
+하지만 초기화 로직은 cleanup이 필요 없으므로, useEffect로 작성하면 **불필요한 2번 실행**이 발생합니다.
+
+---
+
+## 올바른 해결책: 렌더링 중 초기화
+
+### 해법 1: useRef + 조건문 (가장 범용적)
+
+```tsx
+const TranslationProvider = ({ children, initialLocale }) => {
+  const isInitialized = useRef(false);
+
+  //  렌더링 중에 실행 (useEffect 아님!)
+  if (!isInitialized.current) {
+    initTranslations(instance, {
+      locale: initialLocale,
+      namespaces: ['common'],
+    });
+    isInitialized.current = true;
+  }
+
+  return <I18nextProvider i18n={instance}>{children}</I18nextProvider>;
+};
+```
+
+**왜 안전한가?**
+
+| 상황 | 동작 |
+|------|------|
+| **첫 렌더링** | `isInitialized.current === false` → 초기화 실행 → `true` 설정 |
+| **재렌더링** | `isInitialized.current === true` → 초기화 건너뜀 |
+| **Strict Mode (remount)** | `useRef`는 마운트 간 유지되므로 초기화는 **1번만** 실행 |
+
+**실행 순서** (Strict Mode 포함)
+```
+첫 마운트: 초기화 실행 → isInitialized = true
+재마운트 (Strict Mode): 초기화 건너뜀 (useRef는 유지됨)
+```
+
+---
+
+### 해법 2: useState Lazy Initialization
+
+```tsx
+const MyProvider = ({ children, config }) => {
+  //  함수 형태로 전달하면 첫 렌더링에서만 실행
+  const [instance] = useState(() => createInstance(config));
+
+  return <Context.Provider value={instance}>{children}</Context.Provider>;
+};
+```
+
+**특징**:
+- `createInstance(config)`는 **첫 렌더링에서만** 실행
+- `config`가 바뀌어도 `instance`는 **재생성 안 됨**
+- 불변 인스턴스가 필요한 경우 적합
+
+---
+
+### 해법 3: useMemo (props에 반응해야 할 때)
+
+```tsx
+const MyProvider = ({ children, config }) => {
+  //  config가 바뀌면 인스턴스 재생성
+  const instance = useMemo(
+    () => createInstance(config),
+    [config]
+  );
+
+  return <Context.Provider value={instance}>{children}</Context.Provider>;
+};
+```
+
+**언제 사용?**
+- props가 바뀌면 값을 **재계산**해야 하는 경우
+- 계산 비용이 높은 로직을 **메모이제이션**
+
+---
+
+### 주의사항: useRef + if 패턴의 한계
+
+useRef 패턴은 강력하지만, 몇 가지 알아야 할 제약사항이 있습니다.
+
+#### 1. HMR (Hot Module Replacement) 이슈
+
+```tsx
+const MyComponent = () => {
+  const initialized = useRef(false);
+
+  if (!initialized.current) {
+    console.log('초기화:', new Date().toISOString());
+    initialized.current = true;
+  }
+
+  return <div>컴포넌트</div>;
+};
+```
+
+**문제**: 개발 중 코드를 수정하면 HMR이 작동하지만, `useRef.current`는 초기화되지 않습니다.
+- 첫 실행: "초기화: 2026-01-08T10:00:00"
+- 코드 수정 후: 초기화 코드가 **실행되지 않음** (이미 true)
+- 오래된 상태가 유지되어 디버깅 혼란 발생
+
+**해결책**: 개발 중에는 페이지를 새로고침하거나, 초기화 로직을 별도 모듈로 분리합니다.
+
+#### 2. Next.js SSR/Hydration 불일치
+
+```tsx
+// ⚠️ 서버/클라이언트에서 다르게 동작할 수 있음
+const MyProvider = ({ children }) => {
+  const initialized = useRef(false);
+
+  if (!initialized.current) {
+    // 서버: 실행됨
+    // 클라이언트 hydration: 다시 실행됨
+    setupGlobalConfig();
+    initialized.current = true;
+  }
+
+  return <Context.Provider value={data}>{children}</Context.Provider>;
+};
+```
+
+**문제**: SSR과 hydration에서 각각 1번씩 실행될 수 있습니다.
+
+**해결책**:
+- Server Component에서는 모듈 레벨 초기화 사용
+- Client Component에서만 useRef 패턴 사용
+- `'use client'` 지시어로 명확히 구분
+
+#### 3. React DevTools에서 추적 불가
+
+```tsx
+const MyComponent = () => {
+  const initialized = useRef(false); // DevTools에 표시 안 됨
+  const [count, setCount] = useState(0); // DevTools에 표시됨
+
+  // ...
+};
+```
+
+**특징**: `useRef`는 React DevTools의 컴포넌트 탭에 표시되지 않습니다.
+- 디버깅 시 초기화 여부를 확인하기 어려움
+- 개발 중에는 임시 `useState`로 변경해 추적 가능
+
+---
+
+## 다양한 케이스 살펴보기
+
+### Case 1: Provider 초기화
+
+```tsx
+//  Before: useEffect
+const TranslationProvider = ({ children, initialLocale }) => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    initTranslations(instance, { locale: initialLocale });
+    setIsReady(true);
+  }, []);
+
+  if (!isReady) return <div>Loading...</div>;
+  return <I18nextProvider i18n={instance}>{children}</I18nextProvider>;
+};
+
+//  After: useRef + if
+const TranslationProvider = ({ children, initialLocale }) => {
+  const isInitialized = useRef(false);
+
+  if (!isInitialized.current) {
+    initTranslations(instance, { locale: initialLocale });
+    isInitialized.current = true;
+  }
+
+  return <I18nextProvider i18n={instance}>{children}</I18nextProvider>;
+};
+```
+
+**개선 효과**:
+- 렌더링 횟수: 2회 → **1회**
+- 로딩 화면: 있음 → **없음**
+- Strict Mode: 2번 초기화 → **1번 초기화**
+
+---
+
+### Case 2: props 파생 데이터
+
+```tsx
+//  Before: useEffect (안티패턴!)
+const PostList = ({ posts }) => {
+  const [sortedPosts, setSortedPosts] = useState([]);
+
+  useEffect(() => {
+    const sorted = [...posts].sort((a, b) => b.date - a.date);
+    setSortedPosts(sorted); // ⚠️ props 변경 시마다 재렌더링
+  }, [posts]);
+
+  return sortedPosts.map(post => <Post key={post.id} {...post} />);
+};
+
+//  After: useMemo
+const PostList = ({ posts }) => {
+  const sortedPosts = useMemo(
+    () => [...posts].sort((a, b) => b.date - a.date), // 원본 보호
+    [posts]
+  );
+
+  return sortedPosts.map(post => <Post key={post.id} {...post} />);
+};
+```
+
+**왜 문제였나?**
+- useEffect 패턴: 렌더링(빈 배열) → Effect(정렬) → **재렌더링**
+- useMemo 패턴: 렌더링(정렬 완료) → **끝**
+
+---
+
+### Case 3: 전역 설정 (한 번만 실행)
+
+```tsx
+//  Before: useEffect
+const App = () => {
+  useEffect(() => {
+    initAnalytics();
+    configureErrorTracking();
+  }, []); // Strict Mode에서 2번 실행됨
+
+  return <Router>...</Router>;
+};
+
+//  After: useRef + if
+const App = () => {
+  const setupDone = useRef(false);
+
+  if (!setupDone.current) {
+    initAnalytics();
+    configureErrorTracking();
+    setupDone.current = true;
+  }
+
+  return <Router>...</Router>;
+};
+```
+
+---
+
+## 언제 useEffect를 **써야** 하나?
+
+useEffect는 **외부 시스템과의 동기화**에만 사용하세요.
+
+### 올바른 useEffect 사용 예시
+
+#### 1. WebSocket/네트워크 연결
+
+```tsx
+useEffect(() => {
+  const ws = new WebSocket('ws://example.com');
+  ws.onmessage = handleMessage;
+  
+  return () => ws.close(); // cleanup
+}, []);
+```
+
+#### 2. 이벤트 리스너
+
+```tsx
+useEffect(() => {
+  const handleResize = () => setWidth(window.innerWidth);
+  window.addEventListener('resize', handleResize);
+  
+  return () => window.removeEventListener('resize', handleResize);
+}, []);
+```
+
+#### 3. 구독 (Subscribe/Unsubscribe)
+
+```tsx
+useEffect(() => {
+  const subscription = store.subscribe(handleChange);
+  
+  return () => subscription.unsubscribe();
+}, [store]);
+```
+
+#### 4. DOM 조작 (부작용)
+
+```tsx
+useEffect(() => {
+  document.title = `Messages (${count})`;
+}, [count]);
+```
+
+---
+
+## 순수 함수 규칙: 렌더링 중 허용/금지
+
+렌더링 중 초기화는 **순수 함수 규칙**을 지켜야 합니다.
+
+### 허용되는 코드
+
+```tsx
+const MyComponent = ({ config }) => {
+  const initialized = useRef(false);
+
+  if (!initialized.current) {
+    //  useRef 수정 (React가 추적 안 함)
+    initialized.current = true;
+
+    //  지역 변수 생성
+    const instance = createInstance(config);
+
+    //  외부 객체 메서드 호출 (React 외부)
+    instance.init();
+  }
+
+  return <div>...</div>;
+};
+```
+
+### 금지되는 코드
+
+```tsx
+const MyComponent = ({ config }) => {
+  const [state, setState] = useState(0);
+
+  //  렌더링 중 React state 변경 (무한 루프!)
+  if (config.flag) {
+    setState(1); // Error: Cannot update during render
+  }
+
+  //  렌더링 중 DOM 조작
+  document.title = 'My App'; // 부작용!
+
+  //  렌더링 중 전역 변수 수정
+  window.globalCount++;
+
+  return <div>...</div>;
+};
+```
+
+<aside data-type="warning">
+**주의**  
+렌더링 중에는 React state 변경, DOM 조작, 전역 변수 수정을 피해야 합니다.  
+이는 예측 불가능한 동작과 무한 루프를 유발할 수 있습니다.
+</aside>
+
+---
+
+## 패턴 선택 가이드
+
+| 상황 | 패턴 | 예시 |
+|------|------|------|
+| **1회만 실행 (불변)** | `useRef + if` | Provider 초기화, 전역 설정 |
+| **1회만 실행 (state 필요)** | `useState(() => {})` | 인스턴스 생성 후 state 저장 |
+| **props 기반 계산** | `useMemo` | 정렬, 필터링, 변환 |
+| **외부 시스템 동기화** | `useEffect` | WebSocket, 이벤트 리스너, 구독 |
+
+---
+
+## Next.js App Router 환경 고려사항
+
+Next.js 13+ App Router에서는 Server Component와 Client Component를 구분해야 합니다.
+
+### Server Component (기본)
+
+```tsx
+// app/layout.tsx (Server Component)
+import { createI18nInstance } from '@/lib/i18n';
+
+//  모듈 레벨에서 초기화
+const i18n = createI18nInstance({
+  locale: 'ko',
+  namespaces: ['common'],
+});
+
+export default function RootLayout({ children }) {
+  // 서버에서 렌더링되므로 useEffect 사용 불가
+  return (
+    <html lang="ko">
+      <body>{children}</body>
+    </html>
+  );
+}
+```
+
+**특징**:
+- `useEffect`, `useState`, `useRef` 사용 불가
+- 모듈 레벨 초기화 또는 함수 직접 호출
+- 매 요청마다 새로운 인스턴스 생성됨
+
+### Client Component ('use client')
+
+```tsx
+// components/TranslationProvider.tsx
+'use client';
+
+import { useRef } from 'react';
+import { I18nextProvider } from 'react-i18next';
+import { initTranslations } from '@/lib/i18n';
+
+export function TranslationProvider({ children, locale }) {
+  const initialized = useRef(false);
+
+  //  useRef 패턴 사용 가능
+  if (!initialized.current) {
+    initTranslations(locale);
+    initialized.current = true;
+  }
+
+  return <I18nextProvider i18n={i18n}>{children}</I18nextProvider>;
+}
+```
+
+**주의사항**
+- SSR과 hydration에서 각각 1번씩 실행될 수 있음
+- 브라우저 전용 API는 `useEffect` 내부에서만 사용
+- 초기화 로직이 SSR 안전한지 확인 필요
+
+### 패턴 선택: Server vs Client
+
+| 상황 | 권장 패턴 | 이유 |
+|------|----------|------|
+| **정적 설정** | Server Component + 모듈 레벨 | 번들 크기 감소, 서버 렌더링 |
+| **사용자 인터랙션** | Client Component + useRef | 동적 상태 관리 필요 |
+| **브라우저 API** | Client Component + useEffect | window, localStorage 등 |
+| **외부 시스템 연결** | Client Component + useEffect | WebSocket, 이벤트 리스너 |
+
+---
+
+## 렌더링 횟수 비교
+
+### useEffect 패턴의 실행 흐름
+
+```tsx
+const Provider = ({ children }) => {
+  const [isReady, setIsReady] = useState(false);
+
+  useEffect(() => {
+    // 초기화 로직
+    initData();
+    setIsReady(true); // ⚠️ 재렌더링 유발
+  }, []);
+
+  if (!isReady) return <Loading />; // 첫 렌더링
+
+  return <Context.Provider>{children}</Context.Provider>; // 재렌더링
+};
+```
+
+**실행 순서:**
+```
+1. 첫 렌더링
+   └─ isReady === false → <Loading /> 반환
+   └─ 자식 컴포넌트 렌더링 안 됨
+
+2. DOM 커밋 → 화면에 로딩 표시
+
+3. useEffect 실행 → setIsReady(true)
+
+4. 재렌더링 ⚠️
+   └─ isReady === true → <Provider> 반환
+   └─ 모든 자식 컴포넌트 렌더링 시작
+
+5. DOM 커밋 → 실제 콘텐츠 표시
+
+총 렌더링: 2회
+```
+
+### useRef 패턴의 실행 흐름
+
+```tsx
+const Provider = ({ children }) => {
+  const isInitialized = useRef(false);
+
+  if (!isInitialized.current) {
+    // 렌더링 중 초기화 (useEffect 아님!)
+    initData();
+    isInitialized.current = true;
+  }
+
+  return <Context.Provider>{children}</Context.Provider>;
+};
+```
+
+**실행 순서:**
+```
+1. 첫 렌더링
+   └─ 조건문에서 초기화 실행
+   └─ <Provider> 반환
+   └─ 모든 자식 컴포넌트 렌더링
+
+2. DOM 커밋 → 바로 실제 콘텐츠 표시
+
+총 렌더링: 1회
+```
+
+### 핵심 차이점
+
+| 패턴 | 렌더링 횟수 | 불필요한 로딩 UI | 자식 컴포넌트 렌더링 |
+|------|------------|----------------|-------------------|
+| **useEffect** | 2회 |  표시됨 | 재렌더링 시에만 |
+| **useRef** | 1회 |  없음 | 첫 렌더링부터 |
+| **useState lazy** | 1회 |  없음 | 첫 렌더링부터 |
+
+<aside data-type="success">
+**렌더링 횟수가 절반으로 감소**
+
+useEffect 패턴은 항상 2번 렌더링(로딩 화면 + 실제 콘텐츠)하지만, 렌더링 중 초기화 패턴은 1번만 렌더링합니다.  
+이는 불필요한 로딩 UI와 재렌더링 비용을 제거하여 더 나은 사용자 경험을 제공합니다.
+</aside>
+
+---
+
+## Strict Mode 동작 비교
+
+```tsx
+// useEffect
+useEffect(() => {
+  console.log('초기화');
+}, []);
+// 출력: "초기화" "초기화" (2번)
+
+// useRef + if
+const initialized = useRef(false);
+if (!initialized.current) {
+  console.log('초기화');
+  initialized.current = true;
+}
+// 출력: "초기화" (1번만)
+```
+
+| 단계 | useEffect | useRef + if |
+|------|-----------|-------------|
+| **첫 마운트** | - | 초기화 실행 → `true` |
+| **첫 Effect** | 초기화 실행 | - |
+| **Cleanup (언마운트)** | cleanup 실행 | - |
+| **재마운트 (Strict)** | - | `true`이므로 건너뜀 |
+| **두 번째 Effect** | **재실행 ** | - |
+
+---
+
+## 정리
+
+### 핵심 요약
+
+1. **useEffect는 동기화 도구**
+   - 설계 목적: 외부 시스템과 컴포넌트 상태 동기화
+   - "렌더링 후" 실행되므로 초기화에는 비효율적
+
+2. **초기화는 렌더링 중에 처리**
+   - `useRef + if`: 1회 실행 보장 (Strict Mode 안전)
+   - `useState(() => {})`: 불변 인스턴스 생성
+   - `useMemo`: props 기반 계산
+   - Next.js: Server Component는 모듈 레벨 초기화
+
+3. **useEffect 적합한 사용처**
+   - WebSocket, 이벤트 리스너, 구독 등 외부 시스템 연결
+   - cleanup이 필요한 리소스 관리
+   - DOM 조작, 브라우저 API 호출
+
+4. **트레이드오프 고려**
+   - useRef는 DevTools에 표시 안 됨
+   - HMR 시 초기화되지 않을 수 있음
+   - SSR 환경에서는 추가 주의 필요
+
+### Before/After 비교
+
+| 항목 | useEffect | 렌더링 중 초기화 |
+|------|-----------|-----------------|
+| **실행 시점** | 렌더링 후 | 렌더링 중 |
+| **목적** | 동기화 | 초기화 |
+| **첫 렌더링** | 초기화 안 됨 | 초기화 완료  |
+| **렌더링 횟수** | 2회 | 1회  |
+| **Strict Mode** | 2번 실행 | 1번 실행  |
+| **cleanup** | 필요 | 불필요 |
+
+---
+
+## 참고 자료
+
+### React 공식 문서
+- [You Might Not Need an Effect](https://react.dev/learn/you-might-not-need-an-effect)
+- [Synchronizing with Effects](https://react.dev/learn/synchronizing-with-effects)
+- [Referencing Values with Refs](https://react.dev/learn/referencing-values-with-refs)
+- [useState - Lazy Initialization](https://react.dev/reference/react/useState#avoiding-recreating-the-initial-state)
+- [Keeping Components Pure](https://react.dev/learn/keeping-components-pure)
+
+### 추가 학습 자료
+- [React 18 Strict Mode Changes](https://react.dev/blog/2022/03/08/react-18-upgrade-guide#updates-to-strict-mode)
+- [When to Use useMemo and useCallback](https://kentcdodds.com/blog/usememo-and-usecallback)
+
+### Next.js 관련 문서
+- [Server Components](https://nextjs.org/docs/app/building-your-application/rendering/server-components)
+- [Client Components](https://nextjs.org/docs/app/building-your-application/rendering/client-components)
