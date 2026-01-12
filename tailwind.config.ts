@@ -237,6 +237,18 @@ module.exports = {
             "tbody tr:nth-child(odd)": {
               backgroundColor: "#FAFAF9",
             },
+            "thead th:first-child": {
+              paddingLeft: "0.75em",
+            },
+            "thead th:last-child": {
+              paddingRight: "0.75em",
+            },
+            "tbody td:first-child": {
+              paddingLeft: "0.75em",
+            },
+            "tbody td:last-child": {
+              paddingRight: "0.75em",
+            },
 
             // 수평선 (Medium Style)
             hr: {
@@ -252,7 +264,7 @@ module.exports = {
               content: '"· · ·"',
               fontSize: "2rem",
               fontWeight: "bold",
-              color: "#E5E5E5",
+              color: "#CCC",
               position: "absolute",
               top: "50%",
               left: "50%",
