@@ -1,0 +1,461 @@
+---
+title: "React 패턴 선택 가이드: Hook vs HoC vs Props"
+date: "2026-01-13"
+slug: "20260113"
+description: "'어떻게'보다 '왜'에 집중하며, 실무에서 마주한 트레이드오프를 공유합니다."
+category: "Frontend"
+tag: "React"
+thumbnail: ""
+---
+
+컴포넌트를 만들거나, 컴포넌트에 새로운 기능을 추가할 때마다 마주하는 질문이 있습니다.
+
+"이 기능을 **어떻게** 구현할 것인가?"
+
+최근 새로운 프로젝트에서 Input 컴포넌트에 검증 로직을 추가하면서, 세 가지 선택지 앞에서 고민했습니다.
+
+**1. Hook으로 구현**
+```tsx
+const validationProps = useValidation({ validator: customValidator });
+<Input.Field {...validationProps} />
+```
+- 로직을 분리할 수 있지만, props를 Hook으로 생성하는 패턴이 낯설 수 있습니다.
+
+**2. Props 내장 방식으로 구현**
+```tsx
+<Input.Field validation={{ validator: customValidator }} />
+```
+- 직관적이지만, 모든 Input에 validation 로직이 포함됩니다.
+
+**3. HoC 래핑하는 방향으로 구현**
+```tsx
+const ValidatedInput = withValidation(Input.Field, { validator: customValidator });
+<ValidatedInput />
+```
+- 명확하게 분리되지만, 타입 추론과 디버깅이 복잡해집니다.
+
+이 고민은 단순히 구현 방법의 차이가 아니었습니다.  
+**"왜 이 패턴을 선택하는가?"** 에 대한 명확한 기준이 필요했습니다.
+
+## React의 세 가지 재사용 패턴
+
+React에서 로직과 기능을 재사용하는 방법은 크게 세 가지입니다.
+
+### 1. Custom Hooks
+```tsx
+const handlers = useFeature();
+<Component {...handlers} />
+```
+- **용도**: 로직을 재사용하고 싶을 때
+- **특징**: 조합 가능, Tree-shakable
+- Hooks 도입 후 **React 공식 권장 패턴**
+
+### 2. Higher-Order Components (HoC)
+```tsx
+const EnhancedComponent = withFeature(Component);
+<EnhancedComponent />
+```
+- **용도**: 렌더링 트리를 수정하고 싶을 때
+- **특징**: Wrapper 추가, 조건부 렌더링
+
+> Hooks 도입과 함께 "로직 재사용"을 위해서는 Custom Hook을 사용할 것을 권장합니다.
+>
+> 하지만 HoC 패턴 자체가 deprecated된 것은 아닙니다.  
+> 여전히 **"컴포넌트를 래핑해서 추가적인 props를 제공하거나 렌더링을 제어하는 패턴"** 으로 소개되고 있습니다.
+
+### 3. Props (컴포넌트 내장)
+```tsx
+<Component feature={{ enabled: true, config: {...} }} />
+```
+- **용도**: 모든 인스턴스에 필요한 기능
+- **특징**: 직관적, 자기 문서화
+- **주의**: 사용하지 않아도 번들에 포함됨
+
+각 패턴은 명확한 트레이드오프가 있습니다.  
+이 글에서는 세 패턴의 차이와 선택 기준을 정리하려고 합니다.
+
+## 패턴별 구체적 비교
+
+동일한 기능을 세 가지 방식으로 구현하면서 각각의 트레이드오프를 파악했습니다.
+
+### 1. Hook 기반
+
+```tsx
+// useValidation.ts
+export const useValidation = ({ validator, initialValue = '' }) => {
+  const lastValidValueRef = useRef(initialValue);
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement>) => {
+    const currentValue = e.target.value;
+
+    if (validator(currentValue)) {
+      lastValidValueRef.current = currentValue;
+    } else {
+      // 복원 로직
+      updateInputValue(e.target, lastValidValueRef.current);
+    }
+  };
+
+  return { onBlur: handleBlur };
+};
+
+// 사용
+const validationHandlers = useValidation({
+  validator: customValidator
+});
+
+<Input.Field
+  value={value}
+  onChange={handleChange}
+  {...validationHandlers}
+/>
+```
+
+**장점:**
+- Tree-shakable: 사용하지 않으면 번들에 포함 안 됨
+- 조합 가능: 여러 hooks와 함께 사용 가능
+- 타입 안정성 우수
+- React 생태계 표준 패턴
+
+**단점:**
+- Props를 hook으로 생성한다는 것이 직관적이지 않을 수 있음
+- 보일러플레이트 코드 증가 (import, hook 호출)
+
+### 2. Props 내장 방식
+
+```tsx
+// InputField.tsx
+type ValidationConfig = {
+  validator?: (value: string) => boolean;
+  validateOn?: Array<'blur' | 'change'>;
+};
+
+type InputFieldProps = {
+  validation?: ValidationConfig;
+  // ... 기타 props
+};
+
+const InputField = ({ validation, ...props }: InputFieldProps) => {
+  const lastValidRef = useRef('');
+
+  const handleBlur = (e) => {
+    if (validation?.validateOn?.includes('blur')) {
+      if (!validation.validator(e.target.value)) {
+        updateInputValue(e.target, lastValidRef.current);
+      }
+    }
+    props.onBlur?.(e);
+  };
+
+  return <input {...props} onBlur={handleBlur} />;
+};
+
+// 사용
+<Input.Field
+  validation={{
+    validator: customValidator,
+    validateOn: ['blur']
+  }}
+/>
+```
+
+**장점:**
+- 직관적이고 자기 문서화
+- 사용이 간편함
+- Props가 명시적
+
+**단점:**
+- **치명적:** Validation을 사용하지 않는 Input도 관련 로직을 항상 포함
+- 번들 사이즈 증가 (모든 Input에 validation 코드가 포함)
+- InputField의 책임 과다 (단일 책임 원칙 위배)
+
+### 3. HoC 방식
+
+```tsx
+// withValidator.tsx
+const withValidator = (Component, validatorConfig) => {
+  return (props) => {
+    const lastValidRef = useRef('');
+
+    const handleBlur = (e) => {
+      // validation 로직
+    };
+
+    return <Component {...props} onBlur={handleBlur} />;
+  };
+};
+
+// 사용
+const ValidatedInput = withValidator(Input.Field, {
+  type: 'positiveInteger'
+});
+
+<ValidatedInput />
+```
+
+**장점:**
+- Tree-shakable
+- 컴포넌트 래핑으로 명확한 역할 분리
+
+**단점:**
+- 타입 추론 복잡 (TypeScript에서 각별히 주의 필요)
+- 동적 validator 변경 어려움
+- React DevTools에서 디버깅 불편
+- 현대 React에서 권장하지 않는 패턴
+
+---
+
+## 고민 끝에 내린 결론, Hook 방식을 채택하다.
+
+저는 세 가지 패턴을 깊이 비교한 끝에, Hook을 선택했습니다.  
+- 번들 사이즈에 미치는 영향
+- 코드의 유지보수성과 확장성
+- 타입 안정성
+- 팀원들의 이해 가능성
+
+단순히 "요즘 Hook을 많이 쓰니까"가 아닌, 각 기준을 하나씩 검토했습니다.
+
+### 1. 번들 최적화
+
+먼저 실제 사용 패턴을 분석했습니다.  
+대부분의 컴포넌트는 해당 기능을 사용하지 않습니다.
+
+Props 내장 방식은 사용 여부와 관계없이 모든 인스턴스에 코드가 포함됩니다.
+
+```tsx
+// 100개의 Input 중 5개만 validation 사용
+<Input placeholder="이름" />  // validation 미사용, 그러나 코드는 포함
+<Input placeholder="이메일" />  // validation 미사용, 그러나 코드는 포함
+<Input.Field validation={{ ... }} />  // 여기만 필요!
+```
+
+**번들 영향:**
+- Props 내장: 모든 인스턴스에 포함
+- Hook: 사용하는 곳에만 포함, 미사용 시 0 바이트
+
+번들 분석 도구로 확인해본 결과, 기능이 선택적일수록 Hook의 이점이 커졌습니다.
+
+### 2. 관심사의 분리
+
+```tsx
+// Component의 책임: "UI를 렌더링한다"
+const InputField = ({ className, ...props }) => {
+  const context = useInputContext();
+
+  return (
+    <input
+      disabled={context?.disabled}
+      className={cn('...', className)}
+      {...props}
+    />
+  );
+};
+
+// Hook의 책임: "특정 로직을 제공한다"
+export const useValidation = ({ validator }) => {
+  // validation 로직만 집중
+};
+```
+
+**단일 책임 원칙**
+- Component는 렌더링에 집중
+- Hook은 로직에 집중
+- 각자의 역할이 명확
+
+### 3. 조합 가능성 (Composability)
+
+실무에서는 하나의 기능만 필요한 경우가 드뭅니다:
+
+```tsx
+const validation = useValidation({ validator: customValidator });
+const formatting = useFormatting();
+const autoSave = useAutoSave({ debounce: 500 });
+
+<Input.Field
+  {...validation}
+  {...formatting}
+  {...autoSave}
+/>
+```
+
+Hook은 이런 조합이 자연스럽습니다. Props 내장은 이런 유연성을 제공하기 어렵습니다.
+
+Validation만 필요한 게 아니라,  
+formatting, auto-save, analytics 등 여러 기능을 조합해야 하는 상황을 고려하면,  
+**Hook의 조합 가능성** 은 단순한 장점이 아닌 필수 요구사항이었습니다.
+
+### 4. 타입 안정성
+
+TypeScript에서 Hook은 완벽한 타입 추론을 제공합니다:
+
+```tsx
+// Hook: 타입 추론 완벽
+const handlers = useValidation({ validator: customValidator });
+// handlers의 타입: { onBlur: (e: FocusEvent<HTMLInputElement>) => void }
+
+// HoC: 복잡한 제네릭 필요
+const ValidatedInput = withValidator<InputFieldProps>(Input.Field, {...});
+// 컴포넌트 타입 추론이 깨질 위험
+```
+
+---
+
+## 그렇다면 HoC는 언제 사용하는가?
+
+HoC가 deprecated된 게 아닙니다. **렌더링 로직을 수정할 때** 여전히 유용합니다.
+
+### 경험상, HoC가 적합했던 케이스
+
+개인적으로 다음과 같은 상황에서 HoC를 사용했을 때 코드가 더 명확해졌습니다.  
+(어디까지나 단순 예시 코드 입니다.)
+
+#### 1. ErrorBoundary 래핑
+```tsx
+const withErrorBoundary = (Component) => (props) => (
+  <ErrorBoundary>
+    <Component {...props} />
+  </ErrorBoundary>
+);
+```
+
+#### 2. 조건부 렌더링
+```tsx
+const withAuth = (Component) => (props) => {
+  const { isAuthenticated } = useAuth();
+
+  if (!isAuthenticated) {
+    return <Redirect to="/login" />;
+  }
+
+  return <Component {...props} />;
+};
+```
+
+#### 3. Layout 래핑
+```tsx
+const withAdminLayout = (Component) => (props) => (
+  <AdminLayout>
+    <Sidebar />
+    <Component {...props} />
+  </AdminLayout>
+);
+```
+
+#### 4. 기본 스타일 제공
+```tsx
+const withDefaultStyles = (Component, defaultClassName) => {
+  return ({ className, ...props }) => (
+    <Component
+      className={cn(defaultClassName, className)}
+      {...props}
+    />
+  );
+};
+
+const PrimaryButton = withDefaultStyles(
+  Button,
+  "bg-blue-500 hover:bg-blue-600 text-white"
+);
+```
+
+즉, 짧게 정리하자면, <u>**Hook은 로직을 주입할 때, HoC는 렌더링을 수정할 때**</u>   
+이 구분이 명확해지면서 패턴 선택이 훨씬 쉬워졌습니다.
+
+---
+
+## 다른 실전 사례들
+
+동일한 의사결정 프레임워크를 다른 케이스에도 적용해봤습니다.
+
+### 1. Analytics Tracking
+특정 컴포넌트의 클릭을 추적할 때
+
+```tsx
+// Hook - 필요한 곳에만 선택적으로
+const trackingHandlers = useAnalytics('event_name');
+<Button {...trackingHandlers} />
+
+// HoC - 특정 타입 전체에 적용
+const TrackedButton = withTracking(Button, 'event_name');
+```
+
+- 선택적 기능 → Hook
+- 타입 전체 적용 → HoC
+
+### 2. Permission Checking
+권한에 따라 컴포넌트를 제어할 때
+
+```tsx
+// Hook - 로직만 제공 (렌더링은 직접 제어)
+const { canView } = usePermission('admin');
+if (!canView) return null;
+
+// HoC - 렌더링 제어까지 포함
+const AdminPanel = withPermission(Panel, 'admin');
+```
+
+- 렌더링 트리 변경 → HoC
+
+### 3. Data Fetching
+데이터를 가져올 때,
+
+```tsx
+// Hook - 표준 패턴
+const { data, loading } = useQuery();
+
+// HoC - 가능하지만 개인적으로는 Hook이 더 직관적
+const DataComponent = withData(Component);
+```
+
+- 로직 주입 → Hook (조합 가능성 우수)
+
+---
+
+이 고민들을 거치며 정리한 프레임워크입니다. 어디까지나 참고용으로 봐주시면 좋을것 같습니다.
+
+```
+질문 1: 렌더링 트리를 수정하는가?
+├─ Yes → HoC 고려
+│   ├─ Wrapper 추가 (ErrorBoundary, Provider)
+│   ├─ 조건부 렌더링
+│   └─ Layout 변경
+│
+└─ No → 질문 2로
+
+질문 2: 모든 인스턴스에 필요한가?
+├─ Yes → Props 내장 고려
+│   ├─ 예: disabled, error (항상 필요)
+│   └─ 단, 번들 사이즈 체크 필수
+│
+└─ No → Hook 선택
+    ├─ 이벤트 핸들러
+    ├─ 선택적 기능
+    └─ 조합 가능한 로직
+```
+
+---
+
+
+처음에는 "어떻게 구현할까?"에서 시작했지만,
+결국 **"왜 이 패턴인가?"** 를 명확히 답할 수 있게 되었습니다.
+
+이 글의 핵심은 결론 그 자체가 아닌, **의사결정 프레임워크** 입니다.
+
+새로운 기능을 추가할 때마다:
+- "렌더링 트리를 수정하는가?" → HoC 고려
+- "모든 인스턴스에 필요한가?" → Props 내장 고려
+- "선택적이고 조합 가능해야 하는가?" → Hook 선택
+
+이런 질문을 반복하다 보면, 패턴 선택이 자연스러워집니다.
+
+여러분은 어떤 과정으로 패턴을 선택하시나요? 댓글로 의견 나눠주시면 감사하겠습니다.
+
+---
+
+## 참고 자료
+
+- [React Hooks Documentation](https://react.dev/reference/react)
+- [When to use HOCs in React](https://www.patterns.dev/posts/hoc-pattern)
+- [Tree Shaking in Webpack](https://webpack.js.org/guides/tree-shaking/)
+- [Reddit: HOCs vs Hooks Discussion](https://www.reddit.com/r/reactjs/comments/17ee7gs/hochigherorder_components_are_not_commonly_used/)
+
