@@ -2,22 +2,16 @@
 
 import { useAtom } from "jotai";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { selectedTagsAtom, tagsAtom } from "@/entities/post/atoms/postAtom";
-import TagSkeleton from "@/features/tag/ui/skeleton/TagSkeleton";
 import Badge from "@/shared/ui/Badge";
 
 const TagList = () => {
   const [tags] = useAtom(tagsAtom);
   const [selectedTags, setSelectedTags] = useAtom(selectedTagsAtom);
-  const [mounted, setMounted] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
   const category = searchParams.get("category");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const tagsParam = searchParams.getAll("tag");
@@ -47,10 +41,6 @@ const TagList = () => {
 
     router.push(url);
   };
-
-  if (!mounted) {
-    return <TagSkeleton />;
-  }
 
   return (
     <>

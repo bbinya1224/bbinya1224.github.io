@@ -1,10 +1,10 @@
 import { Suspense } from "react";
 import PostList from "@/widgets/post/ui/PostList";
-import PostWidgetSkeleton from "@/widgets/post/ui/skeleton/PostWidgetSkeleton";
+import PostListSkeleton from "@/widgets/post/ui/skeleton/PostListSkeleton";
 
 const MainPage = () => {
   return (
-    <Suspense fallback={<PostWidgetSkeleton />}>
+    <Suspense fallback={<PostListSkeleton />}>
       <PostList />
     </Suspense>
   );
