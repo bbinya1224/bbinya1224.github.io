@@ -29,7 +29,7 @@ return (await response.json()) as { review: string; message: string };
 
 ## 문제 프로젝트의 API 구조
 
-해당 프로젝트는 Next.js App Router의 **Route Handlers**를 사용하여 API를 구현하고 있습니다.
+제가 진행하고 있던 프로젝트는 Next.js App Router의 **Route Handlers**를 사용하여 API를 구현하고 있습니다.
 
 ### 디렉토리 구조
 
@@ -86,7 +86,6 @@ export const generateReview = async (
 ### 컴포넌트에서의 사용
 
 ```typescript
-// 어떤 React 컴포넌트에서
 import { generateReview } from '@/features/review/api/review-api';
 
 const handleGenerate = async () => {
@@ -169,7 +168,7 @@ Next.js API Routes는 서버리스 함수로 동작하며, HTTP 메서드별로 
 
 ### tRPC의 철학
 
-> "If it compiles, it works."
+> If it compiles, it works.
 
 서버와 클라이언트가 동일한 TypeScript 코드베이스를 공유하면, 컴파일 타임에 모든 타입 에러를 잡아낼 수 있습니다.
 
@@ -221,7 +220,7 @@ tRPC는 사용할 수 없습니다. 대신 타입 안정성을 확보할 수 있
 
 ### 예제: 리뷰 생성 API
 
-#### 1️⃣ Next.js API Routes 방식
+#### 1. Next.js API Routes 방식
 
 **서버 (`app/api/generate-review/route.ts`)**
 
@@ -291,7 +290,7 @@ const result = await generateReview({
 });
 ```
 
-#### 2️⃣ `tRPC` 방식
+#### 2. `tRPC` 방식
 
 **서버 (`src/server/routers/review.ts`)**
 
@@ -322,6 +321,7 @@ export const reviewRouter = router({
 export type ReviewRouter = typeof reviewRouter;
 ```
 
+<aside data-type="info">
 #### Zod 통합의 진짜 가치
 
 처음엔 "검증 코드가 줄어드는구나" 정도로 생각했었는데요, 하지만 진짜 가치는 다른 곳에 있었습니다.
@@ -330,6 +330,7 @@ export type ReviewRouter = typeof reviewRouter;
 - TypeScript 타입: 컴파일 타임에만 존재 (런타임에 사라짐)
 - 런타임 검증: 별도로 작성해야 함
 - → 둘이 어긋나면? 버그. 🤯
+</aside>
 
 **Zod + tRPC:**
 ```typescript
@@ -351,8 +352,10 @@ type ReviewPayload = z.infer<typeof reviewPayloadSchema>;
 })
 ```
 
-> **스키마 하나로 타입과 검증을 동시에 정의한다.** 절대 어긋날 수 없다.  
+<aside data-type="success">
+**스키마 하나로 타입과 검증을 동시에 정의한다.** 절대 어긋날 수 없다.  
 이 부분이 정말 와닿았던 부분 이였습니다.
+</aside>
 
 **클라이언트 (`src/utils/trpc.ts`)**
 
@@ -406,90 +409,14 @@ const handleGenerate = () => {
 - 컴파일 타임에 모든 타입 불일치 감지
 - `as` 단언 불필요
 
-### 구체적인 예시
-> 서버 응답 구조를 변경하는 시나리오 라고 가정합니다.
-
-**서버에서 반환 타입 변경**
-
-```typescript
-// Before
-return { review: string, message: string }
-
-// After
-return { review: string, status: 'success' | 'partial' }
-// message 제거, status 추가
-```
-
-**Next.js API Routes의 경우:**
-
-```typescript
-// 클라이언트 코드 - 컴파일 에러 없음!
-const data = await response.json() as { review: string; message: string };
-console.log(data.message); // ⚠️ 런타임에 undefined 반환
-```
-
-👾 문제 발견 시점: **런타임**(프로덕션)에서 발견하게 됩니다.
-
-**tRPC의 경우:**
-
-```typescript
-// 클라이언트 코드 - 즉시 컴파일 에러!
-onSuccess: (data) => {
-  console.log(data.message); 
-  // ❌ 컴파일 에러: Property 'message' does not exist on type '{ review: string; status: "success" | "partial"; }'
-}
-```
-
-🟢 문제 발견 시점: **컴파일 타임**, IDE에서 즉시 감지하게 됩니다.
 
 ---
 
-//// 임시저장
-
-### 네트워크 성능
-
-#### 요청/응답 오버헤드
-
-두 방식 모두 HTTP를 사용하므로 네트워크 레벨에서는 차이가 거의 없습니다.
-
-```
-Next.js API Routes:
-POST /api/generate-review
-Content-Type: application/json
-{ "placeName": "...", "placeUrl": "..." }
-
-tRPC:
-POST /api/trpc/review.generate
-Content-Type: application/json
-{ "placeName": "...", "placeUrl": "..." }
-```
-
-#### Batching (tRPC의 장점)
-
-tRPC는 여러 요청을 하나로 묶는 **배칭(batching)** 기능을 제공합니다:
-
-```typescript
-// 3개의 요청이 동시에 발생하면
-trpc.review.getById.useQuery({ id: 1 });
-trpc.review.getById.useQuery({ id: 2 });
-trpc.review.getById.useQuery({ id: 3 });
-
-// tRPC가 자동으로 하나의 HTTP 요청으로 묶음
-POST /api/trpc
-[
-  { "method": "review.getById", "params": { "id": 1 } },
-  { "method": "review.getById", "params": { "id": 2 } },
-  { "method": "review.getById", "params": { "id": 3 } }
-]
-```
-
----
-
-## 프로젝트별 적합성 분석
+## 🔍 프로젝트별 적합성 분석
 
 ### Next.js API Routes가 적합한 경우
 
-✅ **다음 조건에 해당하면 Next.js API Routes 사용 권장:**
+**다음 조건에 해당하면 Next.js API Routes 사용 권장합니다.**
 
 1. **외부 클라이언트가 API를 사용해야 하는 경우**
    - 모바일 앱 (React Native, Swift, Kotlin)
@@ -513,7 +440,7 @@ POST /api/trpc
 
 ### tRPC가 적합한 경우
 
-✅ **다음 조건에 해당하면 tRPC 사용 권장:**
+**다음 조건에 해당하면 tRPC 사용 권장합니다.**
 
 1. **풀스택 TypeScript 프로젝트**
    - Next.js + TypeScript로 프론트엔드와 백엔드 모두 개발
@@ -535,9 +462,11 @@ POST /api/trpc
 
 ---
 
-## 우리 프로젝트에 tRPC를 도입한다면?
+## 진행중인 프로젝트에 tRPC를 도입한다면?
 
-현재 프로젝트의 API 구조를 분석한 결과:
+<aside data-type="warning">
+아직 리팩토링중에 있으며 해당 부분은 AI의 도움을 받아 가정한 결과입니다.
+</aside>
 
 ### 현재 상황
 
@@ -622,204 +551,10 @@ trpc.admin.whitelist.update.useMutation();
 trpc.admin.whitelist.delete.useMutation();
 ```
 
-#### 3. 예상 작업량
-
-**마이그레이션 범위:**
-1. tRPC 설정 (~2시간)
-2. 각 API 라우트를 tRPC 프로시저로 변환 (~1시간 / 엔드포인트)
-3. 클라이언트 코드 리팩토링 (~30분 / 컴포넌트)
-
-**총 예상 시간**: 약 2-3일
-
 **장기적 이점**: 
 - 타입 불일치 버그 감소 → QA 시간 단축
 - 새로운 API 개발 속도 향상 (~30% 빠름)
 - 리팩토링 안정성 향상
-
----
-
-## 실제 마이그레이션 예시
-
-현재 프로젝트의 `useWhitelist` 훅을 tRPC로 전환하는 과정을 단계별로 살펴보겠습니다.
-
-### Before (Next.js API Routes)
-
-**서버 (`app/api/admin/whitelist/route.ts`)**
-
-```typescript
-export async function GET(request: NextRequest) {
-  const password = request.headers.get('X-Admin-Password');
-  
-  if (!isValidPassword(password)) {
-    return NextResponse.json({ error: '권한 없음' }, { status: 403 });
-  }
-
-  const users = await getWhitelistUsers();
-  return NextResponse.json({ users });
-}
-
-export async function POST(request: NextRequest) {
-  const password = request.headers.get('X-Admin-Password');
-  
-  if (!isValidPassword(password)) {
-    return NextResponse.json({ error: '권한 없음' }, { status: 403 });
-  }
-
-  const { email, notes } = await request.json();
-  const user = await addUserToWhitelist(email, notes);
-  
-  return NextResponse.json({ user });
-}
-```
-
-**클라이언트 (`src/features/admin/lib/useWhitelist.ts`)**
-
-```typescript
-const fetchUsers = async () => {
-  const response = await fetch('/api/admin/whitelist', {
-    headers: { 'X-Admin-Password': password },
-  });
-
-  if (!response.ok) {
-    throw new Error('조회 실패');
-  }
-
-  const data = await response.json();
-  setUsers(data.users);
-};
-
-const addUser = async (email: string, notes: string) => {
-  const response = await fetch('/api/admin/whitelist', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Admin-Password': password,
-    },
-    body: JSON.stringify({ email, notes }),
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.error || '추가 실패');
-  }
-
-  await fetchUsers();
-};
-```
-
-### After (tRPC)
-
-**서버 (`src/server/routers/admin.ts`)**
-
-```typescript
-import { z } from 'zod';
-import { router, protectedProcedure } from '../trpc';
-
-// 관리자 권한 확인 미들웨어
-const adminProcedure = protectedProcedure.use(async ({ ctx, next }) => {
-  const password = ctx.req.headers.get('x-admin-password');
-  
-  if (!isValidPassword(password)) {
-    throw new TRPCError({ code: 'FORBIDDEN' });
-  }
-
-  return next({ ctx });
-});
-
-export const adminRouter = router({
-  whitelist: router({
-    // GET /api/admin/whitelist
-    list: adminProcedure
-      .query(async () => {
-        const users = await getWhitelistUsers();
-        return { users };
-      }),
-
-    // POST /api/admin/whitelist
-    add: adminProcedure
-      .input(z.object({
-        email: z.string().email(),
-        notes: z.string().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const user = await addUserToWhitelist(input.email, input.notes);
-        return { user };
-      }),
-
-    // PUT /api/admin/whitelist
-    update: adminProcedure
-      .input(z.object({
-        email: z.string().email(),
-        is_preview: z.boolean().optional(),
-        usage_count: z.number().optional(),
-      }))
-      .mutation(async ({ input }) => {
-        const user = await updateUserStatus(input);
-        return { user };
-      }),
-
-    // DELETE /api/admin/whitelist
-    delete: adminProcedure
-      .input(z.object({
-        email: z.string().email(),
-      }))
-      .mutation(async ({ input }) => {
-        await deleteUser(input.email);
-        return { success: true };
-      }),
-  }),
-});
-```
-
-**클라이언트 (`src/features/admin/lib/useWhitelist.ts`)**
-
-```typescript
-import { trpc } from '@/utils/trpc';
-
-export function useWhitelist(password: string) {
-  // ✅ React Query 기반 자동 상태 관리
-  const { 
-    data, 
-    isLoading, 
-    error, 
-    refetch 
-  } = trpc.admin.whitelist.list.useQuery(undefined, {
-    enabled: !!password, // password가 있을 때만 자동 실행
-  });
-
-  const addMutation = trpc.admin.whitelist.add.useMutation({
-    onSuccess: () => {
-      refetch(); // 목록 자동 갱신
-    },
-  });
-
-  const updateMutation = trpc.admin.whitelist.update.useMutation({
-    onSuccess: () => {
-      refetch();
-    },
-  });
-
-  const deleteMutation = trpc.admin.whitelist.delete.useMutation({
-    onSuccess: () => {
-      refetch();
-    },
-  });
-
-  return {
-    users: data?.users ?? [],
-    loading: isLoading,
-    error: error?.message ?? '',
-    fetchUsers: refetch,
-    addUser: (email: string, notes?: string) => 
-      addMutation.mutateAsync({ email, notes }),
-    updateUserStatus: (email: string, updates: { is_preview?: boolean; usage_count?: number }) =>
-      updateMutation.mutateAsync({ email, ...updates }),
-    deleteUser: (email: string) =>
-      deleteMutation.mutateAsync({ email }),
-  };
-}
-```
 
 ### 코드 변화 요약
 
@@ -859,7 +594,7 @@ TypeScript를 사용하는가?
 |------|-------------------|------|
 | **프로젝트 규모** | 소형 (~5 API) | 중대형 (10+ API) |
 | **타입 안정성** | 수동 관리 | 자동 보장 |
-| **외부 클라이언트** | 지원 ✅ | 미지원 ❌ |
+| **외부 클라이언트** | 지원 | 미지원  |
 | **학습 곡선** | 낮음 | 중간 |
 | **개발 속도** | 초기: 빠름<br/>장기: 보통 | 초기: 보통<br/>장기: 빠름 |
 | **리팩토링** | 수동, 위험 | 자동, 안전 |
@@ -872,24 +607,17 @@ TypeScript를 사용하는가?
 ### 객관적 비교 요약
 
 **Next.js API Routes의 강점:**
-- ✅ 빠른 시작, 낮은 진입 장벽
-- ✅ REST API 표준 준수
-- ✅ 외부 클라이언트 지원
+- 빠른 시작, 낮은 진입 장벽
+- REST API 표준 준수
+- 외부 클라이언트 지원
 
 **tRPC의 강점:**
-- ✅ 엔드투엔드 타입 안정성
-- ✅ 자동완성 및 타입 추론
-- ✅ 보일러플레이트 제거
-- ✅ 리팩토링 안정성
+- 엔드투엔드 타입 안정성
+- 자동완성 및 타입 추론
+- 보일러플레이트 제거
+- 리팩토링 안정성
 
-### 일반적인 선택 가이드
-
-| 상황 | 권장 |
-|------|------|
-| API < 10개, 빠른 시작 필요 | Next.js API Routes |
-| API ≥ 10개, 타입 안정성 중시 | tRPC |
-| 외부 클라이언트 지원 필요 | Next.js API Routes |
-| 풀스택 TS + 빠른 변화 | tRPC |
+---
 
 ### 나의 선택
 
@@ -897,33 +625,26 @@ TypeScript를 사용하는가?
 
 **결정**: tRPC로 전환
 
-이유는 단순하다. 글 서두에서 말했던 그 불안함:
-
 ```typescript
 return (await response.json()) as { review: string; message: string };
 ```
 
-이 `as`를 더 이상 쓰고 싶지 않다.
+이 `as`를 더 이상 쓰고 싶지 않았습니다.
 
-tRPC를 도입하면 번들 사이즈가 약 15KB 늘어난다. React Query도 함께 들어온다. 학습 비용도 있다. 하지만 **"서버 응답이 바뀌면 클라이언트에서 즉시 컴파일 에러가 난다"**는 것. 이 하나의 이점이 모든 비용을 상쇄한다고 판단했다.
+tRPC를 도입하면 번들 사이즈가 약 15KB 늘어난다고 합니다. (아직 리팩토링중이라 제대로 측정을 못하고 있긴합니다. 리팩토링 후에 글을 수정할 예정이에요!)  
+물론 React Query도 함께 들어오기에 학습 비용도 있습니다.  
+하지만 **"서버 응답이 바뀌면 클라이언트에서 즉시 컴파일 에러가 난다"** 는 것. 이 하나의 이점이 모든 비용을 상쇄한다고 판단했습니다.
 
-프로덕션에서 `undefined` 에러를 디버깅하는 것보다, IDE에서 빨간 줄을 보는 게 낫다.
+프로덕션에서 `undefined` 에러를 디버깅하는 것보다, IDE에서 빨간 줄을 보는 게 낫거든요.
 
----
+물론 모든 프로젝트에 tRPC가 정답은 아닙니다.  
+외부 API를 제공해야 한다면 Next.js API Routes가 맞을수도 있어요. 뿐만아니라, 소규모 프로젝트라면 오버엔지니어링일 수 있습니다.
 
-물론 모든 프로젝트에 tRPC가 정답은 아니다. 외부 API를 제공해야 한다면 Next.js API Routes가 맞다. 소규모 프로젝트라면 오버엔지니어링일 수 있다.
-
-하지만 나처럼 **타입 불일치 버그로 고생해본 경험**이 있다면, tRPC는 확실히 검토해볼 가치가 있다.
+그러나, **타입 불일치 버그로 고생해본 경험**이 있다면, tRPC는 확실히 검토해볼 가치가 있지 않을까 싶습니다.
 
 ---
 
 ## 참고 자료
 
 - [tRPC 공식 문서](https://trpc.io)
-- [Next.js Route Handlers 문서](https://nextjs.org/docs/app/building-your-application/routing/route-handlers)
-- [React Query 공식 문서](https://tanstack.com/query)
-- [Zod 공식 문서](https://zod.dev)
-
----
-
-**마지막 업데이트**: 2026-01-15
+- [Next.js Route Handlers 문서](https://nextjs.org/docs/app/api-reference/file-conventions/route)
