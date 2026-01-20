@@ -19,6 +19,9 @@ function generateRSSFeed() {
 
   files.forEach((file) => {
     const filePath = path.join(postsDirectory, file);
+
+    if (!fs.statSync(filePath).isFile()) return;
+
     const fileContents = fs.readFileSync(filePath, "utf-8");
     const { data } = matter(fileContents);
 
