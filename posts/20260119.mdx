@@ -353,9 +353,40 @@ type ReviewPayload = z.infer<typeof reviewPayloadSchema>;
 ```
 
 <aside data-type="success">
-**스키마 하나로 타입과 검증을 동시에 정의한다.** 절대 어긋날 수 없다.  
+**스키마 하나로 타입과 검증을 동시에 정의한다.** 절대 어긋날 수 없다.
 이 부분이 정말 와닿았던 부분 이였습니다.
 </aside>
+
+#### Middleware로 인증 로직 재사용하기
+
+tRPC의 또 다른 강점은 **미들웨어**입니다. 인증 로직을 한 번 정의해두면 여러 프로시저에서 재사용할 수 있습니다.
+
+```typescript
+// 관리자 전용 프로시저 정의
+const adminProcedure = publicProcedure.use(({ ctx, next }) => {
+  if (!ctx.user?.isAdmin) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' });
+  }
+  return next({ ctx: { ...ctx, user: ctx.user } });
+});
+
+// 사용 예시
+export const adminRouter = router({
+  getWhitelist: adminProcedure.query(async () => {
+    // 이 코드는 관리자만 실행 가능
+    return await db.whitelist.findMany();
+  }),
+
+  deleteUser: adminProcedure
+    .input(z.object({ userId: z.string() }))
+    .mutation(async ({ input }) => {
+      // 이것도 관리자만 실행 가능
+      return await db.user.delete({ where: { id: input.userId } });
+    }),
+});
+```
+
+API Routes였다면 매 핸들러마다 인증 체크 코드를 반복해야 했을 겁니다. tRPC 미들웨어는 이런 횡단 관심사(cross-cutting concerns)를 깔끔하게 분리해줍니다.
 
 **클라이언트 (`src/utils/trpc.ts`)**
 
@@ -424,6 +455,8 @@ const handleGenerate = () => {
    - 서드파티 서비스 연동
    
    tRPC는 TypeScript 클라이언트만 지원하므로 외부 소비자에게는 부적합
+
+   > **Tip**: 외부 클라이언트 지원이 필요하다면 [trpc-openapi](https://github.com/jlalmes/trpc-openapi)를 활용해보세요. tRPC 라우터에서 REST API를 자동 생성할 수 있습니다.
 
 2. **웹훅이나 공개 API를 제공해야 하는 경우**
    ```typescript
