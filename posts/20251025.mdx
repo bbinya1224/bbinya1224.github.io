@@ -7,442 +7,176 @@ category: "Frontend"
 description: "Suspense의 작동 원리부터 클라이언트 컴포넌트에서의 올바른 스켈레톤 UI 구현까지"
 ---
 
-유명한 웹사이트들을 보면 사용자 경험을 최적화 시키기위해 스켈레톤 UI는 필수로 있습니다.
+![Before Skeleton UI](/img/posts/20251025/before_skeleton-ui.gif)
 
-스켈레톤 UI 가 있으면 "나 지금 웹사이트를 보여줄 준비 중이니 조금만 기다려줘"라는 의미로도 보여지기 때문에 사용자 경험을 향상 시킬 수 있어요.
+스켈레톤 UI가 없는 웹사이트는 마치 **응답 없는 엘리베이터 버튼**과 같습니다. 버튼을 눌렀는데 아무 반응이 없으면 "고장났나?" 싶죠. 하지만 버튼에 불이 들어오면 "아, 오고 있구나" 하고 기다릴 수 있습니다.
 
-아직 스켈레톤 UI 를 적용하기전 제 블로그 입니다. 마치 사이트가 멈춘것만 같고, 어떤 컨텐츠가 어디 위치에 있는지도 모르겠고 자칫 버그가 생겨서 사이트가 안나온것처럼 느껴지게 됩니다.  
-이는 사용자 경험에 매우 좋지않은 경험을 주게되므로 개선이 필요한데요, 스켈레톤 UI를 적용하고자 할때에 꼭 알아야 할 컴포넌트가 바로 `Suspense` 입니다.
+스켈레톤 UI도 마찬가지입니다. 컨텐츠가 로딩되는 동안 **"여기에 뭔가 나올 거야"** 라고 알려주는 역할을 합니다.
 
 # 1. Suspense란?
 
-`<Suspense>`는 React의 네이티브 컴포넌트 입니다.
-쉽게 말해서 **"데이터 기다리는 부분이 있으니, 로딩될 때까진 임시로 다른 UI 보여줄게"** 라고 해주는 역할입니다.
+## 레스토랑으로 이해하는 Suspense
 
-기존에는 로딩 상태를 수동으로 관리하고 렌더링했었지만, `Suspense`는 그걸 자동으로 해준다고 생각하시면 됩니다. 즉, 데이터가 준비되면 알아서 실제 콘텐츠로 보여주는 역할입니다.
+레스토랑에서 음식을 주문했다고 생각해보세요.
 
-이를 통해 적용하고자 하는 스켈레톤 UI와 아주 잘 어울리는 컴포넌트임을 알 수 있습니다.
+**Suspense가 없는 레스토랑**
+> 주문 후 아무것도 없는 빈 테이블만 보고 기다림.  
+> "내 주문이 들어간 거 맞아? 주방이 돌아가고 있긴 한 거야?"
+
+**Suspense가 있는 레스토랑**
+> 주문 후 빈 접시와 수저가 세팅됨.  
+> "아, 음식이 오고 있구나. 곧 나오겠네."
+
+React의 `<Suspense>`는 바로 이 **빈 접시와 수저**를 세팅해주는 역할입니다.
+
+```tsx
+<Suspense fallback={<빈접시와수저 />}>
+  <음식 />
+</Suspense>
+```
+
+음식(데이터)이 준비되기 전까지 빈 접시(스켈레톤)를 보여주고, 음식이 도착하면 자동으로 교체해줍니다.
+
+## 핵심 원리: Promise를 던진다.
+
+Suspense의 동작 원리를 좀 더 기술적으로 설명하면,
+
+1. 컴포넌트가 **"나 아직 준비 안 됐어!"** 라고 신호를 보냄 (Promise를 throw)
+2. Suspense가 이 신호를 받아서 **fallback UI를 대신 보여줌**
+3. 준비가 완료되면 (Promise가 resolve되면) **실제 컴포넌트로 교체**
+
+```
+[컴포넌트]  →  "아직이야!" (throw Promise)  →  [Suspense가 감지]
+                                                    ↓
+                                              fallback 표시
+                                                    ↓
+                                              Promise 완료!
+                                                    ↓
+                                              실제 컴포넌트로 교체
+```
+
+# 2. Next.js에서 Suspense가 특별한 이유
+
+여기서 많은 분들이 헷갈려하는 부분이 있습니다.
+
+> "클라이언트 컴포넌트는 Promise를 throw하지 않는데, Suspense로 감싸면 스켈레톤이 보일까?"
+
+정답은 **"Next.js에서는 보인다"** 입니다. 이유를 설명해드릴게요.
+
+## 서버와 클라이언트, 두 개의 세계
+
+Next.js App Router는 **서버에서 먼저 HTML을 만들어서 보내줍니다**.
+
+![](/img/posts/20251025/i31pmg2.png)
 
 <aside data-type="info">
-
-원칙적으로, Suspense는 **실제로 비동기 작업이 필요한 부분만** 감싸야 합니다.
-
+서버에서 "이 컴포넌트는 클라이언트에서만 제대로 동작해"라고 판단하면,  
+**fallback을 미리 렌더링해서 보내줍니다**. 그래서 스켈레톤이 보이게 되는거에요.
 </aside>
 
-## 모든 것을 Suspense로 감싸지는 마세요!
+## useSearchParams()가 특별한 이유
 
-예를들어,
+> `useSearchParams()`는 URL의 쿼리 파라미터를 읽는 훅입니다.
+
+```
+https://bbinya1224.github.io/blog?category=Frontend&tag=React
+                                  ↑
+                            이 부분을 읽음
+```
+
+하지만 서버에서는 이 값을 모릅니다.
+- 서버는 빌드 시점에 HTML을 미리 만들어둠 (Static Rendering)
+- `?category=Frontend`는 사용자가 접속할 때마다 다를 수 있음
+- 그래서 서버는 "이건 클라이언트에서 처리해야 해"라고 판단
+
+이때 Next.js가 똑똑하게 행동합니다.
 
 ```tsx
-<Suspense fallback={<Skeleton />}>
-  <Header />
-</Suspense>
-
-<Suspense fallback={<Skeleton />}>
-  <Sidebar />
-</Suspense>
-
-<Suspense fallback={<Skeleton />}>
-  <MainContent />
-</Suspense>
-
-<Suspense fallback={<Skeleton />}>
-  <Footer />
-</Suspense>
-```
-![Suspense Bad Example](/img/posts/20251025/bad-example.gif)
-
-이렇게 모든 컨텐츠에 Suspense 를 이용하게 되면 스켈레톤 UI를 사용하는 곳이 너무 많아져 어떤것이 데이터를 받아오는지, 우선순위가 무엇인지 헷갈리게 됩니다.
-
-```tsx
-<Header />
-
-<Suspense fallback={<MainSkeleton />}>
-	<Sidebar />
-  <MainContent />
-</Suspense>
-
-<Footer />
-```
-![Suspense Good Example](/img/posts/20251025/good-example.gif)
-
-이처럼 데이터 로딩 등을 통해 비동기 작업이 필요한 부분에만 감싸게 된다면 어떤것이 데이터를 받아오는지에 대해 파악하기 쉽고 정적인 페이지는 먼저 보여주기에 사용자 경험을 해치지 않습니다.
-
-<aside data-type="note">
-
-**Next.js**에서는 중첩 Suspense도 **병렬 스트리밍**으로 처리됩니다.
-
-</aside>
-
-```tsx
-<Suspense fallback={<ContentSkeleton />}>
-  <Header /> {/* 0.5초 */}
-  <Suspense fallback={<ContentSkeleton />}>
-    <Sidebar /> {/* 1.5초 */}
-  </Suspense>
-  <Suspense fallback={<ContentSkeleton />}>
-    <MainContent /> {/* 2.0초 */}
-  </Suspense>
-  <Footer /> {/* 0.8초 */}
+<Suspense fallback={<TagSkeleton />}>
+  <TagList />  {/* useSearchParams() 사용 */}
 </Suspense>
 ```
 
-일반 React에서는 **가장 바깥 Suspense**가 안쪽 Suspense들을 포함하기 때문에, 가장 느린 async가 끝날 때까지 전체 fallback만 보여야 합니다.
+→ 서버: "TagList는 클라이언트에서 처리해야 하니까, 일단 TagSkeleton을 HTML로 보내줄게"  
+→ 클라이언트: "JavaScript 로드 완료! 이제 진짜 TagList 보여줄게"
 
-즉, `<Header />`, `<Footer />`도 `MainContent`가 끝날 때까지 안 보여야 합니다.
+# 3. react-loading-skeleton 적용하기
 
-그런데 Next.js에서는 **React Server Components (RSC)** 와 **Streaming SSR 로 인해 다르게 동작합니다.**
-```
-서버에서 렌더링
-├─ Suspense(전체)
-│   ├─ Header (0.5s)
-│   ├─ Suspense(Sidebar)
-│   ├─ Suspense(MainContent)
-│   └─ Footer (0.8s)
-```
-Next.js는 서버에서 각 `Suspense`블록을 병렬로 처리합니다. 그 후 완료된 블록부터 순서대로 HTML 스트리밍으로 클라이언트에 전송합니다.
-
-쉽게 말해, `Header` 가 0.5초만에 끝나면 바로 전송, `Footer` 는 0.8초만에 바로 전송, `Sidebar, MainContent` 는 `fallback` 표시 후에 교체 되게 됩니다.  
-중첩된 `Suspense` 를 사용해도 Next.js 는 각각 독립된 스트리밍 청크로 취급하여 UX 적으로 중요도 순서로 렌더링 하는걸로 보이게 됩니다.
-
-<aside data-type="note">
-
-그렇더라도 제가 보여드린 예시는 예시일뿐, 실제로 저렇게 쓰는 경우는 드뭅니다. 😅
-
-</aside>
-
-예를들어, 모든 컨텐츠들이 동시에 보여주게 하고 싶다면, 해당 컨텐츠들의 위치에 맞게 스켈레톤 UI를 꾸미고
-
-```tsx
-<Suspense fallback={<ContentSkeleton />}>
-  <Header />
-  <Sidebar />
-  <MainContent />
-  <Footer />
-</Suspense>
-```
-
-이런식으로 작성하게 되면 모든 데이터 로딩이 끝났을때에 짠 하고 보여집니다.
-
-하지만 데이터로드가 끝나는 컴포넌트 먼저 보여주고싶다면 별도의 Suspense 경계 를 두는것을 권장드려요.
-
-# 2. React-loading-skeleton 적용하기
-
-![스켈레톤 UI 적용 전](/img/posts/20251025/before_skeleton-ui.gif)
-<em>(스켈레톤 UI 적용 전)</em>
-
-자 다시 돌아와서, 저는 이 `Suspense` 에 fallback 으로 보여 줄 부분을 단순 로딩이 아닌 스켈레톤 UI를 활용하고자 합니다.
-
-제 블로그는 Next15 기반으로 Tailwind CSS 를 사용하기에 가장 유명한 `React Loading Skeleton` 라이브러리를 이용하려고 합니다.
-
-정적으로 직접 만드는 방법도 있으나, 가볍고 빠른 라이브러리로 자동으로 스타일 적용 및 애니메이션까지 첨부되어 있고 타입스크립트 지원 까지 해주기에 해당 라이브러리를 사용을 하겠습니다.
+이제 Suspense의 fallback으로 보여줄 스켈레톤 UI를 만들어봅시다.
 
 ## 설치
 
-```tsx
+```bash
 npm install react-loading-skeleton
 ```
 
-혹은
+## 스타일 import
+
+최상단 레이아웃에서 CSS를 import합니다.
 
 ```tsx
-yarn add react-loading-skeleton
-```
-
-## 적용하기
-
-사용 방법은 간단합니다!
-
-```tsx
+// app/layout.tsx
 import 'react-loading-skeleton/dist/skeleton.css'
 ```
 
-스타일을 최상단 레이아웃에 `import` 를 해줍니다. 저는 `tailwind` 의 `globals` 와 함께 `import` 해두었어요.
+## 스켈레톤 컴포넌트 만들기
 
 ```tsx
 import Skeleton from "react-loading-skeleton";
 
-const CategorySkeleton = () => {
+const PostListSkeleton = () => {
   return (
-    <div className="flex flex-col gap-2">
+    <div className="space-y-6">
       {Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton key={i} width="100%" height={20} borderRadius={4} />
-      ))}
-    </div>
-  );
-};
-
-export default CategorySkeleton;
-```
-
-간단하게, `Skeleton` 의 스타일만 지정해주면 돼요.
-
-<aside data-type ="warning">
-
-**주의하세요!**
-
-Flex 레이아웃에서 너비가 0이 될 수 있습니다!  
-intrinsic width 가 없기에 flex 컨테이너에서 0이 됩니다.  
-이때는 `<Skeleton containerClassName="flex-1" />` 이런식으로 작성해주시면 돼요.
-
-</aside>
-
-원형 스켈레톤 뿐만 아니라, 애니메이션을 끄고 키고 할 수 있는 기능, 그리고 `SkeletonTheme` 를 통해 다크모드 대응도 손쉽게 가능합니다.
-
-# 3. 실제 적용 시 마주한 문제
-
-자, 이제 Suspense와 react-loading-skeleton을 이용해서 스켈레톤 UI를 적용했습니다!
-
-```tsx
-// Tag.tsx (서버 컴포넌트)
-const Tag = () => {
-  return (
-    <div className="card-base">
-      <SidebarCardHeader contentType="Tag" />
-      <Suspense fallback={<TagSkeleton />}>
-        <TagList />
-      </Suspense>
-    </div>
-  );
-};
-```
-
-완벽해 보이지 않나요? 하지만 실제로 실행해보니... **스켈레톤이 전혀 보이지 않았습니다!** 😱
-
-## 왜 Suspense fallback이 작동하지 않을까?
-
-문제는 `TagList` 컴포넌트가 클라이언트 컴포넌트라는 것이었습니다.
-
-```tsx
-// TagList.tsx (클라이언트 컴포넌트)
-"use client";
-
-import { useAtom } from "jotai";
-import { useRouter, useSearchParams } from "next/navigation";
-
-const TagList = () => {
-  const [tags] = useAtom(tagsAtom);
-  const [selectedTags, setSelectedTags] = useAtom(selectedTagsAtom);
-  const router = useRouter();
-
-  // ... 로직
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {tags.map((tag) => (
-        <Badge key={tag}>{tag}</Badge>
+        <article key={i} className="flex gap-4">
+          {/* 텍스트 영역 */}
+          <div className="flex-1">
+            <Skeleton width="60%" height={24} />      {/* 제목 */}
+            <Skeleton count={2} height={16} />         {/* 설명 2줄 */}
+            <Skeleton width={100} height={14} />       {/* 날짜 */}
+          </div>
+          {/* 썸네일 */}
+          <Skeleton width={112} height={112} borderRadius={8} />
+        </article>
       ))}
     </div>
   );
 };
 ```
-
-**React의 Suspense는 다음 경우에만 fallback을 보여줍니다:**
-
-1. **async 서버 컴포넌트**가 데이터를 가져올 때  
-2. `React.lazy()`로 동적 import된 컴포넌트가 로드될 때
-
-하지만 `TagList`는 **"use client" 클라이언트 컴포넌트**이고, `useAtom`, `useSearchParams` 같은 hooks는 **동기적으로 실행**됩니다.
-
-따라서 Suspense는 "기다릴 것이 없다"고 판단하여 `fallback`을 트리거하지 않습니다.
 
 <aside data-type="warning">
 
-**중요!**
+**Flex 레이아웃 주의사항**
 
-서버 컴포넌트에서 클라이언트 컴포넌트를 `Suspense`로 감싸도, 클라이언트 컴포넌트 내부에 비동기 작업(async/await)이 없으면 fallback이 보이지 않습니다.
-
-</aside>
-
-이 문제를 어떻게 해결할까요?
-
-# 4. 해결 방법
-
-## 방법 1: mounted 상태 활용하기
-
-클라이언트 컴포넌트에서 스켈레톤을 보여주려면, **컴포넌트 내부에서 직접 로딩 상태를 관리**해야 합니다.
-
-```tsx
-"use client";
-
-import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
-import TagSkeleton from "./skeleton/TagSkeleton";
-
-const TagList = () => {
-  const [tags] = useAtom(tagsAtom);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // 마운트되기 전에는 스켈레톤 표시
-  if (!mounted) {
-    return <TagSkeleton />;
-  }
-
-  return (
-    <div className="flex flex-wrap gap-2">
-      {tags.map((tag) => (
-        <Badge key={tag}>{tag}</Badge>
-      ))}
-    </div>
-  );
-};
-```
-
-**왜 이 방법이 작동하는가?**
-
-1. 초기 렌더링(서버 또는 첫 클라이언트 렌더링)에서 `mounted = false`
-2. `useEffect`는 클라이언트에서 마운트 후에만 실행
-3. 따라서 첫 렌더링에서는 스켈레톤이 보임
-4. `useEffect` 실행 후 `mounted = true`가 되어 실제 콘텐츠 표시
-
-이 패턴은 특히 **hydration 중 깜빡임을 방지**하는 데도 유용합니다.
-
-## 방법 2: Suspense + mounted 함께 사용하기
-
-<aside data-type="warning">
-
-**중요: useSearchParams() 사용 시 Suspense 필수!**
-
-Next.js에서 `useSearchParams()`를 사용하는 클라이언트 컴포넌트는 **반드시 Suspense로 감싸야 합니다**.  
-그렇지 않으면 빌드 에러가 발생합니다.
-
-```
-⨯ useSearchParams() should be wrapped in a suspense boundary
-```
+Skeleton은 기본 너비가 없어서 flex 컨테이너에서 찌그러질 수 있습니다.  
+이때는 `containerClassName="flex-1"`을 추가하세요.
 
 </aside>
 
-따라서 `useSearchParams()`를 사용하는 컴포넌트는 **Suspense와 mounted 상태를 함께 사용**해야 합니다.
+# 4. 실제 적용
+
+이제 모든 준비가 끝났습니다. 적용은 정말 간단합니다.
 
 ```tsx
-// Tag.tsx - Suspense는 Next.js 요구사항 충족용
-<Suspense fallback={<TagSkeleton />}>
-  <TagList />
-</Suspense>
+// page.tsx (서버 컴포넌트)
+import { Suspense } from "react";
 
-// TagList.tsx - mounted는 클라이언트 사이드 스켈레톤 표시용
-"use client";
-
-const TagList = () => {
-  const [tags] = useAtom(tagsAtom);
-  const [mounted, setMounted] = useState(false);
-  const searchParams = useSearchParams(); // 이것 때문에 Suspense 필요!
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) return <TagSkeleton />;
-
-  return (/* 실제 콘텐츠 */);
-};
-```
-
-**왜 두 가지 모두 필요한가?**
-
-- **Suspense**: Next.js 빌드 요구사항 충족 + SSR 중 스켈레톤 표시
-- **mounted 상태**: 클라이언트 사이드 hydration 중 스켈레톤 표시 + hydration 불일치 방지
-
-`useSearchParams()`**를 사용하지 않는 컴포넌트라면?**
-
-Header처럼 `useSearchParams()`를 사용하지 않는 컴포넌트는 Suspense 없이 mounted 상태만 사용해도 됩니다.
-
-## 방법 3: React.lazy() 사용하기
-
-만약 정말 Suspense를 사용하고 싶다면, 컴포넌트를 동적으로 import할 수 있습니다.
-
-```tsx
-import { lazy, Suspense } from "react";
-
-const TagList = lazy(() => import("@/features/tag/ui/TagList"));
-
-const Tag = () => {
+const MainPage = () => {
   return (
-    <div>
-      <Suspense fallback={<TagSkeleton />}>
-        <TagList />
-      </Suspense>
-    </div>
+    <Suspense fallback={<PostListSkeleton />}>
+      <PostList />
+    </Suspense>
   );
 };
 ```
 
-하지만 이 방법은,
-- 추가 네트워크 요청이 발생
-- 코드 스플리팅이 필요한 큰 컴포넌트에만 적합
-- 작은 컴포넌트에는 오버엔지니어링
-
-# 5. 실제 적용 사례
-
-## Header 컴포넌트
-
-`next-themes`를 사용하는 Header 컴포넌트에서도 비슷한 문제가 있었습니다.
-
 ```tsx
+// PostList.tsx (클라이언트 컴포넌트)
 "use client";
-
-import { useTheme } from "next-themes";
-import { useEffect, useState } from "react";
-import Skeleton from "react-loading-skeleton";
-
-const Header = () => {
-  const { resolvedTheme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  return (
-    <header>
-      {/* About Me 링크 */}
-      {mounted ? (
-        <Link href="/blog/about-me">About Me</Link>
-      ) : (
-        <Skeleton width={80} height={24} />
-      )}
-
-      {/* 다크모드 토글 */}
-      {mounted ? (
-        resolvedTheme === "dark" ? (
-          <LightModeIcon />
-        ) : (
-          <DarkModeIcon />
-        )
-      ) : (
-        <Skeleton circle width={24} height={24} />
-      )}
-    </header>
-  );
-};
-```
-
-이렇게 하면 hydration 불일치도 방지하면서 스켈레톤 UI를 제공할 수 있습니다.
-
-## PostList 컴포넌트
-
-```tsx
-"use client";
-
-import { useAtom } from "jotai";
-import { useEffect, useState } from "react";
-import PostListSkeleton from "./skeleton/PostListSkeleton";
 
 const PostList = () => {
-  const [posts] = useAtom(filteredPostsAtom);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return <PostListSkeleton />;
-  }
+  const searchParams = useSearchParams();
+  const [posts] = useAtom(postsAtom);
 
   return (
     <section>
@@ -454,87 +188,105 @@ const PostList = () => {
 };
 ```
 
-# 6. 정리
-
-**상황별 올바른 해결 방법:**
-
-- **서버 컴포넌트 + async 데이터 fetching**
-  → `Suspense` 사용
-
-- **클라이언트 컴포넌트 + useSearchParams() 사용**
-  → `Suspense` + `mounted` 상태 **함께 사용** (Next.js 필수 요구사항)
-
-- **클라이언트 컴포넌트 + 일반 hooks만 사용**
-  → `mounted` 상태로 스켈레톤 처리 (Suspense 불필요)
-
-- **큰 클라이언트 컴포넌트 (코드 스플리팅 필요)**
-  → `React.lazy()` + `Suspense`
+끝입니다! `mounted` 상태 같은 추가 처리가 필요 없습니다.
 
 <aside data-type="info">
-1. **Suspense 단독으로는 클라이언트 컴포넌트의 스켈레톤을 보여줄 수 없습니다**
-   - 클라이언트 컴포넌트는 동기적으로 실행되어 fallback이 트리거되지 않음
 
-2. **useSearchParams()를 사용하면 Suspense는 필수입니다**
-   - Next.js 빌드 요구사항
-   - 하지만 클라이언트 사이드 스켈레톤을 위해 mounted 상태도 필요
+**왜 mounted 체크가 필요 없나요?**
 
-3. **mounted 상태는 hydration 문제도 해결합니다**
-   - 서버/클라이언트 렌더링 불일치 방지
-   - 클라이언트 전용 기능(테마, 검색 파라미터) 처리
+Suspense가 이미 서버에서 스켈레톤을 렌더링해서 보내줍니다. 클라이언트에서 JS가 로드되면 자동으로 실제 컴포넌트로 교체됩니다.
+
+`mounted` 체크까지 추가하면 같은 역할을 두 번 하는 셈이에요.
+
 </aside>
 
-## 최종 코드 구조
+# 5. Suspense 경계 설계하기
+
+## 나쁜 예: 모든 곳에 Suspense
 
 ```tsx
-// Tag.tsx - useSearchParams 사용하므로 Suspense 필수
-import { Suspense } from "react";
-
-const Tag = () => {
-  return (
-    <div className="card-base">
-      <SidebarCardHeader contentType="Tag" />
-      <Suspense fallback={<TagSkeleton />}>
-        <TagList />
-      </Suspense>
-    </div>
-  );
-};
-
-// TagList.tsx - Suspense + mounted 상태 함께 사용
-"use client";
-
-const TagList = () => {
-  const [tags] = useAtom(tagsAtom);
-  const [mounted, setMounted] = useState(false);
-  const searchParams = useSearchParams(); // Suspense 필수!
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  // 클라이언트 사이드 스켈레톤 표시
-  if (!mounted) return <TagSkeleton />;
-
-  return (/* 실제 콘텐츠 */);
-};
+<Suspense fallback={<Skeleton />}><Header /></Suspense>
+<Suspense fallback={<Skeleton />}><Sidebar /></Suspense>
+<Suspense fallback={<Skeleton />}><MainContent /></Suspense>
+<Suspense fallback={<Skeleton />}><Footer /></Suspense>
 ```
 
+![Suspense Bad Example](/img/posts/20251025/bad-example.gif)
+
+화면 전체가 깜빡깜빡. 어떤게 주요 컨텐츠인지, 어떤게 로딩 중인지 알 수가 없습니다.
+
+## 좋은 예: 실제로 데이터가 필요한 곳만
+
+```tsx
+<Header />  {/* 정적 컨텐츠 - 바로 보여줌 */}
+
+<Suspense fallback={<ContentSkeleton />}>
+  <Sidebar />      {/* 데이터 필요 */}
+  <MainContent />  {/* 데이터 필요 */}
+</Suspense>
+
+<Footer />  {/* 정적 컨텐츠 - 바로 보여줌 */}
+```
+
+![Suspense Good Example](/img/posts/20251025/good-example.gif)
+
+Header와 Footer는 즉시 보이고, 데이터가 필요한 부분만 스켈레톤으로 표시됩니다.
+
+## 독립적으로 로딩하고 싶다면?
+
+각 영역이 준비되는 대로 보여주고 싶다면 Suspense를 분리합니다.
+
+```tsx
+<Header />
+
+<Suspense fallback={<SidebarSkeleton />}>
+  <Sidebar />  {/* 1초 후 완료 */}
+</Suspense>
+
+<Suspense fallback={<MainSkeleton />}>
+  <MainContent />  {/* 2초 후 완료 */}
+</Suspense>
+
+<Footer />
+```
+
+Next.js는 각 Suspense를 **병렬로 처리**합니다.  
+Sidebar가 먼저 준비되면 먼저 보여주고, MainContent는 아직 스켈레톤으로 남아있습니다.
+
+# 6. 정리
+
+| 상황 | 해결 방법 |
+|------|----------|
+| `useSearchParams()` 사용하는 클라이언트 컴포넌트 | `Suspense`만 사용 |
+| `async` 서버 컴포넌트 (데이터 fetching) | `Suspense`만 사용 |
+| 큰 컴포넌트 코드 스플리팅 | `React.lazy()` + `Suspense` |
+
+<aside data-type="info">
+
+**핵심만 기억하세요**!
+
+1. **Next.js에서 Suspense는 서버에서 fallback을 렌더링합니다**
+   → 클라이언트 컴포넌트를 감싸도 스켈레톤이 잘 보입니다
+
+2. **mounted 체크는 대부분 불필요합니다**
+   → Suspense가 이미 그 역할을 합니다
+
+3. **useSearchParams() 사용 시 Suspense는 필수입니다**
+   → Next.js 빌드 요구사항이기도 합니다
+
+</aside>
+
 ---
+
 ![스켈레톤 UI 적용 후](/img/posts/20251025/example.gif)
 
-이렇게 스켈레톤 UI를 제대로 적용하고 나니, 처음 의도했던 대로 작동하게 되었습니다!
+이렇게 스켈레톤 UI를 적용하고 나니, 처음 의도했던 대로 잘 작동하게 되었습니다!
 
-처음에는 단순히 `Suspense`로 감싸기만 하면 될 줄 알았는데, 실제로는 서버 컴포넌트와 클라이언트 컴포넌트의 차이, Suspense의 작동 원리를 제대로 이해해야 한다는 것을 배웠습니다.
-
-- Suspense는 만능이 아니며, 비동기 작업이 있는 곳에만 사용해야 한다
-- 클라이언트 컴포넌트의 특성을 이해하는 것이 중요하다
-- 때로는 간단한 상태 관리가 더 나은 해결책이다
-- 무작정 라이브러리나 패턴을 따라하지 말고, 왜 작동하는지 이해하는 것이 중요하다
-
-나중에는 조금 시간을 쓰더라도 React 및 Next의 공식문서를 한번 완독해보려고 합니다. 이번 경험을 통해 기본기의 중요성을 다시 한번 느꼈네요.
+처음에는 "클라이언트 컴포넌트를 Suspense로 감싸면 안 되겠지?"라고 생각했는데, Next.js App Router에서는 **서버에서 fallback을 렌더링**해주기 때문에 잘 작동합니다. 프레임워크가 어떻게 동작하는지 이해하는 게 중요하다는 걸 다시 한번 느꼈네요.
 
 ---
 
-[React > Suspense](https://react.dev/reference/react/Suspense)
-[Next.js > Loading UI and Streaming](https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming)
-[react-loading-skeleton](https://www.npmjs.com/package/react-loading-skeleton)
+**참고 자료**
+- [React > Suspense](https://react.dev/reference/react/Suspense)
+- [Next.js > Loading UI and Streaming](https://nextjs.org/docs/app/building-your-application/routing/loading-ui-and-streaming)
+- [react-loading-skeleton](https://www.npmjs.com/package/react-loading-skeleton)
