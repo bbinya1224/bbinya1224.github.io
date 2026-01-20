@@ -2,6 +2,7 @@ import { type ReactNode, Suspense } from "react";
 import PostListProvider from "@/app/provider/PostListProvider";
 import getAllPosts from "@/entities/post/api/getAllPosts";
 import Nav from "@/widgets/header/ui/Nav";
+import NavSkeleton from "@/widgets/header/ui/skeleton/NavSkeleton";
 import Sidebar from "@/widgets/sidebar/ui/Sidebar";
 
 const Layout = ({ children }: { children: ReactNode }) => {
@@ -11,7 +12,7 @@ const Layout = ({ children }: { children: ReactNode }) => {
     <PostListProvider initialPosts={posts}>
       <main className="flex flex-col gap-6 lg:flex-row lg:gap-24">
         <div className="flex-1">
-          <Suspense fallback={<div className="h-10" />}>
+          <Suspense fallback={<NavSkeleton />}>
             <Nav />
           </Suspense>
           {children}
