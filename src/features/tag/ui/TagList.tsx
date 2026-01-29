@@ -27,7 +27,7 @@ const TagList = () => {
       newTags.push(tag);
     }
 
-    let url = "/blog";
+    let url = "/";
     if (category) {
       url += `?category=${encodeURIComponent(category)}`;
     }

@@ -10,26 +10,26 @@ const Nav = () => {
   const currentCategory = searchParams.get("category");
 
   const isActive = (path: string) => {
-    if (path === "/blog") {
-      return pathname === "/blog" && !currentCategory;
+    if (path === "/") {
+      return pathname === "/" && !currentCategory;
     }
-    if (path === "/blog/lists") {
-      return pathname === "/blog/lists" || !!currentCategory;
+    if (path === "/lists") {
+      return pathname === "/lists" || !!currentCategory;
     }
     return pathname === path;
   };
 
   const navItems = [
-    { label: "Home", href: "/blog", active: isActive("/blog") },
+    { label: "Home", href: "/", active: isActive("/") },
     {
       label: "Lists",
-      href: "/blog/lists",
-      active: isActive("/blog/lists"),
+      href: "/lists",
+      active: isActive("/lists"),
     },
     {
       label: "About",
-      href: "/blog/about-me",
-      active: isActive("/blog/about-me"),
+      href: "/about-me",
+      active: isActive("/about-me"),
     },
   ];
 

@@ -22,10 +22,10 @@ const CategoryList = () => {
 
   const handleCategoryClick = (category: string) => {
     if (selectedCategory === category) {
-      router.push("/blog");
+      router.push("/");
     } else {
       const tagsParam = searchParams.getAll("tag");
-      let url = `/blog?category=${encodeURIComponent(category)}`;
+      let url = `/?category=${encodeURIComponent(category)}`;
 
       tagsParam.forEach((tag) => {
         url += `&tag=${encodeURIComponent(tag)}`;
