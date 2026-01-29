@@ -21,7 +21,7 @@ const PostWidget = ({
   return (
     <article className="group flex w-full flex-row justify-between gap-4 border-b border-gray-100 py-8 lg:max-w-[680px] dark:border-gray-800">
       <div className="flex flex-1 flex-col justify-center">
-        <Link href={`/blog/posts/${slug}`}>
+        <Link href={`/posts/${slug}`}>
           <h2 className="mb-2 text-xl font-bold break-keep text-gray-900 transition-colors group-hover:text-amber-400 sm:text-2xl dark:text-gray-100 dark:group-hover:text-amber-400">
             {title}
           </h2>

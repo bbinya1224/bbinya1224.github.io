@@ -28,7 +28,7 @@ function generateRSSFeed() {
     if (data.slug && data.title && data.published !== false) {
       feed.item({
         title: data.title,
-        url: `${site_url}/blog/posts/${data.slug}`,
+        url: `${site_url}/posts/${data.slug}`,
         date: data.date,
         description: data.description || "",
       });

@@ -8,7 +8,7 @@ interface CategoryCardProps {
 const CategoryCard = ({ category, count }: CategoryCardProps) => {
   return (
     <Link
-      href={`/blog?category=${encodeURIComponent(category)}`}
+      href={`/?category=${encodeURIComponent(category)}`}
       className="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-[#1c242c]"
     >
       <div>

@@ -42,7 +42,7 @@ const Header = () => {
       className={`fixed top-0 left-1/2 z-50 flex w-full max-w-[var(--page-width)] -translate-x-1/2 flex-col border-b border-gray-100 bg-white px-4 transition-all duration-300 ease-out sm:px-8 dark:border-gray-800 dark:bg-[#171717] dark:text-white ${isVisible ? "translate-y-0" : "-translate-y-full"} `}
     >
       <div className="flex h-16 items-center justify-between">
-        <Link href="/blog">
+        <Link href="/">
           <Logo className="h-8 w-auto sm:h-10" />
         </Link>
 

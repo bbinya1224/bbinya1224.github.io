@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import PostList from "@/widgets/post/ui/PostList";
 import PostListSkeleton from "@/widgets/post/ui/skeleton/PostListSkeleton";
 
-const MainPage = () => {
+const HomePage = () => {
   return (
     <Suspense fallback={<PostListSkeleton />}>
       <PostList />
@@ -10,4 +10,4 @@ const MainPage = () => {
   );
 };
 
-export default MainPage;
+export default HomePage;
