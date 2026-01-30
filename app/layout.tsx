@@ -3,13 +3,28 @@ import "react-loading-skeleton/dist/skeleton.css";
 import { Provider as JotaiProvider } from "jotai";
 import type { Metadata } from "next";
 import { ThemeProvider } from "next-themes";
-import type { ReactNode } from "react";
+import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
+import type { ReactNode } from "react";
 
 const RootLayout = ({ children }: { children: ReactNode }) => {
   return (
     <html suppressHydrationWarning>
       <head>
+        {/* Google Analytics */}
+        <Script
+          src="https://www.googletagmanager.com/gtag/js?id=G-ET68VN9LQM"
+          strategy="afterInteractive"
+        />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`                                                                    
+          window.dataLayer = window.dataLayer || [];               
+          function gtag(){dataLayer.push(arguments);}         
+          gtag('js', new Date());
+          gtag('config', 'G-ET68VN9LQM');                    
+        `}
+        </Script>
+
         {/* Google Site Verification */}
         <meta
           name="google-site-verification"
