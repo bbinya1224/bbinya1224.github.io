@@ -1,9 +1,10 @@
 import type { MDXComponents } from "mdx/types";
+import ControlledDemo from "@/widgets/lab/ui/controlled-demo/ControlledDemo";
+import FlickeringDemo from "@/widgets/lab/ui/flickering-demo/FlickeringDemo";
 import { ImageCarousel } from "@/widgets/lab/ui/ImageCarousel/ImageCarousel";
 import LifecycleLab from "@/widgets/lab/ui/lifecycle-lab/LifecycleLab";
 import Mermaid from "@/widgets/lab/ui/Mermaid/Mermaid";
 import RaceConditionDemo from "@/widgets/lab/ui/race-condition/RaceConditionDemo";
-import FlickeringDemo from "@/widgets/lab/ui/flickering-demo/FlickeringDemo";
 
 export const mdxComponents: MDXComponents = {
   LifecycleLab,
@@ -11,10 +12,12 @@ export const mdxComponents: MDXComponents = {
   ImageCarousel,
   RaceConditionDemo,
   FlickeringDemo,
+  ControlledDemo,
 
   a: (props) => {
     const href = props.href || "";
-    const isExternal = href.startsWith("http://") || href.startsWith("https://");
+    const isExternal =
+      href.startsWith("http://") || href.startsWith("https://");
 
     if (isExternal) {
       return (

@@ -1,0 +1,479 @@
+---
+title: "React 제어 컴포넌트 vs 비제어 컴포넌트"
+description: "입력 필드 하나 때문에 화면이 버벅거린 경험에서 시작된, 제어 컴포넌트와 비제어 컴포넌트에 대한 고민 기록"
+date: "2026-02-01"
+category: "Frontend"
+tag: "React"
+---
+
+> 입력 필드 하나 때문에 전체 화면이 버벅거리는 경험, 해보신 적 있으신가요?
+
+처음에는 "입력할 때마다 state를 업데이트하면 되겠지"라고 단순하게 생각했습니다.  
+그런데 막상 적용해보니 문제가 생기더라고요.
+
+입력 필드에 타이핑할 때마다 화면 전체가 리렌더링되면서 버벅거리기 시작한 거예요.  
+특히 무거운 컴포넌트들이 같이 있는 페이지에서는 체감이 심했습니다.
+
+"이거... 제어 컴포넌트 문제인가?" 싶어서 비제어 컴포넌트로 바꿔봤더니 버벅임은 사라졌는데,  
+이번엔 실시간 유효성 검증이 안 되더라고요.
+
+---
+
+## 배경: Radix UI와 비제어 컴포넌트
+
+사실 제가 이 주제에 관심을 갖게 된 건 **Radix UI**를 사용하면서 인데요,
+컴포넌트의 Blur 처리 시점에 유효성 검증을 어떻게 하면 좋을지 고민하며 공식 문서를 확인하다가,  
+제어 컴포넌트와 비제어 컴포넌트의 개념을 다시금 마주하게 되었습니다.
+
+그러다 스택오버플로우에서 굉장히 흥미로운 코드 조각을 하나 발견했습니다.  
+바로 React의 상태 관리 체계를 우회하여 Native하게 값을 변경하고 이벤트를 트리거하는 방법이었어요.
+
+```javascript
+const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+  window.HTMLInputElement.prototype,
+  'value'
+).set;
+
+nativeInputValueSetter.call(input, newValue);
+
+const event = new Event('input', { bubbles: true });
+input.dispatchEvent(event);
+```
+
+이 코드는 React가 내부적으로 `value` setter를 가로채더라도,  
+원본 DOM의 setter를 직접 호출하여 값을 강제로 주입합니다.  
+그 후 직접 이벤트를 발생시켜 React가 변화를 감지하게 만들죠. 
+
+비제어 컴포넌트 상황에서 외부 라이브러리와 협업하거나,  
+React의 제어를 잠시 벗어나야 할 때 유용하게 쓰일 수 있는 '비기' 같은 코드라 꼭 기록해두고 싶었습니다.
+
+---
+
+## 먼저 두 방식이 뭐가 다른지 간단히 정리해보려고 합니다.
+
+### 제어 컴포넌트 (Controlled Component)
+
+제어 컴포넌트는 **React의 State가 데이터 관리의 주체**가 되는 방식입니다.  
+입력 필드의 값이 항상 React State와 동기화되어 있고,  
+사용자가 뭔가 입력할 때마다 `onChange` 핸들러를 통해 State를 업데이트 합니다.
+
+```tsx
+const [value, setValue] = useState('');
+
+<input
+  value={value}
+  onChange={(e) => setValue(e.target.value)}
+/>
+```
+
+이 방식의 핵심은 **신뢰 가능한 단일 출처(Single Source of Truth)** 원칙 이라는 것 입니다.  
+입력 필드의 값이 오직 React State에만 의존하니까, State만 보면 현재 입력값을 정확히 알 수 있습니다.
+
+**장점**
+- 실시간 유효성 검증이 가능하다.
+- 입력값을 즉시 가공하거나 포맷팅할 수 있다.
+- 다른 컴포넌트와 State를 쉽게 공유할 수 있다.
+- React의 선언적 패러다임과 잘 맞는다.
+
+**단점**
+- 입력할 때마다 리렌더링이 일어나서 화면이 버벅거릴 수 있다.
+- 보일러플레이트 코드가 좀 많아질 수 있다.
+
+### 비제어 컴포넌트 (Uncontrolled Component)
+
+비제어 컴포넌트는 **DOM이 데이터 관리의 주체**가 되는 방식입니다.  
+React는 `useRef`를 통해 필요할 때만 DOM에 접근해서 값을 읽어오고 있습니다.
+
+```tsx
+const inputRef = useRef<HTMLInputElement>(null);
+
+const handleSubmit = () => {
+  const value = inputRef.current?.value;
+};
+
+<input ref={inputRef} />
+```
+
+이 방식은 **Pull 방식**의 데이터 동기화를 사용합니다.  
+React가 필요할 때 DOM으로부터 값을 끌어오는 형태예요.
+
+**장점**
+- 입력할 때 리렌더링이 발생하지 않아서 성능이 보다 더 좋다.
+- 코드가 간결해진다.
+- 기존 DOM 기반 코드와 통합하기 쉽다.
+
+**단점**
+- 실시간 유효성 검증이 어렵다.
+- 입력값을 즉시 가공하거나 변환할 수 없다.
+- React의 선언적 패러다임에서 벗어난다.
+
+### 비교표
+
+| 특성 | 제어 컴포넌트 | 비제어 컴포넌트 |
+|------|--------------|----------------|
+| **데이터 관리 주체** | React State | DOM |
+| **동기화 방식** | Push (State → DOM) | Pull (DOM → React) |
+| **신뢰 가능한 단일 출처** | React State | DOM |
+| **리렌더링** | 입력마다 발생 | 발생하지 않음 |
+| **실시간 검증** | 가능 | 어려움 |
+| **코드 복잡도** | 높음 | 낮음 |
+| **성능** | 입력이 많으면 저하 가능 | 우수 |
+| **React 패러다임** | 일치 | 불일치 |
+| **사용 추천 시나리오** | 실시간 검증, 동적 UI | 단순 폼, 파일 업로드 |
+
+---
+
+## 실전 예제: Blur 시 검증 및 복구
+
+그럼 실제로 두 방식이 어떻게 다르게 동작하는지 직접 만들어봤습니다.
+
+### 라이브 데모
+
+아래 데모에서 직접 테스트를 해보면, 각 방식의 리렌더링 횟수 차이를 확인할 수 있습니다.
+
+<ControlledDemo />
+
+**요구사항**
+- 양수만 허용하는 숫자 입력 필드
+- 타이핑 중에는 자유롭게 입력 가능 (`-1`, 문자 등)
+- `onBlur` 발생 시 유효성 검사 수행
+- 유효하지 않으면 이전의 유효했던 값으로 복구
+
+### 1. 제어 컴포넌트 버전
+
+처음엔 당연히 제어 컴포넌트로 구현했습니다. 
+
+```tsx
+import React, { useState } from 'react';
+
+const ControlledPositiveInput = () => {
+  // 현재 입력 중인 값 (사용자가 보는 값)
+  const [displayValue, setDisplayValue] = useState<string>('');
+
+  // 마지막으로 유효했던 값 (복구용)
+  const [lastValidValue, setLastValidValue] = useState<string>('');
+
+  // onChange: 입력할 때마다 호출됨
+  // State 업데이트 → 리렌더링 발생
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setDisplayValue(e.target.value);
+  };
+
+  // onBlur: 포커스를 잃을 때 호출됨
+  // 입력값이 양수인지 검증하고, 아니면 복구
+  const handleBlur = () => {
+    const numValue = parseFloat(displayValue);
+
+    if (!isNaN(numValue) && numValue > 0) {
+      setLastValidValue(displayValue);
+    } else {
+      setDisplayValue(lastValidValue);
+    }
+  };
+
+  return (
+    <div>
+      <h3>제어 컴포넌트 (Controlled)</h3>
+      <input
+        type="text"
+        value={displayValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder="양수를 입력하세요"
+      />
+      <p>현재 입력값: {displayValue}</p>
+      <p>마지막 유효값: {lastValidValue}</p>
+      <p style={{ color: 'gray', fontSize: '12px' }}>
+        💡 입력할 때마다 리렌더링이 발생합니다
+      </p>
+    </div>
+  );
+};
+
+export default ControlledPositiveInput;
+```
+
+**동작 흐름:**
+1. 사용자가 타이핑 → `onChange` 발생 → `displayValue` State 업데이트 → **리렌더링**
+2. 입력 필드에서 포커스 아웃 → `onBlur` 발생 → 유효성 검증
+3. 유효하지 않으면 `displayValue`를 `lastValidValue`로 덮어씀 → **리렌더링**
+
+**핵심:**
+- React State(`displayValue`)가 **항상** 입력 필드의 값을 결정합니다.
+- 입력할 때마다 상태 변경 → 리렌더링이 발생하는 **Push 방식**
+
+### 2. 비제어 컴포넌트 버전
+
+버벅임이 심해서 비제어 컴포넌트로도 만들어보았습니다.
+
+```tsx
+import React, { useRef, useState } from 'react';
+
+const UncontrolledPositiveInput: React.FC = () => {
+  // DOM 요소에 직접 접근하기 위한 ref
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // 마지막으로 유효했던 값 (복구용)
+  const [lastValidValue, setLastValidValue] = useState<string>('');
+
+  // onBlur: 포커스를 잃을 때만 호출됨
+  // DOM에서 직접 값을 읽어옴 (Pull 방식)
+  const handleBlur = () => {
+    if (!inputRef.current) return;
+
+    const currentValue = inputRef.current.value;
+    const numValue = parseFloat(currentValue);
+
+    if (!isNaN(numValue) && numValue > 0) {
+      setLastValidValue(currentValue);
+    } else {
+      // DOM의 value를 직접 변경
+      inputRef.current.value = lastValidValue;
+    }
+  };
+
+  return (
+    <div>
+      <h3>비제어 컴포넌트 (Uncontrolled)</h3>
+      <input
+        ref={inputRef}
+        type="text"
+        onBlur={handleBlur}
+        placeholder="양수를 입력하세요"
+        defaultValue={lastValidValue}
+      />
+      <p>마지막 유효값: {lastValidValue}</p>
+      <p style={{ color: 'gray', fontSize: '12px' }}>
+        💡 입력 중에는 리렌더링이 발생하지 않습니다
+      </p>
+    </div>
+  );
+};
+
+export default UncontrolledPositiveInput;
+```
+
+**동작 흐름:**
+1. 사용자가 타이핑 → DOM이 직접 값을 관리 → **리렌더링 없음**
+2. 입력 필드에서 포커스 아웃 → `onBlur` 발생 → `inputRef.current.value`로 값을 읽음 (**Pull 방식**)
+3. 유효하지 않으면 `inputRef.current.value`를 직접 변경
+
+**핵심:**
+- DOM이 데이터의 주인
+- React는 필요할 때만 DOM에서 값을 끌어옵니다.
+- 입력 중에는 React가 관여하지 않으니까 리렌더링이 없습니다.
+
+### 두 방식 비교 요약
+
+| | 제어 컴포넌트 | 비제어 컴포넌트 |
+|---|---|---|
+| **onChange 핸들러** | 필요 (값 동기화) | 불필요 |
+| **입력 중 리렌더링** | 매번 발생 | 없음 |
+| **값 읽기 방식** | State에서 읽음 | DOM에서 읽음 |
+| **값 복구 방식** | State 업데이트 | DOM 직접 수정 |
+| **실시간 표시** | 현재 입력값 표시 가능 | 어려움 |
+
+---
+
+## 그런데 제어 컴포넌트를 포기할 수 없었습니다.
+
+비제어 컴포넌트로 바꾸니까 버벅임은 사라졌는데, 실시간 유효성 검증이 안 되었습니다.  
+제가 만들던 폼은 입력할 때마다 유효성을 체크해서 에러 메시지를 보여줘야 했기 때문입니다.
+
+> "제어 컴포넌트의 장점은 유지하면서 성능 문제만 해결할 수 없을까?"
+
+그래서 `useTransition`을 알아보게 됐습니다.
+
+## 성능 최적화: useTransition으로 제어 컴포넌트 개선하기
+
+제어 컴포넌트의 가장 큰 단점은 **입력할 때마다 리렌더링이 발생**한다는 것 입니다.  
+특히 무거운 컴포넌트 트리를 가진 경우, 입력이 버벅거리는 문제가 생기게 됩니다.
+
+React의 `useTransition` 훅을 사용하면 어떨까 했어요.
+
+**useTransition의 장점:**
+- **입력 반응성 유지**: 사용자 타이핑은 즉시 반영됩니다.
+- **백그라운드 업데이트**: 무거운 State 업데이트는 우선순위를 낮춰 처리합니다.
+- **UI 블로킹 방지**: 브라우저가 입력을 먼저 처리하고, 여유가 있을 때 State를 업데이트합니다.
+- **일관성 보장**: 타이머 없이 React의 동시성 기능으로 자연스럽게 처리됩니다.
+
+### useTransition 적용 예제
+
+```tsx
+import React, { useState, useTransition } from 'react';
+
+const OptimizedControlledInput: React.FC = () => {
+  const [displayValue, setDisplayValue] = useState<string>('');
+  const [lastValidValue, setLastValidValue] = useState<string>('');
+
+  // useTransition 훅
+  // isPending: 전환 중(transition) 상태를 나타냄
+  // startTransition: 낮은 우선순위로 State 업데이트를 실행하는 함수
+  const [isPending, startTransition] = useTransition();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
+
+    // startTransition으로 감싸진 State 업데이트는
+    // "긴급하지 않은 업데이트"로 분류돼요
+    startTransition(() => {
+      setDisplayValue(newValue);
+    });
+  };
+
+  const handleBlur = () => {
+    const numValue = parseFloat(displayValue);
+
+    if (!isNaN(numValue) && numValue > 0) {
+      setLastValidValue(displayValue);
+    } else {
+      // 복구 작업은 즉각적이어야 하니까
+      // startTransition을 사용하지 않아요
+      setDisplayValue(lastValidValue);
+    }
+  };
+
+  return (
+    <div>
+      <h3>최적화된 제어 컴포넌트 (with useTransition)</h3>
+      <input
+        type="text"
+        value={displayValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder="양수를 입력하세요"
+        style={{
+          opacity: isPending ? 0.7 : 1,
+        }}
+      />
+      <p>현재 입력값: {displayValue}</p>
+      <p>마지막 유효값: {lastValidValue}</p>
+      {isPending && (
+        <p style={{ color: 'orange', fontSize: '12px' }}>
+          ⏳ 업데이트 중...
+        </p>
+      )}
+      <p style={{ color: 'green', fontSize: '12px' }}>
+        ✅ 입력 반응성은 유지하면서 무거운 업데이트는 백그라운드로
+      </p>
+    </div>
+  );
+};
+
+export default OptimizedControlledInput;
+```
+
+### useTransition의 기술적 원리
+
+React의 **Concurrent Rendering** 기능 덕분에 `useTransition`이 가능합니다.
+
+1. **우선순위 기반 스케줄링**
+   - 사용자 입력 같은 긴급한 업데이트는 즉시 처리
+   - `startTransition` 내부의 업데이트는 나중에 처리
+
+2. **인터럽트 가능한 렌더링**
+   - 낮은 우선순위 렌더링 중에 높은 우선순위 작업이 들어오면 중단하고 긴급 작업을 먼저 처리
+   - 이후 낮은 우선순위 작업을 재개
+
+3. **입력 반응성 유지**
+   - `displayValue` State가 늦게 업데이트되더라도, 네이티브 input 요소는 즉시 반응
+   - 사용자는 지연을 느끼지 못하게 됩니다.
+
+
+```tsx
+const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  startTransition(() => {
+    setDisplayValue(e.target.value); // 우선순위만 낮춤, 지연 없음
+  });
+};
+// 장점: 입력은 즉시 반영, State는 여유가 있을 때 업데이트
+```
+
+> **useTransition**: 우선순위 조정 → 입력은 즉시 반영, State는 자연스럽게 동기화
+
+---
+
+## 번외: React 19의 form action은 어떨까?
+
+React 19에서는 폼 처리 방식이 조금 달라지게 됩니다.  
+`<form action={함수}>` 형태로 폼을 작성할 수 있게 되었거든요.
+
+이게 비제어 컴포넌트와 만나면 꽤 흥미로운 조합이 됩니다.
+
+```tsx
+function SignupForm() {
+  const [state, formAction, isPending] = useActionState(handleSubmit, null);
+
+  return (
+    <form action={formAction}>
+      <input name="email" type="email" />
+      <SubmitButton />
+    </form>
+  );
+}
+
+function SubmitButton() {
+  const { pending } = useFormStatus();
+  return <button disabled={pending}>가입하기</button>;
+}
+```
+
+<aside data-type="info">
+useActionState와 useFormStatus를 활용하면,  
+비제어 컴포넌트로도 제출 상태를 쉽게 관리할 수 있어요.
+</aside>
+
+다만 이건 "폼 제출" 시나리오에 특화된 거라서,  
+실시간 유효성 검증이 필요한 경우에는 여전히 제어 컴포넌트 + useTransition 조합이 더 적합할 수 있어요.
+
+---
+
+## 언제 어떤 방식을 사용할까?
+
+**제어 컴포넌트를 사용해야 할 때**
+- 실시간 유효성 검증이 필요한 경우
+- 입력값을 즉시 가공/포맷팅해야 하는 경우 (예: 전화번호 자동 포맷)
+- 다른 UI 요소와 입력값을 동기화해야 하는 경우
+- 검색어 자동완성처럼 입력에 따라 다른 컴포넌트가 변경되는 경우
+
+**비제어 컴포넌트를 사용해야 할 때**
+- 단순한 폼 제출 (제출 시에만 값이 필요)
+- 파일 업로드
+- 성능이 중요한 대량의 입력 필드
+- 레거시 DOM 코드와 통합하는 경우
+
+**useTransition을 추가로 고려해야 할 때**
+- 제어 컴포넌트를 사용하지만 입력 지연이 발생하는 경우
+- 입력값에 따라 무거운 계산이나 렌더링이 필요한 경우
+- 실시간 검색, 필터링 등 입력 반응성이 중요한 경우
+
+---
+
+## 마무리
+
+솔직히 말하면, 처음에는 "제어 컴포넌트가 React스럽고 좋은 거 아닌가?"라고 생각했었습니다.
+
+하지만 직접 성능 문제를 겪어보니 생각이 달라졌어요.
+
+> "선언적이어야 한다"는 원칙보다 "사용자가 버벅임 없이 타이핑할 수 있어야 한다"가 더 중요하기 때문입니다.
+
+결국 제어/비제어 컴포넌트는 단순히 "어떻게 값을 읽을까"의 문제가 아니에요.  
+**누가 데이터의 주인인가**(Single Source of Truth), **언제 동기화할 것인가**(Push vs Pull)라는 근본적인 설계 철학의 차이입니다.
+
+React의 `useTransition`은 제어 컴포넌트의 리렌더링 문제를 우아하게 해결해줍니다.  
+"선언적이면서도 성능이 좋은" 코드를 작성할 수 있게 된 거죠.
+
+<aside data-type="success">
+각 방식의 특성을 이해하고 상황에 맞게 선택한다면,  
+더 나은 사용자 경험을 제공할 수 있을 거예요.
+</aside>
+
+---
+
+### 참고 자료
+
+- [Stackoverflow](https://stackoverflow.com/questions/23892547/what-is-the-best-way-to-trigger-change-or-input-event-in-react-js)
+- [React 공식 문서 - Controlled Components](https://react.dev/learn/sharing-state-between-components#controlled-and-uncontrolled-components)
+- [React 공식 문서 - useTransition](https://react.dev/reference/react/useTransition)
+- [React 공식 문서 - useActionState](https://react.dev/reference/react/useActionState)
+- [React 공식 문서 - useFormStatus](https://react.dev/reference/react-dom/hooks/useFormStatus)
