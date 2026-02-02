@@ -9,20 +9,20 @@ tag: "React"
 > 입력 필드 하나 때문에 전체 화면이 버벅거리는 경험, 해보신 적 있으신가요?
 
 처음에는 "입력할 때마다 state를 업데이트하면 되겠지"라고 단순하게 생각했습니다.  
-그런데 막상 적용해보니 문제가 생기더라고요.
+그런데 막상 적용해보니 문제가 생겼습니다.
 
-입력 필드에 타이핑할 때마다 화면 전체가 리렌더링되면서 버벅거리기 시작한 거예요.  
+입력 필드에 타이핑할 때마다 화면 전체가 리렌더링되면서 버벅거리기 시작하며,  
 특히 무거운 컴포넌트들이 같이 있는 페이지에서는 체감이 심했습니다.
 
 "이거... 제어 컴포넌트 문제인가?" 싶어서 비제어 컴포넌트로 바꿔봤더니 버벅임은 사라졌는데,  
-이번엔 실시간 유효성 검증이 안 되더라고요.
+이번엔 실시간 유효성 검증이 안 되었습니다.
 
 ---
 
 ## 배경: Radix UI와 비제어 컴포넌트
 
-사실 제가 이 주제에 관심을 갖게 된 건 **Radix UI**를 사용하면서 인데요,
-컴포넌트의 Blur 처리 시점에 유효성 검증을 어떻게 하면 좋을지 고민하며 공식 문서를 확인하다가,  
+사실 제가 이 주제에 관심을 갖게 된 건 **Radix UI**를 사용하면서 입니다.  
+컴포넌트의 Blur 처리 시점에 유효성 검증을 어떻게 하면 좋을지 고민하며 공식 문서를 확인하다가,
 제어 컴포넌트와 비제어 컴포넌트의 개념을 다시금 마주하게 되었습니다.
 
 그러다 스택오버플로우에서 굉장히 흥미로운 코드 조각을 하나 발견했습니다.  
@@ -144,18 +144,18 @@ React가 필요할 때 DOM으로부터 값을 끌어오는 형태예요.
 처음엔 당연히 제어 컴포넌트로 구현했습니다. 
 
 ```tsx
-import React, { useState } from 'react';
+import { useState, ChangeEvent } from 'react';
 
 const ControlledPositiveInput = () => {
   // 현재 입력 중인 값 (사용자가 보는 값)
-  const [displayValue, setDisplayValue] = useState<string>('');
+  const [displayValue, setDisplayValue] = useState('');
 
   // 마지막으로 유효했던 값 (복구용)
-  const [lastValidValue, setLastValidValue] = useState<string>('');
+  const [lastValidValue, setLastValidValue] = useState('');
 
   // onChange: 입력할 때마다 호출됨
   // State 업데이트 → 리렌더링 발생
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setDisplayValue(e.target.value);
   };
 
@@ -193,12 +193,12 @@ const ControlledPositiveInput = () => {
 export default ControlledPositiveInput;
 ```
 
-**동작 흐름:**
+**동작 흐름**
 1. 사용자가 타이핑 → `onChange` 발생 → `displayValue` State 업데이트 → **리렌더링**
 2. 입력 필드에서 포커스 아웃 → `onBlur` 발생 → 유효성 검증
 3. 유효하지 않으면 `displayValue`를 `lastValidValue`로 덮어씀 → **리렌더링**
 
-**핵심:**
+**핵심**
 - React State(`displayValue`)가 **항상** 입력 필드의 값을 결정합니다.
 - 입력할 때마다 상태 변경 → 리렌더링이 발생하는 **Push 방식**
 
@@ -207,14 +207,14 @@ export default ControlledPositiveInput;
 버벅임이 심해서 비제어 컴포넌트로도 만들어보았습니다.
 
 ```tsx
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 
-const UncontrolledPositiveInput: React.FC = () => {
+const UncontrolledPositiveInput = () => {
   // DOM 요소에 직접 접근하기 위한 ref
   const inputRef = useRef<HTMLInputElement>(null);
 
   // 마지막으로 유효했던 값 (복구용)
-  const [lastValidValue, setLastValidValue] = useState<string>('');
+  const [lastValidValue, setLastValidValue] = useState('');
 
   // onBlur: 포커스를 잃을 때만 호출됨
   // DOM에서 직접 값을 읽어옴 (Pull 방식)
@@ -253,12 +253,12 @@ const UncontrolledPositiveInput: React.FC = () => {
 export default UncontrolledPositiveInput;
 ```
 
-**동작 흐름:**
+**동작 흐름**
 1. 사용자가 타이핑 → DOM이 직접 값을 관리 → **리렌더링 없음**
 2. 입력 필드에서 포커스 아웃 → `onBlur` 발생 → `inputRef.current.value`로 값을 읽음 (**Pull 방식**)
 3. 유효하지 않으면 `inputRef.current.value`를 직접 변경
 
-**핵심:**
+**핵심**
 - DOM이 데이터의 주인
 - React는 필요할 때만 DOM에서 값을 끌어옵니다.
 - 입력 중에는 React가 관여하지 않으니까 리렌더링이 없습니다.
@@ -284,40 +284,69 @@ export default UncontrolledPositiveInput;
 
 그래서 `useTransition`을 알아보게 됐습니다.
 
-## 성능 최적화: useTransition으로 제어 컴포넌트 개선하기
+## 성능 최적화: useTransition과 useDeferredValue
 
 제어 컴포넌트의 가장 큰 단점은 **입력할 때마다 리렌더링이 발생**한다는 것 입니다.  
 특히 무거운 컴포넌트 트리를 가진 경우, 입력이 버벅거리는 문제가 생기게 됩니다.
 
-React의 `useTransition` 훅을 사용하면 어떨까 했어요.
+React의 `useTransition`과 `useDeferredValue` 훅을 사용하면 어떨까 했어요.
 
-**useTransition의 장점:**
-- **입력 반응성 유지**: 사용자 타이핑은 즉시 반영됩니다.
-- **백그라운드 업데이트**: 무거운 State 업데이트는 우선순위를 낮춰 처리합니다.
-- **UI 블로킹 방지**: 브라우저가 입력을 먼저 처리하고, 여유가 있을 때 State를 업데이트합니다.
-- **일관성 보장**: 타이머 없이 React의 동시성 기능으로 자연스럽게 처리됩니다.
+**핵심 원리**
+- **입력값 자체** 는 즉시 업데이트해야 합니다. (그래야 타이핑이 바로 반영됨)
+- **입력값에 따른 무거운 연산/렌더링** 만 우선순위를 낮춰서 처리합니다.
+
+<aside data-type="warning">
+주의: controlled input의 value에 바인딩된 state를 startTransition으로 감싸면,
+오히려 입력이 지연됩니다. 입력값 자체는 항상 즉시 업데이트 해야합니다.
+</aside>
 
 ### useTransition 적용 예제
 
 ```tsx
-import React, { useState, useTransition } from 'react';
+import { useState, useTransition, ChangeEvent } from 'react';
 
-const OptimizedControlledInput: React.FC = () => {
-  const [displayValue, setDisplayValue] = useState<string>('');
-  const [lastValidValue, setLastValidValue] = useState<string>('');
+// 무거운 컴포넌트 예시 (입력값에 따라 리렌더링됨)
+const HeavyValidationResult = ({ value }: { value: string }) => {
+  // 의도적으로 무거운 연산 시뮬레이션
+  const startTime = performance.now();
+  while (performance.now() - startTime < 50) {
+    // 50ms 블로킹
+  }
 
-  // useTransition 훅
-  // isPending: 전환 중(transition) 상태를 나타냄
-  // startTransition: 낮은 우선순위로 State 업데이트를 실행하는 함수
+  const numValue = parseFloat(value);
+  const isValid = !isNaN(numValue) && numValue > 0;
+
+  return (
+    <div style={{
+      padding: '10px',
+      background: isValid ? '#d4edda' : '#f8d7da',
+      borderRadius: '4px'
+    }}>
+      <p>검증 결과: {isValid ? '✅ 유효한 양수' : '❌ 유효하지 않음'}</p>
+      <p>입력값의 제곱: {isValid ? numValue * numValue : '-'}</p>
+    </div>
+  );
+};
+
+const OptimizedControlledInput = () => {
+  // 입력값: 항상 즉시 업데이트 (타이핑 반응성 유지)
+  const [displayValue, setDisplayValue] = useState('');
+
+  // 무거운 연산에 사용할 값: 우선순위를 낮춰서 업데이트
+  const [deferredValue, setDeferredValue] = useState('');
+
+  const [lastValidValue, setLastValidValue] = useState('');
   const [isPending, startTransition] = useTransition();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const newValue = e.target.value;
 
-    // startTransition으로 감싸진 State 업데이트는
-    // "긴급하지 않은 업데이트"로 분류돼요
+    // 입력값은 즉시 업데이트 (startTransition 없이!)
+    setDisplayValue(newValue);
+
+    // 무거운 연산에 사용할 값만 우선순위를 낮춤
     startTransition(() => {
-      setDisplayValue(newValue);
+      setDeferredValue(newValue);
     });
   };
 
@@ -327,9 +356,8 @@ const OptimizedControlledInput: React.FC = () => {
     if (!isNaN(numValue) && numValue > 0) {
       setLastValidValue(displayValue);
     } else {
-      // 복구 작업은 즉각적이어야 하니까
-      // startTransition을 사용하지 않아요
       setDisplayValue(lastValidValue);
+      setDeferredValue(lastValidValue);
     }
   };
 
@@ -348,13 +376,18 @@ const OptimizedControlledInput: React.FC = () => {
       />
       <p>현재 입력값: {displayValue}</p>
       <p>마지막 유효값: {lastValidValue}</p>
+
       {isPending && (
         <p style={{ color: 'orange', fontSize: '12px' }}>
           ⏳ 업데이트 중...
         </p>
       )}
+
+      {/* 무거운 컴포넌트는 deferredValue를 사용 */}
+      <HeavyValidationResult value={deferredValue} />
+
       <p style={{ color: 'green', fontSize: '12px' }}>
-        ✅ 입력 반응성은 유지하면서 무거운 업데이트는 백그라운드로
+        ✅ 입력은 즉시 반영, 무거운 검증은 백그라운드에서
       </p>
     </div>
   );
@@ -363,9 +396,83 @@ const OptimizedControlledInput: React.FC = () => {
 export default OptimizedControlledInput;
 ```
 
+**핵심 포인트**
+- `setDisplayValue(newValue)` - 입력값은 **즉시** 업데이트
+- `startTransition(() => setDeferredValue(newValue))` - 무거운 연산용 값은 **지연** 업데이트
+- `HeavyValidationResult`는 `deferredValue`를 사용하므로, 타이핑 중에는 이전 값으로 렌더링됨
+
+### useDeferredValue로 더 간단하게
+
+`useDeferredValue`를 사용하면 state를 분리하지 않고도 같은 효과를 낼 수 있어요.
+
+```tsx
+import { useState, useDeferredValue, ChangeEvent } from 'react';
+
+const OptimizedWithDeferredValue = () => {
+  const [displayValue, setDisplayValue] = useState('');
+  const [lastValidValue, setLastValidValue] = useState('');
+
+  // displayValue의 "지연된 버전"을 생성
+  // 입력이 빠르게 들어오면, 이 값은 뒤처져서 업데이트됨
+  const deferredValue = useDeferredValue(displayValue);
+
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    // 그냥 평범하게 업데이트하면 됨
+    setDisplayValue(e.target.value);
+  };
+
+  const handleBlur = () => {
+    const numValue = parseFloat(displayValue);
+
+    if (!isNaN(numValue) && numValue > 0) {
+      setLastValidValue(displayValue);
+    } else {
+      setDisplayValue(lastValidValue);
+    }
+  };
+
+  // deferredValue가 displayValue보다 뒤처져 있는지 확인
+  const isPending = deferredValue !== displayValue;
+
+  return (
+    <div>
+      <h3>최적화된 제어 컴포넌트 (with useDeferredValue)</h3>
+      <input
+        type="text"
+        value={displayValue}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        placeholder="양수를 입력하세요"
+      />
+      <p>현재 입력값: {displayValue}</p>
+      <p>지연된 값: {deferredValue}</p>
+      <p>마지막 유효값: {lastValidValue}</p>
+
+      {isPending && (
+        <p style={{ color: 'orange', fontSize: '12px' }}>
+          ⏳ 검증 중...
+        </p>
+      )}
+
+      {/* 무거운 컴포넌트는 deferredValue를 사용 */}
+      <HeavyValidationResult value={deferredValue} />
+    </div>
+  );
+};
+```
+
+**useDeferredValue vs useTransition**
+
+| | useTransition | useDeferredValue |
+|---|---|---|
+| **사용 방식** | state 업데이트를 감싸서 사용 | 값을 전달해서 지연된 버전 생성 |
+| **코드 복잡도** | state를 분리해야 함 | 기존 코드에 쉽게 적용 |
+| **isPending** | 훅에서 직접 제공 | 직접 비교해야 함 |
+| **적합한 상황** | 업데이트 로직을 직접 제어할 때 | 기존 값의 지연 버전만 필요할 때 |
+
 ### useTransition의 기술적 원리
 
-React의 **Concurrent Rendering** 기능 덕분에 `useTransition`이 가능합니다.
+React의 **Concurrent Rendering** 기능 덕분에 이런 최적화가 가능합니다.
 
 1. **우선순위 기반 스케줄링**
    - 사용자 입력 같은 긴급한 업데이트는 즉시 처리
@@ -375,21 +482,23 @@ React의 **Concurrent Rendering** 기능 덕분에 `useTransition`이 가능합�
    - 낮은 우선순위 렌더링 중에 높은 우선순위 작업이 들어오면 중단하고 긴급 작업을 먼저 처리
    - 이후 낮은 우선순위 작업을 재개
 
-3. **입력 반응성 유지**
-   - `displayValue` State가 늦게 업데이트되더라도, 네이티브 input 요소는 즉시 반응
-   - 사용자는 지연을 느끼지 못하게 됩니다.
-
+3. **이전 UI 유지**
+   - 낮은 우선순위 업데이트가 처리되는 동안, React는 이전 UI를 유지
+   - 새로운 UI가 준비되면 한 번에 교체
 
 ```tsx
-const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const newValue = e.target.value;
+
+  setDisplayValue(newValue);  // 즉시 반영 (입력 필드에 표시)
+
   startTransition(() => {
-    setDisplayValue(e.target.value); // 우선순위만 낮춤, 지연 없음
+    setDeferredValue(newValue);  // 나중에 반영 (무거운 연산에 사용)
   });
 };
-// 장점: 입력은 즉시 반영, State는 여유가 있을 때 업데이트
 ```
 
-> **useTransition**: 우선순위 조정 → 입력은 즉시 반영, State는 자연스럽게 동기화
+> **핵심**: 입력값은 즉시, 무거운 연산은 나중에
 
 ---
 
