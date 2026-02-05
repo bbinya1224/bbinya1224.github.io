@@ -84,7 +84,8 @@ const NormalScroll = ({ itemCount }: { itemCount: number }) => {
   useEffect(() => {
     if (containerRef.current) {
       // 실제 렌더링된 DOM 노드 수 계산
-      const count = containerRef.current.querySelectorAll(".scroll-item").length;
+      const count =
+        containerRef.current.querySelectorAll(".scroll-item").length;
       setDomNodeCount(count);
     }
   }, [itemCount]);
@@ -141,7 +142,9 @@ const NormalScroll = ({ itemCount }: { itemCount: number }) => {
           문제점:
         </p>
         <ul className="mt-1 space-y-1 text-orange-700 dark:text-orange-300">
-          <li>• {itemCount}개 항목 → {domNodeCount}개 DOM 노드 생성</li>
+          <li>
+            • {itemCount}개 항목 → {domNodeCount}개 DOM 노드 생성
+          </li>
           <li>• 항목이 늘어날수록 메모리 사용량 증가</li>
           <li>• 스크롤 성능 저하 발생 가능</li>
         </ul>
@@ -246,8 +249,7 @@ const VirtualScroll = ({ itemCount }: { itemCount: number }) => {
             • {itemCount}개 항목 중 ~{domNodeCount}개만 DOM에 렌더링
           </li>
           <li>
-            • 감소율:{" "}
-            {((1 - domNodeCount / itemCount) * 100).toFixed(1)}%
+            • 감소율: {((1 - domNodeCount / itemCount) * 100).toFixed(1)}%
           </li>
           <li>• 항목 수와 무관하게 일정한 성능 유지</li>
         </ul>
