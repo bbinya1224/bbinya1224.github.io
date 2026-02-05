@@ -5,6 +5,7 @@ import { ImageCarousel } from "@/widgets/lab/ui/ImageCarousel/ImageCarousel";
 import LifecycleLab from "@/widgets/lab/ui/lifecycle-lab/LifecycleLab";
 import Mermaid from "@/widgets/lab/ui/Mermaid/Mermaid";
 import RaceConditionDemo from "@/widgets/lab/ui/race-condition/RaceConditionDemo";
+import VirtualScrollDemo from "@/widgets/lab/ui/virtual-scroll-demo/VirtualScrollDemo";
 
 export const mdxComponents: MDXComponents = {
   LifecycleLab,
@@ -13,6 +14,7 @@ export const mdxComponents: MDXComponents = {
   RaceConditionDemo,
   FlickeringDemo,
   ControlledDemo,
+  VirtualScrollDemo,
 
   a: (props) => {
     const href = props.href || "";

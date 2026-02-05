@@ -1,0 +1,349 @@
+---
+title: "무한 스크롤 성능 최적화: Virtual Windowing 도입기"
+description: "O(n)을 O(1)로 개선한 Virtual Windowing 실전 적용 경험"
+date: "2026-02-04"
+category: "Frontend"
+tag: "React"
+published: true
+---
+
+> 무한 스크롤에서 수천 개의 DOM 노드를 렌더링하면 어떤 일이 벌어질까요?
+
+## 배경: 무한 스크롤의 성능 문제
+
+사내 프로젝트인 캔버스 에디터에서 무한 스크롤을 구현하면서 성능 이슈에 직면했습니다. 기존 구현은 Intersection Observer를 활용한 전형적인 방식이었습니다.
+
+```tsx
+// 기존 구현: 모든 항목을 DOM에 렌더링
+{items.map((item) => (
+  <div key={item.id}>{item.content}</div>
+))}
+```
+
+얼핏 보면 문제가 없어 보입니다. Intersection Observer도 사용하고, React.memo로 최적화도 적용했습니다. 하지만 항목이 늘어날수록 성능 저하가 눈에 띄게 나타났습니다.
+
+### 성능 요구사항
+
+진행중인 프로젝트 캔버스기반으로 한 에디터는 특히 성능에 민감한 환경입니다. 사용자가 캔버스를 드래그하고 줌하는 동안 끊김 없는 60fps를 유지해야 합니다. Zustand + useShallow로 상태를 최적화하고, React.memo로 재렌더링을 최소화했지만, 근본적인 문제가 하나 있었습니다.
+
+**모든 항목이 DOM에 존재한다는 것** 입니다.
+
+## 문제 정의: 기본 무한 스크롤의 구조적 한계
+
+### 모든 항목을 DOM에 렌더링하는 문제
+
+기존 방식의 가장 큰 문제는 데이터 구조와 DOM 구조가 1:1로 매핑된다는 점입니다.
+
+```tsx
+// ❌ 1,000개 항목 → 1,000개 DOM 노드
+{items.map((item) => <div>{item}</div>)}
+```
+
+**발생하는 문제**
+
+- **렌더링 복잡도**: O(n) - 항목이 늘어날수록 초기 렌더링 시간 증가
+- **메모리**: 모든 DOM 노드를 메모리에 유지
+- **React Reconciliation**: Virtual DOM 비교 시 모든 노드를 순회
+
+### 성능 저하 원인 분석
+
+1,000개의 항목을 렌더링하면 어떤 일이 벌어질까요?
+
+**브라우저 관점:**
+- 1,000개의 DOM 노드 생성 및 레이아웃 계산
+- 스크롤 이벤트마다 1,000개 노드의 위치 재계산
+- 메모리에 1,000개 노드의 스타일, 속성 정보 유지
+
+**React 관점:**
+- 상태 변경 시 1,000개의 Virtual DOM 노드 비교
+- 각 노드의 props 변경 여부 확인
+- 변경된 노드만 실제 DOM에 반영
+
+Canvas 기반으로 한 에디터와 같은 고빈도 업데이트 환경에서 이런 오버헤드는 치명적입니다.
+
+## Virtual Windowing 원리
+
+> 핵심: 화면에 보이는 항목만 DOM에 렌더링합니다.
+
+Virtual Windowing의 아이디어는 단순하지만 강력합니다. 사용자는 한 번에 화면에 보이는 5~10개의 항목만 인식할 수 있습니다. 나머지 990개는 실제로 DOM에 있을 필요가 없습니다.
+
+```
+전체 1,000개 항목
+┌──────────────────┐
+│  Item 1          │  ← 화면 위 (렌더링 안 함)
+│  Item 2          │
+├──────────────────┤  ← 스크롤 영역 시작
+│  Item 3  ✅      │  ← 렌더링됨
+│  Item 4  ✅      │  ← 렌더링됨
+│  Item 5  ✅      │  ← 렌더링됨
+├──────────────────┤  ← 스크롤 영역 끝
+│  Item 6          │  ← 화면 아래 (렌더링 안 함)
+│  ...             │
+│  Item 1000       │
+└──────────────────┘
+
+결과: ~6개 DOM만 렌더링 (400px / 80px ≈ 5 + overscan 1)
+```
+
+### O(n) → O(1) 복잡도 개선
+
+Virtual Windowing을 적용하면 어떤 변화가 생길까요?
+
+**Before: 기본 방식**
+- 전체 1,000개 항목 중 1,000개가 DOM에 존재
+- 항목 추가 시 DOM 노드 수 선형 증가
+- 복잡도: O(n)
+
+**After: Virtual 방식**
+- 전체 1,000개 항목 중 ~6개만 DOM에 존재
+- 항목 추가 시에도 DOM 노드 수 일정
+- 스크롤 시 DOM 재사용 (Recycling)
+- 복잡도: O(1)
+
+항목 수와 무관하게 일정한 성능을 유지할 수 있습니다.
+
+## TanStack Virtual 선택 근거
+
+Virtual Windowing을 구현하기 위해 여러 라이브러리를 검토했습니다.
+
+### react-window vs TanStack Virtual
+
+| 기준 | TanStack Virtual | react-window |
+|------|------------------|--------------|
+| **TypeScript** | ✅ First-class 지원 | ⚠️ @types 패키지 필요 |
+| **React 최적화** | ✅ React 18+ 최적화 | ⚠️ 유지보수 중단 |
+| **가변 높이** | ✅ 자동 측정 | ⚠️ 수동 계산 필요 |
+| **무한 스크롤** | ✅ 예제 제공 | ❌ 수동 구현 |
+| **번들 크기** | ~5KB | ~3KB |
+| **유지보수** | 2026 기준 Active | 유지보수 느림 |
+
+**TanStack Virtual을 선택한 이유:**
+
+1. **TypeScript-first 지원**: 타입 안전성이 기본으로 제공됩니다
+2. **React 최적화**: React 18+의 최신 기능과 잘 통합됩니다
+3. **동적 높이 자동 측정**: 항목마다 높이가 다를 때도 자동으로 처리됩니다
+4. **활발한 유지보수**: TanStack 생태계의 일부로 지속적인 업데이트가 보장됩니다
+
+번들 크기가 ~2KB 더 크지만, 제공되는 기능과 개발 경험을 고려하면 합리적인 선택이었습니다.
+
+## 로드 트리거 구현
+
+Virtual Windowing과 별개로, 다음 페이지를 언제 로드할지 결정하는 방식도 중요합니다. Intersection Observer를 활용한 sentinel 방식이 직관적이고 범용적입니다.
+
+```tsx
+// Intersection Observer 기반 로드 트리거
+useEffect(() => {
+  const observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0]?.isIntersecting && !isLoading && hasMore) {
+        onLoadMore();
+      }
+    },
+    { root: viewport, rootMargin: '0px 0px 100px 0px' }
+  );
+
+  if (sentinel) {
+    observer.observe(sentinel);
+  }
+
+  return () => observer.disconnect();
+}, [isLoading, hasMore, onLoadMore]);
+```
+
+**동작 원리:**
+- 리스트 맨 아래에 sentinel 요소를 배치
+- sentinel이 뷰포트에 들어오면 다음 페이지 로드
+- 브라우저가 내부적으로 최적화하여 비동기 처리
+
+virtualizer 상태를 기반으로 로드 트리거를 구현할 수도 있습니다.
+
+```tsx
+// virtualizer 상태 기반 로드 트리거
+useEffect(() => {
+  const lastItem = virtualizer.getVirtualItems().at(-1);
+
+  if (lastItem && lastItem.index >= items.length - 1 && hasMore && !isLoading) {
+    onLoadMore();
+  }
+}, [virtualizer.getVirtualItems(), items.length, hasMore, isLoading]);
+```
+
+## 성능 개선 효과
+
+### 테스트 환경
+
+- MacBook Pro M1
+- Chrome 131
+- React 19.1.1
+- 스크롤 영역: 400px 높이
+- 아이템 높이: 80px 고정
+
+### DOM 노드 수 감소
+
+| 항목 수 | Before | After | 감소율 |
+|---------|--------|-------|--------|
+| 100     | 100    | ~6    | 94%    |
+| 1,000   | 1,000  | ~6    | 99.4%  |
+| 10,000  | 10,000 | ~6    | 99.94% |
+
+**계산 근거**: 400px ÷ 80px ≈ 5개 + overscan 1개 = 6개
+
+항목이 10,000개로 늘어나도 DOM 노드는 여전히 ~6개만 유지됩니다. 이것이 Virtual Windowing의 핵심입니다.
+
+### 이론적 개선 효과
+
+**렌더링 복잡도:**
+- Before: O(n) - 항목 수에 비례
+- After: O(1) - 항목 수와 무관
+
+**메모리 사용:**
+- Before: O(n) - 모든 DOM 노드 메모리 점유
+- After: O(1) - 고정된 DOM 노드만 유지
+
+**React Reconciliation:**
+- Before: n번의 Virtual DOM 비교
+- After: ~6번의 Virtual DOM 비교
+
+Virtual Windowing은 실제 DOM뿐 아니라 Virtual DOM 노드 수도 줄입니다. React는 상태 변경 시 Virtual DOM 트리를 비교(diffing)하는데, 비교 대상이 1,000개에서 6개로 줄어들면 Reconciliation 비용도 크게 감소합니다.
+
+**스크롤 성능:**
+- Before: 항목이 늘어날수록 스크롤 끊김 발생
+- After: 항목 수와 무관하게 일정한 성능
+
+실제 측정한 구체적인 수치보다 이론적 개선 효과에 집중하는 이유는, 성능은 환경에 따라 크게 달라지기 때문입니다. 중요한 것은 **알고리즘 복잡도가 개선**되었다는 점입니다.
+
+### 직접 체험해보기
+
+아래 인터랙티브 데모에서 일반 렌더링과 Virtual Windowing의 차이를 직접 확인해보세요. 항목 수를 늘려가며 DOM 노드 수 변화를 관찰할 수 있습니다.
+
+<VirtualScrollDemo />
+
+<aside data-type="info">
+**💡 체험 팁**
+
+1. 항목 수를 100개에서 1,000개로 늘려보세요
+2. **일반 무한 스크롤**: DOM 노드가 항목 수만큼 증가합니다
+3. **Virtual Windowing**: 항목이 늘어나도 DOM 노드는 일정합니다 (~6개)
+
+스크롤해보면서 두 방식의 차이를 체감해보세요!
+</aside>
+
+## 실전 적용 가이드
+
+### 기본 사용법
+
+```tsx
+const MyList = () => {
+  const [items, setItems] = useState([...]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+
+  const loadMore = async () => {
+    setIsLoading(true);
+    const newItems = await fetchItems();
+    setItems(prev => [...prev, ...newItems]);
+    setIsLoading(false);
+  };
+
+  const { virtualizer, viewportRef, sentinelRef } = useInfiniteScroll({
+    items,
+    estimateSize: () => 80, // 고정 높이
+    onLoadMore: loadMore,
+    isLoading,
+    hasMore,
+  });
+
+  return (
+    <ScrollArea viewportRef={viewportRef}>
+      <div style={{ height: virtualizer.getTotalSize(), position: 'relative' }}>
+        {virtualizer.getVirtualItems().map((virtualItem) => {
+          const item = items[virtualItem.index];
+          if (!item) return null;
+
+          return (
+            <div
+              key={virtualItem.key}
+              ref={virtualizer.measureElement}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                transform: `translateY(${virtualItem.start}px)`,
+              }}
+            >
+              <MyItemComponent item={item} />
+            </div>
+          );
+        })}
+        <div ref={sentinelRef} style={{ height: '1px' }} />
+      </div>
+    </ScrollArea>
+  );
+};
+```
+
+### 주요 주의사항
+
+#### 1. Type Guard 필수
+
+Virtual Windowing에서는 새 항목을 로딩하는 순간 `virtualItem.index`가 배열 길이를 초과할 수 있습니다.
+
+```tsx
+// ❌ Bad - undefined 에러 가능
+{virtualizer.getVirtualItems().map((virtualItem) => (
+  <div>{items[virtualItem.index].name}</div>
+))}
+
+// ✅ Good - Type guard로 안전하게 처리
+{virtualizer.getVirtualItems().map((virtualItem) => {
+  const item = items[virtualItem.index];
+  if (!item) return null;
+
+  return <div>{item.name}</div>;
+})}
+```
+
+#### 2. Absolute Positioning
+
+Virtual Windowing이 작동하려면 각 항목이 절대 위치로 배치되어야 합니다.
+
+```tsx
+// ✅ Good - GPU 가속 활용
+<div style={{
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  width: '100%',
+  transform: `translateY(${virtualItem.start}px)`, // GPU 가속
+}}>
+
+// ❌ Bad - 상대 위치는 Virtual Windowing과 호환되지 않음
+<div style={{ marginTop: virtualItem.start }}>
+```
+
+`transform`을 사용하면 GPU 가속을 활용하여 부드러운 스크롤을 구현할 수 있습니다.
+
+## 언제 Virtual Windowing이 필요한가
+
+모든 리스트에 Virtual Windowing이 필요한 건 아닙니다.
+
+| 상황 | Virtual Windowing |
+|------|-------------------|
+| 항목 50개 이하 | 불필요 |
+| 항목 100~500개 | 상황에 따라 |
+| 항목 500개 이상 또는 무한 스크롤 | 권장 |
+| 항목 높이가 매우 가변적 | 측정 비용 고려 필요 |
+| SEO가 중요한 콘텐츠 | 주의 (DOM에 없으면 크롤링 안 됨) |
+
+
+성능 최적화는 문제가 생긴 후가 아니라, 문제가 생길 수 있는 구조를 미리 인식하는 데서 시작하며,  
+확장 가능성이 있는 기능은 설계 단계에서 미리 고려하는 것이 결국 더 적은 비용으로 이어진다는 것에 대해 인사이트를 얻게 된 경험 이였습니다.
+
+---
+
+## 참고 자료
+
+- [TanStack Virtual 공식 문서](https://tanstack.com/virtual/latest)
+- [Intersection Observer API](https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API)
+- [React Performance](https://react.dev/learn/render-and-commit)
