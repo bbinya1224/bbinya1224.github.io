@@ -1,0 +1,333 @@
+---
+title: "asChild 패턴에 대한 생각: Composition이 답인가?"
+description: "Radix UI의 asChild/Slot 패턴을 실무에 적용하면서 느낀 점과 2026년 컴포넌트 설계 트렌드"
+date: "2026-02-06"
+category: "Frontend"
+tag: "React"
+published: true
+---
+
+처음 Radix UI의 `asChild` 패턴을 마주했을 때, 솔직히 약간 혼란스러웠습니다.
+
+```tsx
+<Button asChild>
+  <a href="/pricing">Pricing</a>
+</Button>
+```
+
+"왜 Button 안에 a 태그를 넣는 거지? 그냥 `as="a"`로 하면 안 되나?"
+
+하지만 직접 디자인 시스템을 만들면서 Next.js Link를 붙이고, Tooltip과 Dialog를 겹쳐 쓰다 보니 이게 왜 필요한지 점점 와닿기 시작했습니다.
+
+---
+
+## 왜 `as` prop이 아니라 `asChild`인가
+
+### `as` prop의 한계
+
+Styled Components, Chakra UI 등에서 익숙한 `as` prop 패턴이 있습니다.
+
+```tsx
+<Button as="a" href="/pricing">Pricing</Button>
+```
+
+간결하고 직관적이죠. 하지만 실제로 사용해보면 몇 가지 문제에 부딪힙니다.
+
+**1. Props Collision (속성 충돌)**
+
+```tsx
+// onClick이 Button의 것인지, a의 것인지 모호함
+<Button as="a" onClick={handleClick} href="/pricing">
+  Pricing
+</Button>
+```
+
+**2. TypeScript 성능 저하**
+
+대규모 프로젝트에서 polymorphic 컴포넌트의 타입 추론은 TypeScript 컴파일러에 상당한 부담을 줍니다. 복잡한 제네릭 타입으로 인해 IDE가 느려지는 경험을 해보신 분도 계실 겁니다.
+
+**3. Prop Spreading의 불투명성**
+
+어떤 props가 실제로 전달되는지 추적하기 어렵습니다. ESLint도 검증하기 힘들고, 디버깅도 복잡해집니다.
+
+### asChild가 해결하는 것
+
+```tsx
+<Button variant="primary" asChild>
+  <a href="/pricing" onClick={handleClick}>Pricing</a>
+</Button>
+```
+
+이 패턴에서는:
+- **Button의 props**: `variant="primary"` - 스타일링 담당
+- **a의 props**: `href`, `onClick` - 실제 동작 담당
+
+책임이 명확히 분리됩니다. 부모는 "어떻게 보일지"를, 자식은 "무엇으로 렌더링될지"를 결정합니다.
+
+### 직접 체험해보기
+
+아래 데모에서 asChild 패턴이 어떻게 동작하는지 직접 확인해보세요.
+
+<AsChildDemo />
+
+<aside data-type="info">
+**체험 팁**
+
+1. **DOM 구조 비교**: 전통적 방식은 wrapper가 생기고, asChild는 깔끔합니다
+2. **Props 병합**: 버튼을 클릭해서 이벤트 실행 순서를 확인해보세요
+3. **시맨틱 차이**: 두 버튼을 우클릭해서 컨텍스트 메뉴 차이를 확인해보세요
+</aside>
+
+---
+
+## 실무에서 느낀 장점
+
+### 1. Next.js Link와의 완벽한 통합
+
+```tsx
+<Button asChild>
+  <Link href="/dashboard">Dashboard</Link>
+</Button>
+```
+
+`as` prop 방식에서는 Next.js Link의 prefetching 같은 기능이 제대로 동작하지 않는 경우가 있었습니다. asChild는 이 문제를 깔끔하게 해결합니다.
+
+<aside data-type="info">
+**prefetching**  
+Link 컴포넌트가 뷰포트에 보이면 해당 페이지의 JS 번들과 데이터를 미리 로드하는 기능입니다.  
+asChild는 Link 컴포넌트를 그대로 유지하기 때문에 prefetching, client-side navigation 등 Next.js 라우팅 기능이 전부 정상 동작합니다.
+</aside>
+
+### 2. 다중 Primitive 조합
+
+```tsx
+<Tooltip.Root>
+  <Dialog.Root>
+    <Tooltip.Trigger asChild>
+      <Dialog.Trigger asChild>
+        <Button>Open Dialog (with Tooltip)</Button>
+      </Dialog.Trigger>
+    </Tooltip.Trigger>
+  </Dialog.Root>
+  <Tooltip.Content>Click to open dialog</Tooltip.Content>
+</Tooltip.Root>
+```
+
+Tooltip과 Dialog의 Trigger를 동시에 적용할 수 있습니다. `as` prop으로는 불가능한 조합이죠.
+
+### 3. 깔끔한 DOM 구조
+
+```tsx
+// asChild 방식 - 불필요한 wrapper 없음
+<button aria-describedby="tooltip-1">Hover me</button>
+<div id="tooltip-1" role="tooltip">Tooltip content</div>
+
+// 전통적 방식 - wrapper div 생성
+<div class="tooltip-wrapper">
+  <button>Hover me</button>
+  <div class="tooltip-content">...</div>
+</div>
+```
+
+CSS 타겟팅도 훨씬 단순해집니다.
+
+---
+
+## 이 방식을 선택하기 전 고려해야 할 사항
+
+하지만 마냥 좋기만 한 건 아닙니다. 실제로 적용하면서 몇 가지 어려움을 겪었습니다.
+
+### 1. ref forwarding 필수
+
+```tsx
+// 작동하지 않음
+const BrokenButton = (props) => <button {...props} />;
+
+<Tooltip.Trigger asChild>
+  <BrokenButton>Hover me</BrokenButton>  {/* Radix가 ref 접근 불가 */}
+</Tooltip.Trigger>
+```
+
+커스텀 컴포넌트를 asChild의 자식으로 사용하려면 반드시 ref를 전달해야 합니다.
+
+```tsx
+// React 19+
+const WorkingButton = ({ ref, ...props }) => (
+  <button ref={ref} {...props} />
+);
+
+// React 18 이하
+const WorkingButton = React.forwardRef((props, ref) => (
+  <button ref={ref} {...props} />
+));
+```
+
+### 2. 단일 자식만 허용
+
+```tsx
+// 에러 발생
+<Button asChild>
+  <span>Icon</span>
+  <span>Text</span>
+</Button>
+```
+
+여러 자식이 필요하면 하나의 요소로 감싸야 합니다.
+
+```tsx
+// 해결
+<Button asChild>
+  <a href="/">
+    <span>Icon</span>
+    <span>Text</span>
+  </a>
+</Button>
+```
+
+### 3. 디버깅 복잡도
+
+React DevTools에서 props 흐름을 추적하기가 어렵습니다.
+
+```
+<Button>
+  <Slot>
+    <SlotClone>
+      <a>  {/* 실제 렌더링된 요소 */}
+```
+
+어떤 props가 어디서 왔는지 파악하려면 경험이 필요합니다.
+
+### 4. RSC(React Server Components) 이슈
+
+2025년 5월에 발견된 버그로, Server Component에서 Slot 사용 시 렌더링이 실패하는 경우가 있습니다. `@radix-ui/react-slot` 1.2.2+ 버전에서 발생하며, Client Component로 변경하거나 버전을 다운그레이드해야 합니다.
+
+<aside data-type="warning">
+RSC를 많이 사용하는 Next.js 프로젝트라면 이 이슈를 반드시 확인하세요.
+
+- [Slot stops working in Server Component React #3542](https://github.com/radix-ui/primitives/issues/3542)
+- [asChild with lazy references fails in React 19 + RSC production builds #3776](https://github.com/radix-ui/primitives/issues/3776)
+</aside>
+
+---
+
+## 2026년 트렌드: 선택지가 늘어나고 있다
+
+### Base UI의 등장
+
+2025년 12월, MUI 팀의 Base UI가 v1.0으로 안정화되었습니다.  
+shadcn/ui도 이제 프로젝트 초기화 시 Radix UI 또는 Base UI를 선택할 수 있습니다.
+
+Base UI는 `asChild` 대신 **Render Props** 패턴을 사용합니다.
+
+```tsx
+// Radix UI
+<Button asChild>
+  <Link href="/home">Home</Link>
+</Button>
+
+// Base UI
+<Button render={(props) => <Link {...props} href="/home">Home</Link>} />
+```
+
+Render Props가 더 장황하지만, props 흐름이 명시적이고 TypeScript 타입 추론이 더 정확합니다.
+
+### 라이브러리별 비교
+
+| 라이브러리 | Composition 방식 | 특징 |
+|-----------|----------------|------|
+| **Radix UI** | `asChild` prop | cloneElement 기반, 가장 간결 |
+| **Base UI** | Render props | 더 명시적, 타입 추론 우수 |
+| **React Aria** | Render props + Data attributes | 접근성 전문 |
+| **Ark UI** | `asChild` prop | Chakra 팀의 headless UI |
+
+---
+
+## React.cloneElement의 미래
+
+React 공식 문서는 2024년에 `cloneElement`를 "Legacy API"로 지정했습니다.
+
+> "Using cloneElement is uncommon and can lead to fragile code."
+
+asChild/Slot 패턴은 내부적으로 `cloneElement`를 사용합니다.  
+그래서 일부에서는 우려의 목소리가 있죠.
+
+하지만 Radix UI 유지보수자의 입장은 명확합니다.
+
+> "No immediate plans. There are no equivalent workarounds at the moment and as of now asChild/Slot work great."
+
+**Legacy ≠ Deprecated**입니다. 여전히 유효한 API이고, 당장 대안이 없습니다.
+
+다만 성능 측면에서 `cloneElement`는 React의 자동 리렌더링 최적화에서 제외됩니다. 매 렌더링마다 새로운 엘리먼트 인스턴스가 생성되죠.  
+대부분의 UI에서는 영향이 미미하지만, 초당 수십 번 렌더링되는 Critical path에서는 주의가 필요합니다.
+
+---
+
+## asChild를 선택한 이유
+
+**1. 확장성**
+
+새로운 유스케이스가 생겨도 props를 추가할 필요가 없습니다.
+
+```tsx
+// Configuration 방식 - props가 계속 늘어남
+<Button
+  leftIcon={...}
+  rightIcon={...}
+  loading={...}
+  variant="primary"
+  size="large"
+  as="a"
+  href="..."
+/>
+
+// Composition 방식 - 조합으로 해결
+<Button variant="primary" size="large" asChild>
+  <a href="...">
+    <Icon />
+    <span>Text</span>
+    {loading && <Spinner />}
+  </a>
+</Button>
+```
+
+**2. 시맨틱 정확성**
+
+```tsx
+// 비시맨틱 - 버튼이 링크처럼 보이지만 실제로는 버튼
+<Button onClick={() => router.push('/pricing')}>Pricing</Button>
+
+// 시맨틱 - 실제로 anchor 태그
+<Button asChild>
+  <a href="/pricing">Pricing</a>
+</Button>
+```
+
+스크린 리더가 올바른 요소 타입을 인식하고, 브라우저의 "링크로 이동" 컨텍스트 메뉴도 제대로 동작합니다.
+
+**3. 선택권**
+
+Headless UI의 핵심은 "스타일링 자유"입니다.  
+asChild는 여기서 한 발 더 나아가 "렌더링 요소 자유"까지 제공합니다.
+
+
+---
+
+## 언제 무엇을 선택할까
+
+저는 Radix UI 기반으로 디자인 시스템을 구축하고 있어서 자연스럽게 asChild를 쓰고 있는데, 모든 상황에 정답은 아닙니다.
+
+타입 안정성이 정말 중요한 프로젝트라면 Base UI의 Render Props가 더 나을 수 있고, 이미 Chakra나 MUI로 돌아가는 프로젝트를 굳이 마이그레이션할 필요도 없습니다. 팀원들이 asChild 개념 자체를 처음 접한다면 온보딩 비용도 무시 못 하고요.
+
+결국 프로젝트 상황이랑 팀 컨텍스트에 맞게 고르는 게 맞다고 생각합니다.
+
+---
+
+## 참고 자료
+
+- [Radix UI - Composition Guide](https://www.radix-ui.com/primitives/docs/guides/composition)
+- [Radix UI - Slot Utility](https://www.radix-ui.com/primitives/docs/utilities/slot)
+- [React - cloneElement API](https://react.dev/reference/react/cloneElement)
+- [React - Legacy APIs](https://react.dev/reference/react/legacy)
+- [Radix UI - Plans for asChild/Slot with cloneElement legacy #2537](https://github.com/radix-ui/primitives/issues/2537)
+- [shadcn/ui Documentation](https://ui.shadcn.com/)
+- [Base UI Documentation](https://base-ui.com/)

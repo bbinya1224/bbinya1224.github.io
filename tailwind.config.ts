@@ -97,17 +97,33 @@ module.exports = {
 
             // 인용구
             blockquote: {
-              borderLeftColor: "#61AFFE",
-              color: "#333",
+              borderLeftColor: "#3B82F6",
+              color: "#374151",
               fontWeight: "500",
-              backgroundColor: "#F7FAFC",
-              paddingTop: "0.5em",
-              paddingBottom: "0.5em",
-              paddingRight: "1em",
+              fontStyle: "normal",
+              backgroundColor: "#F8FAFC",
+              paddingTop: "1em",
+              paddingBottom: "0.75em",
+              paddingInline: "1.25em",
+              borderRadius: "0 0.5em 0.5em 0",
+              position: "relative",
+              quotes: "none",
+            },
+            "blockquote::before": {
+              position: "absolute",
+              left: "0.5em",
+              top: "0.25em",
+              fontSize: "2.5em",
+              color: "#93C5FD",
+              fontFamily: "Georgia, serif",
+              lineHeight: "1",
             },
             "blockquote p": {
               marginTop: "0",
               marginBottom: "0",
+            },
+            "blockquote code": {
+              backgroundColor: "#E2E8F0",
             },
 
             // 코드
@@ -157,55 +173,82 @@ module.exports = {
               padding: "0",
             },
 
+            // Aside - 기본 스타일
             aside: {
-              backgroundColor: "#F5F4F3",
+              backgroundColor: "#F7F7F5",
               borderRadius: "0.5em",
-              padding: "1em",
+              padding: "1em 1.25em",
               marginTop: "1.5em",
               marginBottom: "1.5em",
-              fontSize: "1rem", // Slightly smaller than body
-              borderLeftWidth: "4px", // Thinner
+              fontSize: "1rem",
+              color: "#4A4A4A",
+              borderLeftWidth: "4px",
+              borderLeftColor: "#D4D4D4",
               borderBottomLeftRadius: "0",
               borderTopLeftRadius: "0",
+              lineHeight: "1.7",
             },
+            "aside strong": {
+              color: "#1A1A1A",
+            },
+            "aside code": {
+              backgroundColor: "#EAEAEA",
+            },
+
             // 경고 (빨간색 계열)
             "aside[data-type='warning']": {
-              borderLeftColor: "#E03B8D",
-              backgroundColor: "#FFE5E0",
-              color: "#921A1A",
+              borderLeftColor: "#DC2626",
+              backgroundColor: "#FEF2F2",
+              color: "#7F1D1D",
             },
             "aside[data-type='warning'] strong": {
-              color: "#921A1A",
+              color: "#7F1D1D",
+            },
+            "aside[data-type='warning'] code": {
+              backgroundColor: "#FEE2E2",
+              color: "#991B1B",
             },
 
             // 정보 (파란색 계열)
             "aside[data-type='info']": {
-              borderLeftColor: "#0084E8",
-              backgroundColor: "#E5F1FF",
-              color: "#004199",
+              borderLeftColor: "#2563EB",
+              backgroundColor: "#EFF6FF",
+              color: "#1E40AF",
             },
             "aside[data-type='info'] strong": {
-              color: "#004199",
+              color: "#1E3A8A",
+            },
+            "aside[data-type='info'] code": {
+              backgroundColor: "#DBEAFE",
+              color: "#1D4ED8",
             },
 
             // 주의 (노란색 계열)
             "aside[data-type='note']": {
-              borderLeftColor: "#F4A640",
-              backgroundColor: "#FFF7E5",
-              color: "#805D0C",
+              borderLeftColor: "#D97706",
+              backgroundColor: "#FFFBEB",
+              color: "#92400E",
             },
             "aside[data-type='note'] strong": {
-              color: "#805D0C",
+              color: "#78350F",
+            },
+            "aside[data-type='note'] code": {
+              backgroundColor: "#FEF3C7",
+              color: "#B45309",
             },
 
             // 성공 (녹색 계열)
             "aside[data-type='success']": {
-              borderLeftColor: "#46A758",
-              backgroundColor: "#E5FDE5",
-              color: "#0E5F1E",
+              borderLeftColor: "#16A34A",
+              backgroundColor: "#F0FDF4",
+              color: "#166534",
             },
             "aside[data-type='success'] strong": {
-              color: "#0E5F1E",
+              color: "#14532D",
+            },
+            "aside[data-type='success'] code": {
+              backgroundColor: "#DCFCE7",
+              color: "#15803D",
             },
 
             // 이미지
@@ -277,18 +320,21 @@ module.exports = {
         // 다크 모드
         invert: {
           css: {
-            color: "#EBEBEB",
+            color: "#E8E8E8",
 
             "h1, h2, h3, h4, h5, h6": {
               color: "#FFFFFF",
-              borderBottom: 0,
+            },
+            h2: {
+              borderBottom: "1px solid #404040",
+              paddingBottom: "0.3em",
             },
 
             a: {
-              color: "#61AFFE",
-              borderBottomColor: "#61AFFE",
+              color: "#7CC4FA",
+              borderBottomColor: "#7CC4FA",
               "&:hover": {
-                backgroundColor: "rgba(97, 175, 254, 0.1)",
+                backgroundColor: "rgba(124, 196, 250, 0.15)",
               },
             },
 
@@ -297,70 +343,120 @@ module.exports = {
             },
 
             blockquote: {
-              borderLeftColor: "#61AFFE",
-              color: "#E0E0E0",
+              borderLeftColor: "#60A5FA",
+              color: "#D1D5DB",
               fontWeight: "500",
-              backgroundColor: "#1A2A3D",
-              paddingTop: "0.5em",
-              paddingBottom: "0.5em",
-              paddingRight: "1em",
+              fontStyle: "normal",
+              backgroundColor: "#1E293B",
+              paddingTop: "1em",
+              paddingBottom: "0.75em",
+              paddingInline: "1.25em",
+              borderRadius: "0 0.5em 0.5em 0",
+              position: "relative",
+              quotes: "none",
+            },
+            "blockquote::before": {
+              position: "absolute",
+              left: "0.5em",
+              top: "0.25em",
+              fontSize: "2.5em",
+              color: "#3B82F6",
+              fontFamily: "Georgia, serif",
+              lineHeight: "1",
             },
             "blockquote p": {
               marginTop: "0",
               marginBottom: "0",
             },
+            "blockquote code": {
+              backgroundColor: "#334155",
+            },
 
             em: {
-              color: "#e5f5fd",
+              color: "#D4E8F8",
               fontStyle: "italic",
             },
 
             code: {
-              color: "#FF7B9F",
-              backgroundColor: "#2D2D2D",
+              color: "#F8A5B8",
+              backgroundColor: "#363636",
             },
 
             // Aside - 기본 스타일 (다크 모드)
             aside: {
-              backgroundColor: "#2D2D2D",
+              backgroundColor: "#2A2A2A",
               borderRadius: "0.5em",
-              padding: "1em",
+              padding: "1em 1.25em",
               marginTop: "1.5em",
               marginBottom: "1.5em",
-              fontSize: "0.95em",
-              color: "#EBEBEB",
-              borderLeftWidth: "8px",
+              fontSize: "1rem",
+              color: "#D4D4D4",
+              borderLeftWidth: "4px",
+              borderLeftColor: "#525252",
               borderBottomLeftRadius: "0",
               borderTopLeftRadius: "0",
+            },
+            "aside strong": {
+              color: "#FFFFFF",
+            },
+            "aside code": {
+              backgroundColor: "#404040",
             },
 
             // 경고 (빨간색 계열)
             "aside[data-type='warning']": {
-              borderLeftColor: "#E03B8D",
-              backgroundColor: "#3D1F1F",
+              borderLeftColor: "#F87171",
+              backgroundColor: "#2D1B1B",
+              color: "#FCA5A5",
+            },
+            "aside[data-type='warning'] strong": {
+              color: "#FECACA",
+            },
+            "aside[data-type='warning'] code": {
+              backgroundColor: "#3D2626",
+              color: "#FCA5A5",
             },
 
             // 정보 (파란색 계열)
             "aside[data-type='info']": {
-              borderLeftColor: "#0084E8",
-              backgroundColor: "#1A2F4A",
+              borderLeftColor: "#60A5FA",
+              backgroundColor: "#1E293B",
+              color: "#BFDBFE",
+            },
+            "aside[data-type='info'] strong": {
+              color: "#DBEAFE",
+            },
+            "aside[data-type='info'] code": {
+              backgroundColor: "#1E3A5F",
+              color: "#BFDBFE",
             },
 
             // 주의 (노란색 계열)
             "aside[data-type='note']": {
-              borderLeftColor: "#F4A640",
-              backgroundColor: "#3D2F1F",
-              color: "#FFD79D",
+              borderLeftColor: "#FBBF24",
+              backgroundColor: "#2D2518",
+              color: "#FDE68A",
             },
             "aside[data-type='note'] strong": {
-              color: "#FFD79D",
+              color: "#FEF3C7",
+            },
+            "aside[data-type='note'] code": {
+              backgroundColor: "#3D3118",
+              color: "#FDE68A",
             },
 
             // 성공 (녹색 계열)
             "aside[data-type='success']": {
-              borderLeftColor: "#46A758",
+              borderLeftColor: "#4ADE80",
+              backgroundColor: "#1A2E1A",
+              color: "#BBF7D0",
+            },
+            "aside[data-type='success'] strong": {
+              color: "#DCFCE7",
+            },
+            "aside[data-type='success'] code": {
               backgroundColor: "#1F3D1F",
-              color: "#98FF98",
+              color: "#BBF7D0",
             },
 
             pre: {
