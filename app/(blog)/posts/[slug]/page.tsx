@@ -23,7 +23,7 @@ const PostDetailPage = async ({ params }: PageProps) => {
     author: {
       "@type": "Person",
       name: "삔야",
-      url: "https://bbinya1224.github.io/blog/about-me",
+      url: "https://bbinya1224.github.io/about-me",
     },
     publisher: {
       "@type": "Person",
@@ -34,7 +34,7 @@ const PostDetailPage = async ({ params }: PageProps) => {
       : undefined,
     mainEntityOfPage: {
       "@type": "WebPage",
-      "@id": `https://bbinya1224.github.io/blog/posts/${slug}`,
+      "@id": `https://bbinya1224.github.io/posts/${slug}`,
     },
   };
 
@@ -72,7 +72,7 @@ export async function generateMetadata({
     };
   }
 
-  const url = `https://bbinya1224.github.io/blog/posts/${slug}`;
+  const url = `https://bbinya1224.github.io/posts/${slug}`;
 
   return {
     title: post.title,

@@ -9,7 +9,7 @@
     "lint:fix": "eslint src/ --fix && prettier --write src/",
     "format": "prettier --write src/",
     "build": "next build",
-    "postbuild": "next-sitemap && node src/app/scripts/generate-rss.js",
+    "postbuild": "node src/app/scripts/generate-rss.js",
     "new": "plop --plopfile src/shared/config/plop/plopfile.js"
   },
   "dependencies": {
@@ -31,7 +31,6 @@
     "mermaid": "^10.9.5",
     "next": "^15.5.9",
     "next-mdx-remote": "^5.0.0",
-    "next-sitemap": "^4.2.3",
     "next-themes": "^0.4.6",
     "nextjs-toploader": "^3.9.17",
     "react": "^19.2.3",
