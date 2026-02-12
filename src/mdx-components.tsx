@@ -1,5 +1,6 @@
 import type { MDXComponents } from "mdx/types";
 import AsChildDemo from "@/widgets/lab/ui/as-child-demo/AsChildDemo";
+import ContextRerenderDemo from "@/widgets/lab/ui/context-rerender-demo/ContextRerenderDemo";
 import ControlledDemo from "@/widgets/lab/ui/controlled-demo/ControlledDemo";
 import FlickeringDemo from "@/widgets/lab/ui/flickering-demo/FlickeringDemo";
 import { ImageCarousel } from "@/widgets/lab/ui/ImageCarousel/ImageCarousel";
@@ -10,6 +11,7 @@ import VirtualScrollDemo from "@/widgets/lab/ui/virtual-scroll-demo/VirtualScrol
 
 export const mdxComponents: MDXComponents = {
   AsChildDemo,
+  ContextRerenderDemo,
   LifecycleLab,
   Mermaid,
   ImageCarousel,
