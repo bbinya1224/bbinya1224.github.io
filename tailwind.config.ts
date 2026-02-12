@@ -33,8 +33,6 @@ module.exports = {
             },
             h2: {
               fontSize: "1.5rem",
-              borderBottom: "1px solid #E5E5E5",
-              paddingBottom: "0.3em",
             },
             h3: {
               fontSize: "1.25rem",
@@ -325,10 +323,7 @@ module.exports = {
             "h1, h2, h3, h4, h5, h6": {
               color: "#FFFFFF",
             },
-            h2: {
-              borderBottom: "1px solid #404040",
-              paddingBottom: "0.3em",
-            },
+            h2: {},
 
             a: {
               color: "#7CC4FA",
