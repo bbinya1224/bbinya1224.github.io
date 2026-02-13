@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
-import PostList from "@/widgets/post/ui/PostList";
-import PostListSkeleton from "@/widgets/post/ui/skeleton/PostListSkeleton";
+import getAllPosts from "@/entities/post/api/getAllPosts";
+import toFrontmatter from "@/entities/post/lib/toFrontmatter";
+import InfinitePostList from "@/widgets/post/ui/InfinitePostList";
 
 export const metadata: Metadata = {
   alternates: {
@@ -10,11 +10,8 @@ export const metadata: Metadata = {
 };
 
 const HomePage = () => {
-  return (
-    <Suspense fallback={<PostListSkeleton />}>
-      <PostList />
-    </Suspense>
-  );
+  const posts = getAllPosts();
+  return <InfinitePostList posts={posts.map(toFrontmatter)} />;
 };
 
 export default HomePage;

@@ -8,5 +8,9 @@ export const metadata: Metadata = {
 };
 
 export default function ListsPage() {
-  return <CategoryCollection />;
+  return (
+    <section className="w-full">
+      <CategoryCollection />
+    </section>
+  );
 }

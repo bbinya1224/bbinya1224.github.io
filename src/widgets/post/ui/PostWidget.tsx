@@ -47,7 +47,7 @@ const PostWidget = ({
 
       {thumbnail && (
         <Link
-          href={`/blog/posts/${slug}`}
+          href={`/posts/${slug}`}
           className="relative hidden h-[166px] w-[160px] shrink-0 overflow-hidden sm:block"
         >
           <Image

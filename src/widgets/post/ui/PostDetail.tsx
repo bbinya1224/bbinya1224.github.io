@@ -1,4 +1,5 @@
-import { type Post } from "@/entities/post/model/types";
+import Link from "next/link";
+import { type Post, type PostFrontmatter } from "@/entities/post/model/types";
 import Comment from "@/features/comment/ui/Comment";
 import CalendarIcon from "@/shared/icons/ic_calendar.svg";
 import CategoryIcon from "@/shared/icons/ic_category.svg";
@@ -6,9 +7,10 @@ import TagIcon from "@/shared/icons/ic_tag.svg";
 
 type PostDetailProps = {
   post: Post;
+  relatedPosts: PostFrontmatter[];
 };
 
-const PostDetail = ({ post }: PostDetailProps) => {
+const PostDetail = ({ post, relatedPosts }: PostDetailProps) => {
   const tags = post.tag?.split(",").map((t) => t.trim()) || [];
   const formattedDate = new Date(post.date).toLocaleDateString("ko-KR", {
     year: "numeric",
@@ -50,6 +52,26 @@ const PostDetail = ({ post }: PostDetailProps) => {
       </header>
 
       <div className="prose dark:prose-invert max-w-none">{post.content}</div>
+
+      {relatedPosts.length > 0 && (
+        <section className="mt-12 border-t border-gray-200 pt-8 dark:border-gray-700">
+          <h2 className="mb-4 text-xl font-semibold text-gray-900 dark:text-gray-100">
+            관련 글
+          </h2>
+          <ul className="space-y-3">
+            {relatedPosts.map((related) => (
+              <li key={related.slug}>
+                <Link
+                  href={`/posts/${related.slug}`}
+                  className="text-base text-gray-700 hover:text-amber-500 dark:text-gray-300 dark:hover:text-amber-400"
+                >
+                  {related.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
 
       <Comment />
     </article>

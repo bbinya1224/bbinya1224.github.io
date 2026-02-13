@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Script from "next/script";
 import getAllPosts from "@/entities/post/api/getAllPosts";
 import getPostBySlug from "@/entities/post/lib/getPostBySlug";
+import getRelatedPosts from "@/entities/post/lib/getRelatedPosts";
 import PostDetail from "@/widgets/post/ui/PostDetail";
 
 type PageProps = {
@@ -13,6 +14,10 @@ const PostDetailPage = async ({ params }: PageProps) => {
   const post = await getPostBySlug(slug);
 
   if (!post) return <div>게시글을 찾을 수 없습니다.</div>;
+  const relatedPosts = getRelatedPosts({
+    currentPost: post,
+    posts: getAllPosts(),
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -46,7 +51,7 @@ const PostDetailPage = async ({ params }: PageProps) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <section className="mx-auto h-full w-full max-w-4xl">
-        <PostDetail post={post} />
+        <PostDetail post={post} relatedPosts={relatedPosts} />
       </section>
     </>
   );
