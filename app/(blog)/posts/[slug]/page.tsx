@@ -2,7 +2,7 @@ import { Metadata } from "next";
 import Script from "next/script";
 import getAllPosts from "@/entities/post/api/getAllPosts";
 import getPostBySlug from "@/entities/post/lib/getPostBySlug";
-import toFrontmatter from "@/entities/post/lib/toFrontmatter";
+import getRelatedPosts from "@/entities/post/lib/getRelatedPosts";
 import PostDetail from "@/widgets/post/ui/PostDetail";
 
 type PageProps = {
@@ -14,16 +14,10 @@ const PostDetailPage = async ({ params }: PageProps) => {
   const post = await getPostBySlug(slug);
 
   if (!post) return <div>게시글을 찾을 수 없습니다.</div>;
-  const relatedPosts = getAllPosts()
-    .filter((item) => item.slug !== slug)
-    .sort((a, b) => {
-      const scoreA = a.category === post.category ? 1 : 0;
-      const scoreB = b.category === post.category ? 1 : 0;
-      if (scoreA !== scoreB) return scoreB - scoreA;
-      return new Date(b.date).getTime() - new Date(a.date).getTime();
-    })
-    .slice(0, 5)
-    .map(toFrontmatter);
+  const relatedPosts = getRelatedPosts({
+    currentPost: post,
+    posts: getAllPosts(),
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
