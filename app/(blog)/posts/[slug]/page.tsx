@@ -2,6 +2,7 @@ import { Metadata } from "next";
 import Script from "next/script";
 import getAllPosts from "@/entities/post/api/getAllPosts";
 import getPostBySlug from "@/entities/post/lib/getPostBySlug";
+import toFrontmatter from "@/entities/post/lib/toFrontmatter";
 import PostDetail from "@/widgets/post/ui/PostDetail";
 
 type PageProps = {
@@ -21,7 +22,8 @@ const PostDetailPage = async ({ params }: PageProps) => {
       if (scoreA !== scoreB) return scoreB - scoreA;
       return new Date(b.date).getTime() - new Date(a.date).getTime();
     })
-    .slice(0, 5);
+    .slice(0, 5)
+    .map(toFrontmatter);
 
   const jsonLd = {
     "@context": "https://schema.org",

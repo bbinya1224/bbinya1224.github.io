@@ -16,17 +16,27 @@ const ensureDir = (dirPath) => {
 };
 
 const copyAsDirectoryIndex = (htmlFilePath, targetDir) => {
+  const targetPath = path.join(targetDir, "index.html");
+  if (fs.existsSync(targetPath)) {
+    console.log(`Skipping ${targetPath} (already exists)`);
+    return;
+  }
   ensureDir(targetDir);
-  fs.copyFileSync(htmlFilePath, path.join(targetDir, "index.html"));
+  fs.copyFileSync(htmlFilePath, targetPath);
 };
 
-const htmlFiles = fs.readdirSync(outDir).filter((file) => file.endsWith(".html"));
+const htmlFiles = fs
+  .readdirSync(outDir)
+  .filter((file) => file.endsWith(".html"));
 
 htmlFiles.forEach((fileName) => {
   if (fileName === "index.html" || fileName === "404.html") return;
 
   const fileBaseName = fileName.replace(/\.html$/, "");
-  copyAsDirectoryIndex(path.join(outDir, fileName), path.join(outDir, fileBaseName));
+  copyAsDirectoryIndex(
+    path.join(outDir, fileName),
+    path.join(outDir, fileBaseName),
+  );
 });
 
 const postsDir = path.join(outDir, "posts");
@@ -37,7 +47,10 @@ if (fs.existsSync(postsDir)) {
 
   postHtmlFiles.forEach((fileName) => {
     const slug = fileName.replace(/\.html$/, "");
-    copyAsDirectoryIndex(path.join(postsDir, fileName), path.join(postsDir, slug));
+    copyAsDirectoryIndex(
+      path.join(postsDir, fileName),
+      path.join(postsDir, slug),
+    );
   });
 }
 

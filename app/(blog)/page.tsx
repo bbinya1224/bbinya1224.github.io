@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import getAllPosts from "@/entities/post/api/getAllPosts";
+import toFrontmatter from "@/entities/post/lib/toFrontmatter";
 import InfinitePostList from "@/widgets/post/ui/InfinitePostList";
 
 export const metadata: Metadata = {
@@ -10,8 +11,7 @@ export const metadata: Metadata = {
 
 const HomePage = () => {
   const posts = getAllPosts();
-  const postItems = posts.map(({ ...frontmatter }) => frontmatter);
-  return <InfinitePostList posts={postItems} />;
+  return <InfinitePostList posts={posts.map(toFrontmatter)} />;
 };
 
 export default HomePage;

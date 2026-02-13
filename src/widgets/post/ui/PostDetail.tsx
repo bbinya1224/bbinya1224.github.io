@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { type Post } from "@/entities/post/model/types";
+import { type Post, type PostFrontmatter } from "@/entities/post/model/types";
 import Comment from "@/features/comment/ui/Comment";
 import CalendarIcon from "@/shared/icons/ic_calendar.svg";
 import CategoryIcon from "@/shared/icons/ic_category.svg";
@@ -7,7 +7,7 @@ import TagIcon from "@/shared/icons/ic_tag.svg";
 
 type PostDetailProps = {
   post: Post;
-  relatedPosts: Post[];
+  relatedPosts: PostFrontmatter[];
 };
 
 const PostDetail = ({ post, relatedPosts }: PostDetailProps) => {

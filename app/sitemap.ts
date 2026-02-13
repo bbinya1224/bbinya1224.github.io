@@ -23,7 +23,7 @@ const sitemap = (): MetadataRoute.Sitemap => {
       changeFrequency: "weekly",
       priority: 1.0,
     },
-{
+    {
       url: `${baseUrl}/about-me`,
       lastModified: now,
       changeFrequency: "weekly",
