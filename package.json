@@ -9,7 +9,7 @@
     "lint:fix": "eslint src/ --fix && prettier --write src/",
     "format": "prettier --write src/",
     "build": "next build",
-    "postbuild": "node src/app/scripts/generate-rss.js",
+    "postbuild": "node src/app/scripts/generate-rss.js && node src/app/scripts/generate-static-indexes.js",
     "new": "plop --plopfile src/shared/config/plop/plopfile.js"
   },
   "dependencies": {
@@ -35,7 +35,6 @@
     "nextjs-toploader": "^3.9.17",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
-    "react-intersection-observer": "^10.0.0",
     "react-loading-skeleton": "^3.5.0",
     "rehype-pretty-code": "^0.14.1",
     "remark": "^15.0.1",

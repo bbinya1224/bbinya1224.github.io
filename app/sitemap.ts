@@ -14,19 +14,24 @@ const sitemap = (): MetadataRoute.Sitemap => {
     priority: 0.8,
   }));
 
+  const now = new Date();
+
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: baseUrl,
+      lastModified: now,
       changeFrequency: "weekly",
       priority: 1.0,
     },
-    {
+{
       url: `${baseUrl}/about-me`,
+      lastModified: now,
       changeFrequency: "weekly",
       priority: 1.0,
     },
     {
       url: `${baseUrl}/lists`,
+      lastModified: now,
       changeFrequency: "daily",
       priority: 0.7,
     },

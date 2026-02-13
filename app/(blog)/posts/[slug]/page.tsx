@@ -13,6 +13,15 @@ const PostDetailPage = async ({ params }: PageProps) => {
   const post = await getPostBySlug(slug);
 
   if (!post) return <div>게시글을 찾을 수 없습니다.</div>;
+  const relatedPosts = getAllPosts()
+    .filter((item) => item.slug !== slug)
+    .sort((a, b) => {
+      const scoreA = a.category === post.category ? 1 : 0;
+      const scoreB = b.category === post.category ? 1 : 0;
+      if (scoreA !== scoreB) return scoreB - scoreA;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    })
+    .slice(0, 5);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -46,7 +55,7 @@ const PostDetailPage = async ({ params }: PageProps) => {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <section className="mx-auto h-full w-full max-w-4xl">
-        <PostDetail post={post} />
+        <PostDetail post={post} relatedPosts={relatedPosts} />
       </section>
     </>
   );
