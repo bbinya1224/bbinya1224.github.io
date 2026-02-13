@@ -186,11 +186,24 @@ module.exports = {
               borderTopLeftRadius: "0",
               lineHeight: "1.7",
             },
+            "aside p": {
+              marginTop: "0.5em",
+              marginBottom: "0.5em",
+            },
             "aside strong": {
               color: "#1A1A1A",
             },
-            "aside code": {
+            "aside:not([data-type]) code": {
               backgroundColor: "#EAEAEA",
+              color: "#1F2937",
+              border: "1px solid #D1D5DB",
+              borderRadius: "0.35em",
+              padding: "0.15em 0.35em",
+            },
+            "aside pre": {
+              marginTop: "1em !important",
+              marginBottom: "1em !important",
+              boxShadow: "none !important",
             },
 
             // 경고 (빨간색 계열)
@@ -205,6 +218,10 @@ module.exports = {
             "aside[data-type='warning'] code": {
               backgroundColor: "#FEE2E2",
               color: "#991B1B",
+              border: "1px solid #FCA5A5",
+            },
+            "aside[data-type='warning'] pre": {
+              backgroundColor: "#7F1D1D !important",
             },
 
             // 정보 (파란색 계열)
@@ -219,6 +236,10 @@ module.exports = {
             "aside[data-type='info'] code": {
               backgroundColor: "#DBEAFE",
               color: "#1D4ED8",
+              border: "1px solid #93C5FD",
+            },
+            "aside[data-type='info'] pre": {
+              backgroundColor: "#1E3A8A !important",
             },
 
             // 주의 (노란색 계열)
@@ -233,6 +254,10 @@ module.exports = {
             "aside[data-type='note'] code": {
               backgroundColor: "#FEF3C7",
               color: "#B45309",
+              border: "1px solid #FCD34D",
+            },
+            "aside[data-type='note'] pre": {
+              backgroundColor: "#78350F !important",
             },
 
             // 성공 (녹색 계열)
@@ -247,6 +272,10 @@ module.exports = {
             "aside[data-type='success'] code": {
               backgroundColor: "#DCFCE7",
               color: "#15803D",
+              border: "1px solid #86EFAC",
+            },
+            "aside[data-type='success'] pre": {
+              backgroundColor: "#14532D !important",
             },
 
             // 이미지
@@ -391,11 +420,24 @@ module.exports = {
               borderBottomLeftRadius: "0",
               borderTopLeftRadius: "0",
             },
+            "aside p": {
+              marginTop: "0.5em",
+              marginBottom: "0.5em",
+            },
             "aside strong": {
               color: "#FFFFFF",
             },
-            "aside code": {
+            "aside:not([data-type]) code": {
               backgroundColor: "#404040",
+              color: "#F3F4F6",
+              border: "1px solid #525252",
+              borderRadius: "0.35em",
+              padding: "0.15em 0.35em",
+            },
+            "aside pre": {
+              marginTop: "1em !important",
+              marginBottom: "1em !important",
+              boxShadow: "none !important",
             },
 
             // 경고 (빨간색 계열)
@@ -410,6 +452,7 @@ module.exports = {
             "aside[data-type='warning'] code": {
               backgroundColor: "#3D2626",
               color: "#FCA5A5",
+              border: "1px solid #7F1D1D",
             },
 
             // 정보 (파란색 계열)
@@ -424,6 +467,7 @@ module.exports = {
             "aside[data-type='info'] code": {
               backgroundColor: "#1E3A5F",
               color: "#BFDBFE",
+              border: "1px solid #1D4ED8",
             },
 
             // 주의 (노란색 계열)
@@ -438,6 +482,7 @@ module.exports = {
             "aside[data-type='note'] code": {
               backgroundColor: "#3D3118",
               color: "#FDE68A",
+              border: "1px solid #92400E",
             },
 
             // 성공 (녹색 계열)
@@ -452,6 +497,7 @@ module.exports = {
             "aside[data-type='success'] code": {
               backgroundColor: "#1F3D1F",
               color: "#BBF7D0",
+              border: "1px solid #166534",
             },
 
             pre: {
