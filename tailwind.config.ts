@@ -278,6 +278,16 @@ module.exports = {
               backgroundColor: "#14532D !important",
             },
 
+            // 형광펜 (mark)
+            mark: {
+              background:
+                "linear-gradient(to top, #FDE68A 40%, transparent 40%)",
+              color: "inherit",
+              padding: "0.05em 0.15em",
+              borderRadius: "0.2em",
+              boxDecorationBreak: "clone",
+            },
+
             // 이미지
             img: {
               margin: "2em auto",
@@ -430,7 +440,6 @@ module.exports = {
             "aside:not([data-type]) code": {
               backgroundColor: "#404040",
               color: "#F3F4F6",
-              border: "1px solid #525252",
               borderRadius: "0.35em",
               padding: "0.15em 0.35em",
             },
@@ -452,7 +461,6 @@ module.exports = {
             "aside[data-type='warning'] code": {
               backgroundColor: "#3D2626",
               color: "#FCA5A5",
-              border: "1px solid #7F1D1D",
             },
 
             // 정보 (파란색 계열)
@@ -467,7 +475,6 @@ module.exports = {
             "aside[data-type='info'] code": {
               backgroundColor: "#1E3A5F",
               color: "#BFDBFE",
-              border: "1px solid #1D4ED8",
             },
 
             // 주의 (노란색 계열)
@@ -482,7 +489,6 @@ module.exports = {
             "aside[data-type='note'] code": {
               backgroundColor: "#3D3118",
               color: "#FDE68A",
-              border: "1px solid #92400E",
             },
 
             // 성공 (녹색 계열)
@@ -497,7 +503,12 @@ module.exports = {
             "aside[data-type='success'] code": {
               backgroundColor: "#1F3D1F",
               color: "#BBF7D0",
-              border: "1px solid #166534",
+            },
+
+            mark: {
+              background:
+                "linear-gradient(to top, rgba(250, 204, 21, 0.35) 40%, transparent 40%)",
+              color: "inherit",
             },
 
             pre: {
