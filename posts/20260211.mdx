@@ -20,7 +20,7 @@ React가 리렌더링 여부를 판단하는 기준,<mark>**Element 참조**</ma
 
 ---
 
-## <mark>React Element는 그냥 객체입니다.</mark>
+## React Element는 그냥 객체입니다.
 
 JSX를 쓰면 React는 내부적으로 평범한 JavaScript 객체를 만듭니다.
 
@@ -155,7 +155,7 @@ Context 리렌더링: value 변경 → Fiber 순회 → 구독자 직접 dirty �
 <aside data-type="info">
 `Object.is`는 `===`과 거의 동일하지만 두 가지 경우에 다르게 동작합니다.  
 `Object.is(NaN, NaN)`은 `true`이고(===는 false), `Object.is(+0, -0)`은 `false`입니다(===는 true).  
-실무에서 이 차이가 문제가 되는 경우는 거의 없지만, Context value 비교가 `===`이 아니라 `Object.is`라는 점은 알아두면 좋습니다.
+프로젝트 진행시 이 차이가 문제가 되는 경우는 거의 없지만, Context value 비교가 `===`이 아니라 `Object.is`라는 점은 알아두면 좋습니다.
 </aside>
 
 ---
@@ -186,7 +186,7 @@ Context 리렌더링: value 변경 → Fiber 순회 → 구독자 직접 dirty �
 
 ---
 
-## 실무에서의 Context 성능 최적화
+## 프로젝트에서의 Context 성능 최적화
 
 원리를 이해했으니, 프로젝트에 적용할 수 있는 전략을 정리해보겠습니다.
 

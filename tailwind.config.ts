@@ -33,9 +33,17 @@ module.exports = {
             },
             h2: {
               fontSize: "1.5rem",
+              background:
+                "linear-gradient(to top, #DDD6FE 40%, transparent 40%)",
+              width: "fit-content",
+              boxDecorationBreak: "clone",
             },
             h3: {
               fontSize: "1.25rem",
+              background:
+                "linear-gradient(to top, rgba(221, 214, 254, 0.45) 40%, transparent 40%)",
+              width: "fit-content",
+              boxDecorationBreak: "clone",
             },
             h4: {
               fontSize: "1.1rem",
@@ -362,7 +370,18 @@ module.exports = {
             "h1, h2, h3, h4, h5, h6": {
               color: "#FFFFFF",
             },
-            h2: {},
+            h2: {
+              background:
+                "linear-gradient(to top, rgba(167, 139, 250, 0.35) 40%, transparent 40%)",
+              width: "fit-content",
+              boxDecorationBreak: "clone",
+            },
+            h3: {
+              background:
+                "linear-gradient(to top, rgba(167, 139, 250, 0.18) 40%, transparent 40%)",
+              width: "fit-content",
+              boxDecorationBreak: "clone",
+            },
 
             a: {
               color: "#7CC4FA",
@@ -507,7 +526,7 @@ module.exports = {
 
             mark: {
               background:
-                "linear-gradient(to top, rgba(250, 204, 21, 0.35) 40%, transparent 40%)",
+                "linear-gradient(to top, rgba(253, 230, 138, 0.45) 40%, transparent 40%)",
               color: "inherit",
             },
 

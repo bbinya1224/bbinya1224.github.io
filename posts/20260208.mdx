@@ -31,7 +31,7 @@ const counterSlice = createSlice({ name: 'counter', initialState: { count: 0 } }
 
 ## 세 라이브러리의 핵심 철학
 
-### <mark>Zustand: "Store 하나로 단순하게"</mark>
+### Zustand: "Store 하나로 단순하게"
 
 Zustand는 <mark>**Top-Down**</mark> 방식입니다.  
 하나의 Store를 만들고, 컴포넌트가 필요한 상태를 구독하는 구조입니다.
@@ -78,7 +78,7 @@ const { count, increment } = useStore(
 
 ---
 
-### <mark>Jotai: "Atom 단위로 쪼개서 조합"</mark>
+### Jotai: "Atom 단위로 쪼개서 조합"
 
 Jotai는 <mark>**Bottom-Up**</mark> 방식입니다.  
 상태를 작은 Atom 단위로 쪼개고, 이를 조합해서 복잡한 상태를 만듭니다.  
@@ -121,7 +121,7 @@ const userAtom = atom(async (get) => {
 `countAtom`이 바뀌면 `doubleCountAtom`도 자동으로 업데이트됩니다.  
 이 의존 관계가 그래프 형태로 연결되면서, **변경된 Atom을 구독하는 컴포넌트만** 정확히 리렌더링됩니다.
 
-### <mark>Redux Toolkit: "예측 가능한 단방향 흐름"</mark>
+### Redux Toolkit: "예측 가능한 단방향 흐름"
 
 Redux는 **Flux 아키텍처** 기반입니다.  
 Action을 dispatch하면, Reducer가 상태를 업데이트하고, 구독 중인 컴포넌트가 리렌더링됩니다.
@@ -163,7 +163,7 @@ function Counter() {
 
 철학 차이는 결국 <mark>"어떤 변경이 어떤 컴포넌트를 다시 그리게 만드는가"</mark>에서 체감됩니다.
 
-### Zustand: <mark>selector 기반 구독</mark>
+### Zustand: selector 기반 구독
 
 ```tsx
 const useStore = create((set) => ({
@@ -182,7 +182,7 @@ function AgeDisplay() {
 selector가 반환한 값이 같으면 리렌더링을 건너뜁니다.  
 다만 객체를 반환하면 매번 새 참조가 생길 수 있어 `useShallow`를 함께 쓰는 것이 안전합니다.
 
-### Jotai: <mark>Atom 단위 자동 구독</mark>
+### Jotai: Atom 단위 자동 구독
 
 ```tsx
 const nameAtom = atom('');
@@ -196,7 +196,7 @@ function AgeDisplay() {
 
 Atom이 이미 분리돼 있기 때문에 selector를 따로 신경 쓰지 않아도 구독 범위가 자연스럽게 좁아집니다.
 
-### Redux Toolkit: <mark>`useSelector` + 메모이제이션</mark>
+### Redux Toolkit: `useSelector` + 메모이제이션
 
 ```tsx
 const selectAge = (state) => state.profile.age;

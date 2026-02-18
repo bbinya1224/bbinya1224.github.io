@@ -1,7 +1,8 @@
 ---
-title: "Next.js API Routes vs tRPC: 타입 안전한 API 통신의 진화"
-description: "as 타입 단언이 불안했던 경험에서 시작된 tRPC 도입기."
+title: "Route Handlers vs tRPC: 타입 안전한 API를 만드는 두 가지 방법"
+description: "as 타입 단언이 불안했던 경험에서 시작해, Route Handlers와 tRPC를 비교합니다."
 date: "2026-01-19"
+slug: "20260119"
 published: true
 category: "Frontend"
 tag: "Next.js, TypeScript, API, tRPC"
@@ -13,252 +14,45 @@ return (await response.json()) as { review: string; message: string };
 
 이 코드를 볼 때마다 불안했습니다.
 
-`as`는 TypeScript에게 "내 말을 믿어"라고 강요하는 것이거든요. 서버가 실제로 무엇을 반환하든, 컴파일러는 모릅니다. 서버에서 `message`를 `status`로 바꿔도 IDE는 경고하지 않습니다. 런타임에 터지게 되는거죠.
+`as`는 TypeScript 컴파일러에게 "내 말을 믿어"라고 강요하는 문법입니다. 서버가 실제로 무엇을 반환하든 컴파일러는 검증하지 않습니다. 서버에서 `message`를 `status`로 바꿔도 IDE는 아무 경고도 하지 않고, 런타임에 `undefined`가 됩니다.
 
-실제로 이런 버그를 겪기도 했습니다. 서버 응답 구조를 변경했는데, 클라이언트 코드의 `as` 단언을 깜빡하고 수정하지 않았었던거죠. 이에따라, `undefined` 에러가 터졌었습니다.
+실제로 이런 버그를 겪었습니다. 서버 응답 구조를 변경했는데, 클라이언트의 `as` 단언을 수정하지 않아서 `undefined` 에러가 터졌습니다.
 
-이러한 문제를 해결하고자 tRPC 도입을 생각하게 되었습니다.
-
----
-
-> 이 글에서는 두 가지 방식을 객관적으로 비교하면서, 왜 tRPC로의 전환을 결정했는지 그 과정을 공유합니다.
-> 1. **Next.js의 기본 API Routes** (App Router의 Route Handlers)
-> 2. **tRPC** (TypeScript Remote Procedure Call)
+이 문제를 해결할 방법을 찾다가 tRPC를 알게 됐습니다.
 
 ---
 
-## 문제 프로젝트의 API 구조
+## Route Handlers의 타입 문제
 
-제가 진행하고 있던 프로젝트는 Next.js App Router의 **Route Handlers**를 사용하여 API를 구현하고 있습니다.
+<aside data-type="info">
+이 글에서 "Route Handlers"는 Next.js App Router의 `app/api/*/route.ts` 방식을 말합니다. Pages Router의 `pages/api/*`(API Routes)와는 다릅니다.
+</aside>
 
-### 디렉토리 구조
+Next.js App Router에서 API를 만드는 가장 기본적인 방법은 Route Handlers입니다.
 
-```
-app/api/
-├── admin/
-│   ├── prompts/route.ts
-│   └── whitelist/route.ts
-├── generate-review/route.ts
-├── edit-review/route.ts
-├── analyze-style/route.ts
-└── style-profile/route.ts
-```
-
-### 서버 사이드 (API Route)
+**서버**
 
 ```typescript
 // app/api/generate-review/route.ts
-import { createGenerateReviewHandler } from '@/features/review/api/create-generate-review-handler';
-import { generateReviewWithClaudeAPI } from '@/features/review/lib/review-generator';
-
-export const POST = createGenerateReviewHandler({
-  validateReviewPayload: isValidReviewPayload,
-  readStyleProfile,
-  generateReview: generateReviewWithClaudeAPI,
-  saveReviewToDB,
-  getUserStatus,
-  incrementUsageCount,
-});
-```
-
-### 클라이언트 사이드 (API 호출)
-
-```typescript
-// src/features/review/api/review-api.ts
-export const generateReview = async (
-  payload: ReviewPayload,
-): Promise<{ review: string; message: string }> => {
-  const response = await fetch('/api/generate-review', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(errorData.error || '리뷰 생성에 실패했습니다.');
-  }
-
-  return (await response.json()) as { review: string; message: string };
-};
-```
-
-### 컴포넌트에서의 사용
-
-```typescript
-import { generateReview } from '@/features/review/api/review-api';
-
-const handleGenerate = async () => {
-  try {
-    const result = await generateReview({
-      placeName: '서울 맛집',
-      placeUrl: 'https://example.com',
-      userDraft: '정말 맛있었어요!',
-    });
-    console.log(result.review);
-  } catch (error) {
-    console.error(error);
-  }
-};
-```
-
----
-
-## Next.js API Routes의 작동 방식
-
-Next.js API Routes는 서버리스 함수로 동작하며, HTTP 메서드별로 핸들러를 export하는 방식입니다.
-
-### 장점
-
-1. **빠른 시작**: 별도 설정 없이 `app/api` 폴더에 파일만 만들면 됨
-2. **익숙한 REST API 패턴**: HTTP 메서드(GET, POST, PUT, DELETE) 사용
-3. **유연성**: 외부 클라이언트(모바일 앱, 다른 서비스)에서도 호출 가능
-4. **단순성**: 추가 라이브러리 없이 Next.js만으로 완결
-
-### 단점
-
-1. **타입 안정성 부족**
-   ```typescript
-   // 서버에서 정의한 타입
-   type Response = { review: string; message: string };
-   
-   // 클라이언트에서는 타입을 수동으로 as 단언해야 함
-   return (await response.json()) as { review: string; message: string };
-   ```
-   - 서버와 클라이언트 간 타입이 자동으로 동기화되지 않음
-   - 타입 불일치 시 런타임 에러 발생 가능
-
-2. **보일러플레이트 코드 반복**
-   ```typescript
-   // 모든 API 호출마다 반복되는 코드
-   const response = await fetch('/api/...', {
-     method: 'POST',
-     headers: { 'Content-Type': 'application/json' },
-     body: JSON.stringify(payload),
-   });
-   
-   if (!response.ok) {
-     const errorData = await response.json().catch(() => ({}));
-     throw new Error(errorData.error || '...');
-   }
-   
-   return await response.json();
-   ```
-
-3. **타입 추론 불가**
-   - IDE에서 API 응답 구조를 자동 완성할 수 없음
-   - 파라미터 검증을 런타임에 수동으로 해야 함
-
-4. **URL 하드코딩**
-   ```typescript
-   fetch('/api/generate-review') // 오타 발생 시 컴파일 타임에 감지 불가
-   ```
-
----
-
-## **tRPC**란 무엇인가?
-
-**tRPC**는 "TypeScript Remote Procedure Call"의 약자로, **타입 안전한 API를 만들기 위한 라이브러리** 입니다.
-
-### 핵심 개념
-
-- **엔드투엔드 타입 안정성**: 서버에서 정의한 타입이 클라이언트에 자동으로 전달.
-- **RPC 스타일**: REST가 아닌 함수 호출처럼 API 사용.
-- **Zero-runtime overhead**: 타입 정보는 빌드 시에만 사용되고 런타임에는 제거됨.
-
-### tRPC의 철학
-
-> If it compiles, it works.
-
-서버와 클라이언트가 동일한 TypeScript 코드베이스를 공유하면, 컴파일 타임에 모든 타입 에러를 잡아낼 수 있습니다.
-
-### 왜 "같은 코드베이스"여야 하는가?
-
-처음 tRPC를 접했을 때 이 부분이 잘 이해되지 않았습니다.  
-왜 풀스택 TypeScript 프로젝트에서만 사용할 수 있는 걸까요?
-
-**핵심은 TypeScript 컴파일러가 서버 코드를 "직접 읽어야" 한다는 것 이였습니다.**
-
-```typescript
-// 서버 (src/server/routers/user.ts)
-export const userRouter = router({
-  getUser: publicProcedure.query(() => {
-    return { name: "철수", age: 30 };  // ← TypeScript가 이 반환 타입을 추론
-  }),
-});
-
-// 클라이언트 (src/pages/index.tsx)
-import type { AppRouter } from '@/server/routers/_app';  // ← 서버 타입을 import!
-
-const { data } = trpc.user.getUser.useQuery();
-// data의 타입: { name: string; age: number } - 자동 추론됨
-```
-
-클라이언트가 서버의 타입 정의를 **직접 import**할 수 있어야 합니다. 만약 서버가 Java나 Python으로 작성되어 있다면, TypeScript 컴파일러가 그 코드를 읽을 수 없으니, tRPC 방식은 불가능합니다.
-
-이것이 tRPC의 **강점이자 제약**이 되어버립니다.
-- 강점: 타입이 자동으로 동기화됨
-- 제약: 프론트엔드와 백엔드가 같은 TypeScript 프로젝트여야 함
-
-만약, Next.js 풀스택 프로젝트라면, 완벽한 조합이 되겠죠.
-
-### 외부 백엔드(Java/Python 등)를 사용한다면?
-
-tRPC는 사용할 수 없습니다. 대신 타입 안정성을 확보할 수 있는 대안들이 있습니다.
-
-- **OpenAPI + 코드 생성**: 백엔드의 Swagger 스펙에서 TypeScript 타입을 자동 생성
-- **GraphQL**: 스키마 기반으로 타입 자동 생성
-- **수동 타입 정의**: API 문서를 보고 직접 타입 작성 (유지보수 비용 높음)
-
-이 글에서는 Next.js 풀스택 환경을 전제로 tRPC를 다룹니다.
-
----
-
-## 실제 코드 비교
-
-같은 기능을 Next.js API Routes와 tRPC로 각각 구현해보겠습니다.
-
-### 예제: 리뷰 생성 API
-
-#### 1. Next.js API Routes 방식
-
-**서버 (`app/api/generate-review/route.ts`)**
-
-```typescript
-import { NextRequest, NextResponse } from 'next/server';
-import type { ReviewPayload } from '@/entities/review/model/types';
-
 export async function POST(request: NextRequest) {
-  try {
-    const payload: ReviewPayload = await request.json();
-    
-    if (!payload.placeName || !payload.placeUrl) {
-      return NextResponse.json(
-        { error: '필수 필드가 누락되었습니다.' },
-        { status: 400 }
-      );
-    }
+  // request.json()의 반환 타입은 any — 여기서도 사실상 타입 단언과 같은 문제가 있음
+  const payload: ReviewPayload = await request.json();
 
-    const review = await generateReview(payload);
-    
-    return NextResponse.json({ 
-      review, 
-      message: '생성 완료' 
-    });
-  } catch (error) {
+  if (!payload.placeName || !payload.placeUrl) {
     return NextResponse.json(
-      { error: '서버 오류' },
-      { status: 500 }
+      { error: '필수 필드가 누락되었습니다.' },
+      { status: 400 }
     );
   }
+
+  const review = await generateReview(payload);
+  return NextResponse.json({ review, message: '생성 완료' });
 }
 ```
 
-**클라이언트 (`src/features/review/api/review-api.ts`)**
+**클라이언트**
 
 ```typescript
-import type { ReviewPayload } from '@/entities/review/model/types';
-
 export const generateReview = async (
   payload: ReviewPayload
 ): Promise<{ review: string; message: string }> => {
@@ -273,96 +67,118 @@ export const generateReview = async (
     throw new Error(errorData.error || '리뷰 생성에 실패했습니다.');
   }
 
-  // ⚠️ 타입 단언 필요 - 런타임에 검증되지 않음
+  // ⚠️ 서버가 실제로 이 구조를 반환하는지 검증할 방법이 없음
   return (await response.json()) as { review: string; message: string };
 };
 ```
 
-**사용 (`컴포넌트`)**
+문제는 명확합니다.
+
+- 서버 응답 타입과 클라이언트 타입이 **수동으로 동기화**됩니다.
+- 서버가 응답 구조를 바꿔도 **컴파일 타임에 감지되지 않습니다.**
+- `fetch` URL이 문자열이라 **오타도 잡히지 않습니다.**
+- 모든 API 호출마다 **fetch + 에러 처리 보일러플레이트**가 반복됩니다.
+
+---
+
+## tRPC는 이 문제를 어떻게 해결하는가
+
+tRPC(TypeScript Remote Procedure Call)는 서버에서 정의한 타입이 <mark>클라이언트에 **자동으로 전달**</mark>되는 라이브러리입니다.
+
+핵심 원리는 단순합니다.  
+클라이언트가 서버의 타입 정의를 `import type`으로 직접 가져옵니다.
+
+<aside data-type="info">
+**프로시저(Procedure)** 는 "절차"라는 뜻으로, 특정 작업을 수행하는 코드 묶음입니다. tRPC에서는 API 엔드포인트 하나하나를 프로시저라고 부릅니다. RPC(Remote Procedure Call)의 핵심이 "원격 서버의 함수를 로컬 함수처럼 호출한다"이기 때문입니다. `query`는 데이터를 읽는 프로시저, `mutation`은 데이터를 변경하는 프로시저입니다.
+</aside>
 
 ```typescript
-import { generateReview } from '@/features/review/api/review-api';
-
-const result = await generateReview({
-  placeName: '서울 맛집',
-  placeUrl: 'https://example.com',
-  userDraft: '맛있어요',
+// 서버 (src/server/routers/review.ts)
+export const reviewRouter = router({
+  generate: publicProcedure
+    .input(reviewPayloadSchema)
+    .mutation(async ({ input }) => {
+      const review = await generateReview(input);
+      return { review, message: '생성 완료' };
+    }),
 });
 ```
 
-#### 2. `tRPC` 방식
+```typescript
+// 클라이언트
+import type { AppRouter } from '@/server/routers/_app';
 
-**서버 (`src/server/routers/review.ts`)**
+const { mutate } = trpc.review.generate.useMutation();
+
+mutate(
+  { placeName: '서울 맛집', placeUrl: 'https://...' },
+  {
+    onSuccess: (data) => {
+      // data: { review: string; message: string } — 자동 추론
+      console.log(data.review);
+    },
+  }
+);
+```
+
+서버에서 `message`를 `status`로 바꾸면, 클라이언트에서 `data.message`를 쓰는 모든 곳에 **즉시 컴파일 에러**가 발생합니다. `as` 단언이 필요 없습니다.
+
+### 같은 코드베이스여야 하는 이유
+
+왜 풀스택 TypeScript 프로젝트에서만 사용할 수 있었을까요? 그 이유는 TypeScript 컴파일러가 서버 코드를 **직접 읽어야** 하기 때문입니다.  
+서버가 Java나 Python이면 TypeScript 컴파일러가 반환 타입을 추론할 수 없습니다. 이것이 tRPC의 강점이자 제약입니다.
+
+- **강점**: 별도의 코드 생성 없이 타입이 자동으로 동기화
+- **제약**: 프론트엔드와 백엔드가 같은 TypeScript 프로젝트여야 함
+
+Next.js 풀스택 프로젝트라면 이 조건은 자연스럽게 충족됩니다.
+
+<aside data-type="info">
+외부 백엔드(Java, Python 등)를 사용하는 경우에는 tRPC 대신 OpenAPI + 코드 생성(Swagger 스펙에서 TypeScript 타입 자동 생성)이나 GraphQL 같은 대안을 검토할 수 있습니다.
+</aside>
+
+---
+
+## Zod 통합: 스키마 하나로 검증과 타입을 동시에
+
+tRPC에서 가장 와닿았던 부분은 Zod 통합이었습니다.
+
+기존 방식에서는 TypeScript 타입과 런타임 검증이 별개였습니다. 타입은 컴파일 타임에만 존재하고 런타임에는 사라집니다. 검증 로직을 따로 작성해야 했고, 타입과 검증이 어긋나면 버그가 됐습니다.
 
 ```typescript
-import { z } from 'zod';
-import { publicProcedure, router } from '../trpc';
-
-// Zod를 사용한 런타임 + 타입 검증
+// Zod 스키마 하나로 해결
 const reviewPayloadSchema = z.object({
   placeName: z.string().min(1, '장소명을 입력해주세요'),
   placeUrl: z.string().url('올바른 URL을 입력해주세요'),
   userDraft: z.string().optional(),
 });
 
-export const reviewRouter = router({
-  generate: publicProcedure
-    .input(reviewPayloadSchema) // 자동 검증
-    .mutation(async ({ input }) => {
-      const review = await generateReview(input);
+// 스키마에서 타입 추출
+type ReviewPayload = z.infer<typeof reviewPayloadSchema>;
+// → { placeName: string; placeUrl: string; userDraft?: string }
 
-      return {
-        review,
-        message: '생성 완료'
-      };
-    }),
-});
-
-export type ReviewRouter = typeof reviewRouter;
+// tRPC 프로시저에서 사용하면
+publicProcedure
+  .input(reviewPayloadSchema)  // 런타임 검증 + 타입 추론
+  .mutation(async ({ input }) => {
+    // input: ReviewPayload — 자동 추론됨
+  })
 ```
+
+스키마 하나가 런타임 검증과 타입 정의를 동시에 담당합니다.
 
 <aside data-type="info">
-#### Zod 통합의 진짜 가치
-
-처음엔 "검증 코드가 줄어드는구나" 정도로 생각했었는데요, 하지만 진짜 가치는 다른 곳에 있었습니다.
-
-**기존 방식의 문제:**
-- TypeScript 타입: 컴파일 타임에만 존재 (런타임에 사라짐)
-- 런타임 검증: 별도로 작성해야 함
-- → 둘이 어긋나면? 버그. 🤯
+입력(`.input()`)은 Zod 스키마로 강하게 동기화되지만, 출력은 TypeScript 반환 타입 추론에 의존합니다. 출력까지 엄격하게 검증하려면 `.output()` 스키마를 별도로 정의해야 합니다.
 </aside>
 
-**Zod + tRPC:**
-```typescript
-// 스키마 하나로 "런타임 검증"과 "타입 정의"를 동시에!
-const reviewPayloadSchema = z.object({
-  placeName: z.string().min(1),
-  placeUrl: z.string().url(),
-});
+---
 
-// 이 스키마에서 타입을 추출할 수 있다
-type ReviewPayload = z.infer<typeof reviewPayloadSchema>;
-// → { placeName: string; placeUrl: string }
+## 미들웨어로 인증 로직 재사용
 
-// tRPC에서 사용하면
-.input(reviewPayloadSchema)
-.mutation(async ({ input }) => {
-  // input의 타입이 자동으로 ReviewPayload!
-  // 그리고 런타임에도 실제로 검증됨!
-})
-```
-
-<aside data-type="success">
-**스키마 하나로 타입과 검증을 동시에 정의한다.** 절대 어긋날 수 없다.
-이 부분이 정말 와닿았던 부분 이였습니다.
-</aside>
-
-#### Middleware로 인증 로직 재사용하기
-
-tRPC의 또 다른 강점은 **미들웨어**입니다. 인증 로직을 한 번 정의해두면 여러 프로시저에서 재사용할 수 있습니다.
+tRPC의 또 다른 장점은 미들웨어입니다. 인증 로직을 한 번 정의하면 여러 프로시저에서 재사용할 수 있습니다.
 
 ```typescript
-// 관리자 전용 프로시저 정의
+// 관리자 전용 프로시저
 const adminProcedure = publicProcedure.use(({ ctx, next }) => {
   if (!ctx.user?.isAdmin) {
     throw new TRPCError({ code: 'UNAUTHORIZED' });
@@ -370,314 +186,139 @@ const adminProcedure = publicProcedure.use(({ ctx, next }) => {
   return next({ ctx: { ...ctx, user: ctx.user } });
 });
 
-// 사용 예시
+// 이 라우터의 모든 프로시저는 관리자만 실행 가능
 export const adminRouter = router({
   getWhitelist: adminProcedure.query(async () => {
-    // 이 코드는 관리자만 실행 가능
     return await db.whitelist.findMany();
   }),
-
   deleteUser: adminProcedure
     .input(z.object({ userId: z.string() }))
     .mutation(async ({ input }) => {
-      // 이것도 관리자만 실행 가능
       return await db.user.delete({ where: { id: input.userId } });
     }),
 });
 ```
 
-API Routes였다면 매 핸들러마다 인증 체크 코드를 반복해야 했을 겁니다. tRPC 미들웨어는 이런 횡단 관심사(cross-cutting concerns)를 깔끔하게 분리해줍니다.
+Route Handlers에서는 매 핸들러마다 인증 체크를 반복하거나, 별도 유틸로 감싸야 합니다. tRPC 미들웨어는 이런 횡단 관심사를 구조적으로 분리합니다.
 
-**클라이언트 (`src/utils/trpc.ts`)**
+---
+
+## Route Handlers에서도 개선할 수 있다
+
+tRPC만이 유일한 해결책은 아닙니다. Route Handlers에서도 Zod + 공용 스키마로 타입 안전성을 높일 수 있습니다.
 
 ```typescript
-import { createTRPCReact } from '@trpc/react-query';
-import type { AppRouter } from '@/server/routers/_app';
+// 공용 스키마 정의 (src/shared/schemas/review.ts)
+export const reviewPayloadSchema = z.object({
+  placeName: z.string().min(1),
+  placeUrl: z.string().url(),
+  userDraft: z.string().optional(),
+});
 
-export const trpc = createTRPCReact<AppRouter>();
+export const reviewResponseSchema = z.object({
+  review: z.string(),
+  message: z.string(),
+});
+
+export type ReviewPayload = z.infer<typeof reviewPayloadSchema>;
+export type ReviewResponse = z.infer<typeof reviewResponseSchema>;
 ```
 
-**사용 (`컴포넌트`)**
+```typescript
+// 서버 — Zod로 입력 검증
+export async function POST(request: NextRequest) {
+  const body = await request.json();
+  const result = reviewPayloadSchema.safeParse(body);
+
+  if (!result.success) {
+    return NextResponse.json({ error: result.error.message }, { status: 400 });
+  }
+
+  const review = await generateReview(result.data);
+  return NextResponse.json({ review, message: '생성 완료' });
+}
+```
 
 ```typescript
-import { trpc } from '@/utils/trpc';
+// 클라이언트 — as 대신 런타임 검증
+import { reviewResponseSchema } from '@/shared/schemas/review';
+import type { ReviewPayload, ReviewResponse } from '@/shared/schemas/review';
 
-const generateMutation = trpc.review.generate.useMutation();
-
-const handleGenerate = () => {
-  generateMutation.mutate({
-    placeName: '서울 맛집',
-    placeUrl: 'https://example.com',
-    userDraft: '맛있어요',
-  }, {
-    onSuccess: (data) => {
-      // data의 타입이 자동으로 추론됨!
-      // data: { review: string; message: string }
-      console.log(data.review);
-    },
+export const generateReview = async (
+  payload: ReviewPayload
+): Promise<ReviewResponse> => {
+  const response = await fetch('/api/generate-review', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
   });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || '리뷰 생성에 실패했습니다.');
+  }
+
+  const data = await response.json();
+  return reviewResponseSchema.parse(data); // as 대신 런타임 검증
 };
 ```
 
----
+`as` 단언 대신 Zod `parse`로 런타임 검증을 하고, 공용 스키마로 서버/클라이언트 타입을 동기화할 수 있습니다.
 
-## 타입 안정성 비교
+다만 한계는 있습니다.
 
-### Next.js API Routes의 타입 흐름
-![nextJs API Routes 흐름](/img/posts/20260119/i47amg2.png)
+- fetch 보일러플레이트는 여전히 반복됩니다.
+- URL 문자열 오타는 컴파일 타임에 잡히지 않습니다.
+- 서버 응답이 바뀌면 공용 스키마를 **수동으로** 업데이트해야 합니다.
 
-**문제점:**
-- 서버 응답이 바뀌면 클라이언트 타입을 수동으로 업데이트해야 함
-- 타입 불일치 시 컴파일 타임에 감지 불가
-- `as` 단언으로 인한 타입 안정성 저하
-
-### tRPC의 타입 흐름
-
-![tRPC의 타입 흐름](/img/posts/20260119/image.png)
-
-**장점:**
-- 서버 응답이 바뀌면 클라이언트에서 즉시 타입 에러 발생
-- 컴파일 타임에 모든 타입 불일치 감지
-- `as` 단언 불필요
-
+tRPC는 이 모든 것을 자동화합니다. 하지만 Route Handlers + Zod 조합만으로도 `as` 단언은 제거할 수 있습니다.
 
 ---
 
-## 🔍 프로젝트별 적합성 분석
+## 언제 무엇을 선택할까
 
-### Next.js API Routes가 적합한 경우
+| 기준 | Route Handlers | tRPC |
+|---|---|---|
+| 외부 클라이언트 지원 | 가능 (REST 표준) | TypeScript 클라이언트 중심 |
+| 타입 동기화 | 수동 (공용 스키마) | 자동 |
+| 학습 곡선 | 낮음 | 중간 (라우터, 프로시저, React Query) |
+| 보일러플레이트 | 많음 (fetch 반복) | 적음 |
+| 스트리밍/SSE/웹훅 | 직접 제어 가능 | 제한적 |
+| 리팩토링 안전성 | 수동 확인 필요 | 컴파일 타임 자동 검증 |
 
-**다음 조건에 해당하면 Next.js API Routes 사용 권장합니다.**
+**Route Handlers가 맞는 경우:**
 
-1. **외부 클라이언트가 API를 사용해야 하는 경우**
-   - 모바일 앱 (React Native, Swift, Kotlin)
-   - 다른 웹사이트
-   - 서드파티 서비스 연동
-   
-   tRPC는 TypeScript 클라이언트만 지원하므로 외부 소비자에게는 부적합
+- 외부 클라이언트(모바일 앱, 서드파티)가 API를 사용해야 할 때
+- 스트리밍, SSE, 웹훅 같은 HTTP 기능이 핵심일 때
+- 프로젝트 규모가 작고 API 수가 적을 때
 
-   > **Tip**: 외부 클라이언트 지원이 필요하다면 [trpc-openapi](https://github.com/jlalmes/trpc-openapi)를 활용해보세요. tRPC 라우터에서 REST API를 자동 생성할 수 있습니다.
+**tRPC가 맞는 경우:**
 
-2. **웹훅이나 공개 API를 제공해야 하는 경우**
-   ```typescript
-   // Stripe 웹훅, GitHub 웹훅 등
-   POST /api/webhooks/stripe
-   ```
+- 풀스택 TypeScript 프로젝트에서 내부 API만 사용할 때
+- API 스펙이 자주 변경되고 리팩토링이 잦을 때
+- 타입 불일치 버그를 컴파일 타임에 잡고 싶을 때
 
-3. **프로젝트 규모가 작은 경우**
-   - API 엔드포인트가 5개 이하
-   - 타입 불일치로 인한 버그 위험이 낮음
-
-4. **팀원들이 TypeScript에 익숙하지 않은 경우**
-   - REST API는 더 직관적이고 학습 곡선이 낮음
-
-### tRPC가 적합한 경우
-
-**다음 조건에 해당하면 tRPC 사용 권장합니다.**
-
-1. **풀스택 TypeScript 프로젝트**
-   - Next.js + TypeScript로 프론트엔드와 백엔드 모두 개발
-   - 외부 클라이언트 지원이 불필요
-
-2. **빠르게 변화하는 프로젝트**
-   - API 스펙이 자주 변경됨
-   - 리팩토링이 잦음
-   - 타입 안정성으로 버그 사전 방지 필요
-
-3. **중대형 프로젝트**
-   - API 엔드포인트가 10개 이상
-   - 여러 개발자가 동시에 작업
-   - 타입 불일치로 인한 버그 비용이 큼
-
-4. **DX(Developer Experience)를 중시하는 경우**
-   - 자동완성, 타입 추론 등으로 생산성 향상
-   - 리팩토링 안정성 확보
+두 방식을 혼용할 수도 있습니다. CRUD는 tRPC로, 스트리밍/웹훅은 Route Handlers로 처리하는 구조입니다. 다만 API 패턴이 이원화되면 팀의 인지 부하가 커질 수 있으니, 혼용 범위는 명확히 정해야 합니다.
 
 ---
 
-## 진행중인 프로젝트에 tRPC를 도입한다면?
+## 마치며
 
-<aside data-type="warning">
-아직 리팩토링중에 있으며 해당 부분은 AI의 도움을 받아 가정한 결과입니다.
-</aside>
+처음에는 단순히 `as` 단언을 없애고 싶었습니다.
 
-### 현재 상황
+정리하다 보니 결국 "서버와 클라이언트 사이의 타입 계약을 누가 보장하는가"라는 문제였습니다. Route Handlers에서는 개발자가 수동으로 관리해야 하고, tRPC에서는 TypeScript 컴파일러가 자동으로 검증합니다.
 
-```
-API 엔드포인트:
-- /api/generate-review (POST)
-- /api/edit-review (POST)
-- /api/analyze-style (POST)
-- /api/style-profile (GET, POST)
-- /api/admin/prompts (GET, POST)
-- /api/admin/prompts/[id] (GET, PUT, DELETE)
-- /api/admin/whitelist (GET, POST, PUT, DELETE)
-```
-
-**총 7개의 주요 API 라우트**, 약 15개의 엔드포인트
-
-### tRPC 도입 시 예상 개선사항
-
-#### 1. 타입 안정성 확보
-
-**현재 (useWhitelist.ts):**
-
-```typescript
-const response = await fetch('/api/admin/whitelist', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'X-Admin-Password': password,
-  },
-  body: JSON.stringify({
-    email: email.trim(),
-    notes: notes.trim() || undefined,
-  }),
-});
-
-const data = await response.json();
-// ⚠️ data의 타입: any
-```
-
-**tRPC로 전환 후:**
-
-```typescript
-const addUserMutation = trpc.admin.whitelist.add.useMutation();
-
-addUserMutation.mutate({
-  email: email.trim(),
-  notes: notes.trim() || undefined,
-}, {
-  onSuccess: (data) => {
-    // ✅ data: { user: ApprovedUser }
-    // ✅ 타입 안전, 자동완성 지원
-  },
-});
-```
-
-#### 2. 코드 중복 제거
-
-**현재 반복되는 패턴:**
-
-```typescript
-// useWhitelist.ts에만 4번 반복
-const response = await fetch('/api/admin/whitelist', {
-  method: '...',
-  headers: { 'X-Admin-Password': password },
-  body: JSON.stringify(...),
-});
-
-if (!response.ok) {
-  throw new Error('...');
-}
-
-const data = await response.json();
-```
-
-**tRPC로 전환 후:**
-
-```typescript
-// 한 줄로 해결
-trpc.admin.whitelist.list.useQuery();
-trpc.admin.whitelist.add.useMutation();
-trpc.admin.whitelist.update.useMutation();
-trpc.admin.whitelist.delete.useMutation();
-```
-
-**장기적 이점**: 
-- 타입 불일치 버그 감소 → QA 시간 단축
-- 새로운 API 개발 속도 향상 (~30% 빠름)
-- 리팩토링 안정성 향상
-
-### 코드 변화 요약
-
-| 항목 | Before (API Routes) | After (tRPC) |
-|------|---------------------|--------------|
-| **서버 코드 라인 수** | ~80줄 | ~60줄 (-25%) |
-| **클라이언트 코드 라인 수** | ~100줄 | ~45줄 (-55%) |
-| **타입 안정성** | 수동 타입 단언 | 자동 타입 추론 |
-| **에러 처리** | 수동 | React Query 통합 |
-| **상태 관리** | useState | React Query (자동 캐싱) |
-| **보일러플레이트** | 많음 | 적음 |
-
----
-
-## 언제 무엇을 선택해야 할까?
-
-### 의사결정 플로우차트
-
-```
-TypeScript를 사용하는가?
-  ├─ No → Next.js API Routes
-  └─ Yes
-      ├─ 외부 클라이언트 지원이 필요한가?
-      │   ├─ Yes → Next.js API Routes (또는 tRPC + REST 혼용)
-      │   └─ No
-      │       ├─ API 엔드포인트가 10개 이상인가?
-      │       │   ├─ Yes → tRPC 강력 추천
-      │       │   └─ No
-      │       │       ├─ 타입 안정성을 중시하는가?
-      │       │       │   ├─ Yes → tRPC 권장
-      │       │       │   └─ No → Next.js API Routes
-```
-
-### 요약 가이드
-
-| 기준 | Next.js API Routes | tRPC |
-|------|-------------------|------|
-| **프로젝트 규모** | 소형 (~5 API) | 중대형 (10+ API) |
-| **타입 안정성** | 수동 관리 | 자동 보장 |
-| **외부 클라이언트** | 지원 | 미지원  |
-| **학습 곡선** | 낮음 | 중간 |
-| **개발 속도** | 초기: 빠름<br/>장기: 보통 | 초기: 보통<br/>장기: 빠름 |
-| **리팩토링** | 수동, 위험 | 자동, 안전 |
-| **번들 사이즈** | 0KB | ~15KB (gzipped) |
-
----
-
-## 결론
-
-### 객관적 비교 요약
-
-**Next.js API Routes의 강점:**
-- 빠른 시작, 낮은 진입 장벽
-- REST API 표준 준수
-- 외부 클라이언트 지원
-
-**tRPC의 강점:**
-- 엔드투엔드 타입 안정성
-- 자동완성 및 타입 추론
-- 보일러플레이트 제거
-- 리팩토링 안정성
-
----
-
-### 나의 선택
-
-**현재 상황**: 15개의 엔드포인트, 풀스택 TypeScript 프로젝트
-
-**결정**: tRPC로 전환
-
-```typescript
-return (await response.json()) as { review: string; message: string };
-```
-
-이 `as`를 더 이상 쓰고 싶지 않았습니다.
-
-tRPC를 도입하면 번들 사이즈가 약 15KB 늘어난다고 합니다. (아직 리팩토링중이라 제대로 측정을 못하고 있긴합니다. 리팩토링 후에 글을 수정할 예정이에요!)  
-물론 React Query도 함께 들어오기에 학습 비용도 있습니다.  
-하지만 **"서버 응답이 바뀌면 클라이언트에서 즉시 컴파일 에러가 난다"** 는 것. 이 하나의 이점이 모든 비용을 상쇄한다고 판단했습니다.
-
-프로덕션에서 `undefined` 에러를 디버깅하는 것보다, IDE에서 빨간 줄을 보는 게 낫거든요.
-
-물론 모든 프로젝트에 tRPC가 정답은 아닙니다.  
-외부 API를 제공해야 한다면 Next.js API Routes가 맞을수도 있어요. 뿐만아니라, 소규모 프로젝트라면 오버엔지니어링일 수 있습니다.
-
-그러나, **타입 불일치 버그로 고생해본 경험**이 있다면, tRPC는 확실히 검토해볼 가치가 있지 않을까 싶습니다.
+모든 프로젝트에 tRPC가 정답은 아닙니다. 외부 API를 제공해야 하거나 스트리밍이 핵심이라면 Route Handlers가 더 적합합니다. 하지만 풀스택 TypeScript 프로젝트에서 타입 불일치 버그를 겪어본 적이 있다면, tRPC는 검토해볼 가치가 있습니다.
 
 ---
 
 ## 참고 자료
 
 - [tRPC 공식 문서](https://trpc.io)
-- [Next.js Route Handlers 문서](https://nextjs.org/docs/app/api-reference/file-conventions/route)
+- [tRPC — Concepts](https://trpc.io/docs/concepts)
+- [tRPC — Set up with Next.js](https://trpc.io/docs/client/nextjs/setup)
+- [tRPC — Middlewares](https://trpc.io/docs/server/middlewares)
+- [Next.js Route Handlers](https://nextjs.org/docs/app/api-reference/file-conventions/route)
+- [TanStack Query (React Query) 공식 문서](https://tanstack.com/query/latest)
+- [Zod 공식 문서](https://zod.dev)
+- [trpc-openapi — tRPC에서 REST API 생성](https://github.com/jlalmes/trpc-openapi)
