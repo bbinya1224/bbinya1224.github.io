@@ -1,4 +1,4 @@
-import { type ReactNode, Suspense } from "react";
+import { Suspense, type ReactNode } from "react";
 import PostListProvider from "@/app/provider/PostListProvider";
 import getAllPosts from "@/entities/post/api/getAllPosts";
 import Header from "@/widgets/header/ui/Header";
