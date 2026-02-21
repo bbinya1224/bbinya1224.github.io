@@ -228,8 +228,13 @@ module.exports = {
               color: "#991B1B",
               border: "1px solid #FCA5A5",
             },
+            "aside[data-type='warning'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
+            },
             "aside[data-type='warning'] pre": {
-              backgroundColor: "#7F1D1D !important",
+              backgroundColor: "#111827 !important",
             },
 
             // 정보 (파란색 계열)
@@ -246,8 +251,13 @@ module.exports = {
               color: "#1D4ED8",
               border: "1px solid #93C5FD",
             },
+            "aside[data-type='info'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
+            },
             "aside[data-type='info'] pre": {
-              backgroundColor: "#1E3A8A !important",
+              backgroundColor: "#111827 !important",
             },
 
             // 주의 (노란색 계열)
@@ -264,8 +274,13 @@ module.exports = {
               color: "#B45309",
               border: "1px solid #FCD34D",
             },
+            "aside[data-type='note'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
+            },
             "aside[data-type='note'] pre": {
-              backgroundColor: "#78350F !important",
+              backgroundColor: "#111827 !important",
             },
 
             // 성공 (녹색 계열)
@@ -282,8 +297,13 @@ module.exports = {
               color: "#15803D",
               border: "1px solid #86EFAC",
             },
+            "aside[data-type='success'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
+            },
             "aside[data-type='success'] pre": {
-              backgroundColor: "#14532D !important",
+              backgroundColor: "#111827 !important",
             },
 
             // 형광펜 (mark)
@@ -481,6 +501,11 @@ module.exports = {
               backgroundColor: "#3D2626",
               color: "#FCA5A5",
             },
+            "aside[data-type='warning'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
+            },
 
             // 정보 (파란색 계열)
             "aside[data-type='info']": {
@@ -494,6 +519,11 @@ module.exports = {
             "aside[data-type='info'] code": {
               backgroundColor: "#1E3A5F",
               color: "#BFDBFE",
+            },
+            "aside[data-type='info'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
             },
 
             // 주의 (노란색 계열)
@@ -509,6 +539,11 @@ module.exports = {
               backgroundColor: "#3D3118",
               color: "#FDE68A",
             },
+            "aside[data-type='note'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
+            },
 
             // 성공 (녹색 계열)
             "aside[data-type='success']": {
@@ -522,6 +557,11 @@ module.exports = {
             "aside[data-type='success'] code": {
               backgroundColor: "#1F3D1F",
               color: "#BBF7D0",
+            },
+            "aside[data-type='success'] pre code": {
+              backgroundColor: "transparent !important",
+              color: "inherit !important",
+              border: "0 !important",
             },
 
             mark: {

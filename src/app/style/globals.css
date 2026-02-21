@@ -120,4 +120,10 @@
     word-break: break-word !important;
     overflow-wrap: anywhere !important;
   }
+
+  /* Force readable syntax colors when rehype-pretty-code injects inline token styles */
+  .prose pre code span[style*="#6A737D"],
+  .prose pre code span[style*="rgb(106, 115, 125)"] {
+    color: #9ca3af !important;
+  }
 }
