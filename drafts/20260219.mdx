@@ -25,13 +25,16 @@ published: false
   ---
   fetch의 불편한 점
 
+  ```javascript
   // fetch — 매번 해줘야 하는 것들이 많음
   const res = await fetch('/api/products');
   if (!res.ok) throw new Error('서버 에러');  // 수동 에러 체크
   const data = await res.json();               // 수동 JSON 파싱
+  ```
 
   axios로 같은 코드
 
+  ```javascript
   import axios from 'axios';
 
   // GET — 깔끔
@@ -42,12 +45,14 @@ published: false
 
   // DELETE
   await axios.delete(`/api/products/${id}`);
+  ```
 
   res.json() 안 해도 되고, 4xx/5xx면 자동으로 에러가 던져짐.
 
   ---
-  axios가 실무에서 많이 쓰이는 이유: 인터셉터
+  axios가 프로젝트에서 많이 쓰이는 이유: 인터셉터
 
+  ```javascript
   // 모든 요청에 토큰 자동 첨부
   axios.interceptors.request.use((config) => {
     config.headers.Authorization = `Bearer ${getToken()}`;
@@ -64,6 +69,7 @@ published: false
       return Promise.reject(error);
     }
   );
+  ```
 
   인증, 에러 처리, 로깅을 한 곳에서 관리할 수 있습니다.
 

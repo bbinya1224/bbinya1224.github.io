@@ -98,8 +98,14 @@ export default function PostListIsland({ posts, batchSize = 10 }: PostListIsland
     setVisibleCount(batchSize);
   }, [selectedCategory, selectedTags, batchSize]);
 
+  const isInitialMount = useRef(true);
+
   // Sync URL
   useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
     const params = new URLSearchParams();
     if (selectedCategory) params.set('category', selectedCategory);
     selectedTags.forEach((tag) => params.append('tag', tag));

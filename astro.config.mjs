@@ -18,6 +18,7 @@ export default defineConfig({
     plugins: [tailwindcss()],
   },
   markdown: {
+    syntaxHighlight: false,
     remarkPlugins: [remarkGfm],
     rehypePlugins: [
       [

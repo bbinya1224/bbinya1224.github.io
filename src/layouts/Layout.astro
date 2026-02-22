@@ -1,5 +1,6 @@
 ---
 import '@/styles/global.css';
+import { ClientRouter } from 'astro:transitions';
 
 interface Props {
   title?: string;
@@ -90,7 +91,7 @@ const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
     )}
 
     <!-- View Transitions -->
-    <meta name="view-transition" content="same-origin" />
+    <ClientRouter />
   </head>
   <body>
     <slot />

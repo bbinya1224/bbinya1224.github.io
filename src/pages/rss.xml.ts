@@ -9,10 +9,14 @@ export async function GET(context: APIContext) {
     (a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime(),
   );
 
+  if (!context.site) {
+    throw new Error('RSS 피드 생성을 위해 astro.config.mjs에 site 옵션이 필요합니다.');
+  }
+
   return rss({
     title: "삔야's Blog",
     description: '프론트엔드 개발자 삔야 기술 블로그',
-    site: context.site!,
+    site: context.site,
     items: sortedPosts.map((post) => ({
       title: post.data.title,
       pubDate: new Date(post.data.date),
