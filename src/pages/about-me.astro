@@ -1,0 +1,194 @@
+---
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+const projectEntries = await getCollection('projects');
+
+const projects = await Promise.all(
+  projectEntries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return {
+      id: entry.id,
+      title: entry.data.title,
+      description: entry.data.description,
+      techStack: entry.data.techStack,
+      imageUrl: entry.data.imageUrl,
+      demoUrl: entry.data.demoUrl,
+      repoUrl: entry.data.repoUrl,
+      period: entry.data.period,
+      Content,
+    };
+  }),
+);
+
+const myTechStacks = [
+  'React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP',
+  'Storybook', 'Jotai', 'FSD', 'Sentry', 'Vue3',
+];
+
+const badgeColors: Record<string, string> = {
+  React: 'bg-blue-100 dark:bg-blue-900',
+  'Next.js': 'bg-gray-100 dark:bg-gray-800',
+  TypeScript: 'bg-blue-100 dark:bg-blue-900',
+  'Tailwind CSS': 'bg-cyan-100 dark:bg-cyan-900',
+  GSAP: 'bg-purple-100 dark:bg-purple-900',
+  Storybook: 'bg-pink-100 dark:bg-pink-900',
+  Jotai: 'bg-orange-100 dark:bg-orange-900',
+  FSD: 'bg-yellow-100 dark:bg-yellow-900',
+  Sentry: 'bg-red-100 dark:bg-red-900',
+  Vue3: 'bg-green-100 dark:bg-green-900',
+};
+---
+
+<BlogLayout title="About Me" canonicalUrl={`${Astro.site?.origin}/about-me`}>
+  <section class="relative mx-auto h-full w-full py-6 sm:py-4 sm:pr-2 sm:pl-7 lg:px-0">
+    <article class="mb-4 flex flex-row-reverse items-center justify-between gap-4 border-b border-gray-200 pb-5 dark:border-slate-700">
+      <div class="flex size-full flex-col gap-4">
+        <h1 class="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
+          We Have Today!
+        </h1>
+        <div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2">
+          <span class="inline-flex cursor-default items-center justify-center rounded-full px-1 py-0.5 text-sm font-medium whitespace-nowrap bg-amber-200 dark:bg-amber-700 sm:px-2 sm:text-base">높은 수용성</span>
+          <span class="inline-flex cursor-default items-center justify-center rounded-full px-1 py-0.5 text-sm font-medium whitespace-nowrap bg-blue-300 dark:bg-blue-700 sm:px-2 sm:text-base">투철한 책임감</span>
+          <span class="inline-flex cursor-default items-center justify-center rounded-full px-1 py-0.5 text-sm font-medium whitespace-nowrap bg-red-300 dark:bg-red-700 sm:px-2 sm:text-base">강한 인정 욕심</span>
+          <span class="inline-flex cursor-default items-center justify-center rounded-full px-1 py-0.5 text-sm font-medium whitespace-nowrap bg-green-300 dark:bg-green-700 sm:px-2 sm:text-base">능숙한 커뮤니케이션</span>
+        </div>
+        <div class="flex flex-row flex-wrap justify-between gap-4">
+          <div class="flex flex-1 flex-col flex-wrap gap-1">
+            <h3 class="text-primary text-2xl font-bold dark:text-gray-300">My Blog History</h3>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="https://bbinya.tistory.com" target="_blank" rel="noopener noreferrer" class="relative inline-flex items-center gap-2" aria-label="go to my tistory blog">
+                <svg class="size-6" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;">
+                  <g transform="matrix(1.04895,0,0,1.04895,38.4615,44.7552)">
+                    <g transform="matrix(1.00704,0,0,1.00704,-13.169,30.1761)"><circle cx="166" cy="117" r="142" style="fill:rgb(234,82,32);"/></g>
+                    <g><g transform="matrix(0.986042,0,0,0.986042,0.428741,-1.92393)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,62.2981,-1.92393)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,62.2981,59.9454)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,62.2981,121.815)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,124.167,-1.92393)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g></g>
+                  </g>
+                </svg>
+                <span class="font-bold text-[#333] dark:text-[#ededed]">https://bbinya.tistory.com/</span>
+              </a>
+            </p>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="https://velog.io/@subin1224/posts" target="_blank" rel="noopener noreferrer" class="relative inline-flex items-center gap-2" aria-label="go to my Velog">
+                <svg class="size-6" role="img" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 0C1.338 0 0 1.338 0 3v18c0 1.662 1.338 3 3 3h18c1.662 0 3-1.338 3-3V3c0-1.662-1.338-3-3-3H3Zm6.883 6.25c0.63 0 1.005 0.3 1.125 0.9l1.463 8.303c0.465-0.615 0.846-1.133 1.146-1.553 0.465-0.66 0.893-1.418 1.283-2.273 0.405-0.855 0.608-1.62 0.608-2.295 0-0.405-0.113-0.727-0.338-0.967-0.21-0.255-0.608-0.577-1.193-0.967 0.6-0.765 1.35-1.148 2.25-1.148 0.48 0 0.878 0.143 1.193 0.428 0.33 0.285 0.494 0.704 0.494 1.26 0 0.93-0.39 2.093-1.17 3.488-0.765 1.38-2.241 3.457-4.431 6.232l-2.227 0.156-1.711-9.628h-2.25V7.24c0.6-0.195 1.305-0.406 2.115-0.63 0.81-0.24 1.358-0.36 1.643-0.36Z"/>
+                </svg>
+                <span class="font-bold text-[#333] dark:text-[#ededed]">https://velog.io/@subin1224</span>
+              </a>
+            </p>
+          </div>
+          <div class="flex flex-1 flex-col gap-1">
+            <h3 class="text-primary text-2xl font-bold dark:text-gray-300">Contact</h3>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="mailto:bbinya1224@gmail.com" class="relative inline-flex items-center gap-2" aria-label="Send email to bbinya1224@gmail.com">
+                <svg class="size-5" viewBox="0 -4 32 32" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M30,20 C30,20.203 29.961,20.395 29.905,20.578 L21,11 L30,4 L30,20 ZM3.556,21.946 L12.58,12.33 L16,14.915 L19.272,12.314 L28.444,21.946 C28.301,21.979 3.699,21.979 3.556,21.946 ZM2,20 L2,4 L11,11 L2.095,20.578 C2.039,20.395 2,20.203 2,20 ZM29,2 L16,12 L3,2 L29,2 ZM28,0 L4,0 C1.791,0 0,1.791 0,4 L0,20 C0,22.209 1.791,24 4,24 L28,24 C30.209,24 32,22.209 32,20 L32,4 C32,1.791 30.209,0 28,0 Z"/>
+                </svg>
+                <span class="font-bold text-[#333] dark:text-[#ededed]">bbinya1224@gmail.com</span>
+              </a>
+            </p>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="https://www.linkedin.com/in/bbinya" target="_blank" rel="noopener noreferrer" class="relative inline-flex items-center gap-2" aria-label="go to my LinkedIn">
+                <svg class="size-5" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                </svg>
+                <span class="font-bold text-[#333] dark:text-[#ededed]">Linked In</span>
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="relative mb-4 border-b border-gray-200 pb-5 dark:border-slate-700">
+      <h1 class="relative mb-1 ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
+        About Me
+      </h1>
+      <div class="prose dark:prose-invert mt-2 max-w-full text-base break-keep">
+        <p>프론트엔드 개발은 화면을 그리는 일을 넘어, 팀과 서비스의 흐름을 연결하는 역할이라고 생각합니다.</p>
+        <p>저는 혼자 빠르게 구현하는 개발자보다, 팀 전체의 생산성과 결과를 끌어올리는 개발자가 되기 위해 고민해 왔습니다.</p>
+        <p>단순한 기능 구현이 아니라 "왜 이 구조가 필요한지"를 설명하고 합의하는 과정 자체를 중요하게 여깁니다. 앞으로도 저는 코드의 품질뿐 아니라, 협업 방식과 개발 문화까지 함께 개선하는 프론트엔드 개발자로 성장하고자 합니다.</p>
+        <p class="text-gray-400">저에 대해 자세하게 알고싶으시다면 이메일 주세요!</p>
+      </div>
+    </article>
+
+    <article class="relative mb-4 border-b border-gray-200 pb-5 dark:border-slate-700">
+      <h1 class="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
+        Tech Stacks
+      </h1>
+      <span class="text-gray-400">제가 주로 사용했던 기술 스택들 입니다.</span>
+      <div class="mt-2">
+        <ul class="flex flex-wrap gap-2 sm:gap-3 md:gap-3">
+          {myTechStacks.map((skill) => (
+            <li class="cursor-default">
+              <span class={`inline-flex cursor-default items-center justify-center rounded-full px-1 py-0.5 text-sm font-medium whitespace-nowrap transition-[shadow] duration-200 hover:shadow-md sm:px-2 sm:text-base ${badgeColors[skill] || 'bg-blue-100 dark:bg-blue-900'}`}>
+                {skill}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </article>
+
+    <article class="border-b border-gray-200 pb-5 lg:border-b-0 lg:pb-0 dark:border-slate-700">
+      <h1 class="relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-amber-300">
+        Side Projects
+      </h1>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:gap-6">
+        {projects.map((project) => (
+          <details class="group overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 open:shadow-lg dark:border-gray-800 dark:bg-[#1a1a1a]">
+            <summary class="list-none cursor-pointer">
+              <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 class="text-xl font-semibold text-gray-900 group-open:text-amber-500 dark:text-gray-100 dark:group-open:text-amber-400">
+                    {project.title}
+                  </h2>
+                  <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{project.description}</p>
+                  {project.period && (
+                    <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">기간: {project.period}</p>
+                  )}
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  {project.techStack.map((tech) => (
+                    <span class="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </summary>
+
+            <div class="mt-4 border-t border-gray-100 pt-4 dark:border-gray-800">
+              {(project.repoUrl || project.demoUrl) && (
+                <div class="mb-4 flex flex-wrap gap-3">
+                  {project.repoUrl && (
+                    <a
+                      href={project.repoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800"
+                    >
+                      GitHub 저장소
+                    </a>
+                  )}
+                  {project.demoUrl && (
+                    <a
+                      href={project.demoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      class="rounded-md bg-blue-600 px-3 py-1 text-sm text-white transition hover:bg-blue-700"
+                    >
+                      라이브 데모
+                    </a>
+                  )}
+                </div>
+              )}
+              <div class="prose dark:prose-invert max-w-none">
+                <project.Content />
+              </div>
+            </div>
+          </details>
+        ))}
+      </div>
+    </article>
+  </section>
+</BlogLayout>

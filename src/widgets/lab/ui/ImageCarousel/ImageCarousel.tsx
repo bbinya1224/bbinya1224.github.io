@@ -1,7 +1,4 @@
-"use client";
-
 import { X } from "lucide-react";
-import Image from "next/image";
 import { useEffect, useState } from "react";
 import type { CarouselApi } from "@/shared/model/carousel.types";
 import { Button } from "@/shared/ui/Button";
@@ -29,15 +26,12 @@ export const ImageCarousel = ({
 
   useEffect(() => {
     if (!modalApi) return;
-
     const updateSlide = () => {
       setCurrentSlide(modalApi.selectedScrollSnap() + 1);
     };
-
     updateSlide();
     modalApi.on("select", updateSlide);
     modalApi.on("reInit", updateSlide);
-
     return () => {
       modalApi.off("select", updateSlide);
       modalApi.off("reInit", updateSlide);
@@ -48,7 +42,7 @@ export const ImageCarousel = ({
     return null;
   }
 
-  const renderThumbnail = (src: string, index: number, isPriority: boolean) => (
+  const renderThumbnail = (src: string, index: number) => (
     <div
       className="group relative aspect-[16/9] w-full cursor-pointer overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900"
       onClick={() => setSelectedIndex(index)}
@@ -62,13 +56,11 @@ export const ImageCarousel = ({
       }}
       aria-label={`View image ${index + 1} in fullscreen`}
     >
-      <Image
+      <img
         src={src}
         alt={`${alt} ${index + 1}`}
-        fill
-        className="object-contain transition-transform duration-300 group-hover:scale-105"
-        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 80vw, 1200px"
-        priority={isPriority}
+        className="absolute inset-0 h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
+        loading="lazy"
       />
     </div>
   );
@@ -96,13 +88,10 @@ export const ImageCarousel = ({
                     {images.map((image, index) => (
                       <CarouselItem key={`modal-${index}`}>
                         <div className="relative flex h-[80vh] w-full items-center justify-center">
-                          <Image
+                          <img
                             src={image}
                             alt={`${alt} ${index + 1}`}
-                            fill
-                            className="object-contain"
-                            quality={100}
-                            priority={index === selectedIndex}
+                            className="absolute inset-0 h-full w-full object-contain"
                           />
                         </div>
                       </CarouselItem>
@@ -139,7 +128,7 @@ export const ImageCarousel = ({
 
       {images.length === 1 ? (
         <div className="not-prose relative mx-auto my-8 w-full max-w-4xl overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
-          {renderThumbnail(images[0], 0, true)}
+          {renderThumbnail(images[0], 0)}
         </div>
       ) : (
         <div className="not-prose mx-auto my-8 w-full max-w-4xl px-12">
@@ -154,7 +143,7 @@ export const ImageCarousel = ({
               {images.map((image, index) => (
                 <CarouselItem key={`thumbnail-${index}`}>
                   <div className="relative overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-gray-800">
-                    {renderThumbnail(image, index, index === 0)}
+                    {renderThumbnail(image, index)}
                   </div>
                 </CarouselItem>
               ))}

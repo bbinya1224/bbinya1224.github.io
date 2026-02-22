@@ -32,19 +32,21 @@ jobs:
 
       - name: Build
         env:
-          NEXT_PUBLIC_GISCUS_REPO: ${{ secrets.GISCUS_REPO }}
-          NEXT_PUBLIC_GISCUS_REPO_ID: ${{ secrets.GISCUS_REPO_ID }}
-          NEXT_PUBLIC_GISCUS_CATEGORY: ${{ secrets.GISCUS_CATEGORY }}
-          NEXT_PUBLIC_GISCUS_CATEGORY_ID: ${{ secrets.GISCUS_CATEGORY_ID }}
+          PUBLIC_GISCUS_REPO: ${{ secrets.GISCUS_REPO }}
+          PUBLIC_GISCUS_REPO_ID: ${{ secrets.GISCUS_REPO_ID }}
+          PUBLIC_GISCUS_CATEGORY: ${{ secrets.GISCUS_CATEGORY }}
+          PUBLIC_GISCUS_CATEGORY_ID: ${{ secrets.GISCUS_CATEGORY_ID }}
+          PUBLIC_GA_ID: ${{ secrets.GA_ID }}
+          PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ secrets.GOOGLE_SITE_VERIFICATION }}
         run: npm run build
 
       - name: Add .nojekyll
-        run: touch ./out/.nojekyll
+        run: touch ./dist/.nojekyll
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./out
+          path: ./dist
 
   deploy:
     environment:

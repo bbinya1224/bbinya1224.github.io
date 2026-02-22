@@ -1,7 +1,4 @@
-"use client";
-
 import mermaid from "mermaid";
-import { useTheme } from "next-themes";
 import React, { useEffect, useRef, useState } from "react";
 
 interface MermaidProps {
@@ -11,19 +8,32 @@ interface MermaidProps {
 const Mermaid = ({ chart }: MermaidProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [hasMounted, setHasMounted] = useState(false);
-  const { resolvedTheme } = useTheme();
-  const mermaidTheme = resolvedTheme === "dark" ? "dark" : "default";
+  const [theme, setTheme] = useState<string>("default");
+
+  useEffect(() => {
+    const isDark = document.documentElement.classList.contains("dark");
+    setTheme(isDark ? "dark" : "default");
+
+    const observer = new MutationObserver(() => {
+      const isDark = document.documentElement.classList.contains("dark");
+      setTheme(isDark ? "dark" : "default");
+    });
+    observer.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ["class"],
+    });
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     mermaid.initialize({
       startOnLoad: false,
-      theme: mermaidTheme,
-      securityLevel: "loose",
+      theme,
+      securityLevel: "strict",
       fontFamily: "inherit",
     });
-
     setHasMounted(true);
-  }, [mermaidTheme]);
+  }, [theme]);
 
   useEffect(() => {
     if (hasMounted && ref.current) {
@@ -31,14 +41,12 @@ const Mermaid = ({ chart }: MermaidProps) => {
       ref.current.innerHTML = chart.trim();
 
       mermaid
-        .run({
-          nodes: [ref.current],
-        })
+        .run({ nodes: [ref.current] })
         .catch((err: unknown) => {
           console.error("Mermaid rendering failed:", err);
         });
     }
-  }, [hasMounted, chart, resolvedTheme]);
+  }, [hasMounted, chart, theme]);
 
   if (!hasMounted) {
     return (
@@ -50,7 +58,7 @@ const Mermaid = ({ chart }: MermaidProps) => {
     <div
       className="mermaid not-prose my-8 flex items-center justify-center overflow-x-auto rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-[#404040] dark:bg-[#1e1e1e]"
       ref={ref}
-      key={resolvedTheme}
+      key={theme}
     >
       {chart}
     </div>

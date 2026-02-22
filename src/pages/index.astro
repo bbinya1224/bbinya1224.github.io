@@ -1,0 +1,24 @@
+---
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import PostListIsland from '@/islands/PostListIsland';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog', ({ data }) => data.published !== false);
+
+const sortedPosts = allPosts
+  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime())
+  .map((post) => ({
+    id: post.id,
+    title: post.data.title,
+    date: post.data.date instanceof Date ? post.data.date.toISOString() : String(post.data.date),
+    slug: post.data.slug || post.id,
+    category: post.data.category,
+    tag: post.data.tag,
+    description: post.data.description,
+    thumbnail: post.data.thumbnail,
+  }));
+---
+
+<BlogLayout canonicalUrl={Astro.site?.href}>
+  <PostListIsland client:load posts={sortedPosts} />
+</BlogLayout>

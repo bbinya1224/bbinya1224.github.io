@@ -1,8 +1,9 @@
 import typography from "@tailwindcss/typography";
+import type { Config } from "tailwindcss";
 
-module.exports = {
+export default {
   darkMode: "class",
-  content: ["./app/**/*.{js,ts,jsx,tsx}", "./src/**/*.{js,ts,jsx,tsx}"],
+  content: ["./src/**/*.{astro,js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
