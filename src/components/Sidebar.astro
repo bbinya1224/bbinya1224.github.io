@@ -43,19 +43,18 @@
     </div>
   </div>
 
-  <script is:inline>
-    (function() {
-      const img = document.getElementById('profile-image');
-      const skeleton = document.getElementById('profile-skeleton');
-      if (!img) return;
+  <script>
+    const img = document.getElementById('profile-image') as HTMLImageElement | null;
+    const skeleton = document.getElementById('profile-skeleton');
+    if (img) {
       function onLoaded() {
-        img.classList.remove('opacity-0');
-        img.classList.add('opacity-100');
-        if (skeleton) skeleton.remove();
+        img!.classList.remove('opacity-0');
+        img!.classList.add('opacity-100');
+        skeleton?.remove();
       }
       if (img.complete && img.naturalWidth > 0) onLoaded();
       else img.addEventListener('load', onLoaded);
-    })();
+    }
   </script>
 
   <!-- Sidebar Footer -->

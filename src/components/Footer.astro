@@ -15,6 +15,7 @@
   <p class="mt-2 text-xs text-slate-400 dark:text-slate-500">Powered by 삔야</p>
 </footer>
 
-<script is:inline>
-  document.getElementById('footer-year').textContent = new Date().getFullYear();
+<script>
+  const yearEl = document.getElementById('footer-year');
+  if (yearEl) yearEl.textContent = String(new Date().getFullYear());
 </script>
