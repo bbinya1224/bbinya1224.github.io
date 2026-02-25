@@ -89,7 +89,7 @@ const jsonLd = {
   publishedTime={post.data.date instanceof Date ? post.data.date.toISOString() : String(post.data.date)}
   type="article"
 >
-  <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')} />
 
   <section class="mx-auto h-full w-full max-w-4xl">
     <article class="relative p-4 sm:p-8">

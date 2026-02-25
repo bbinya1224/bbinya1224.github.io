@@ -640,4 +640,4 @@ export default {
     },
   },
   plugins: [typography],
-};
+} satisfies Config;

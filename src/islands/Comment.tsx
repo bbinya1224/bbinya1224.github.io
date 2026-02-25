@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
 import GiscusComponent from '@giscus/react';
 
+const REPO = import.meta.env.PUBLIC_GISCUS_REPO;
+const REPO_ID = import.meta.env.PUBLIC_GISCUS_REPO_ID;
+const CATEGORY = import.meta.env.PUBLIC_GISCUS_CATEGORY;
+const CATEGORY_ID = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
+
 export default function Comment() {
   const [theme, setTheme] = useState<'light' | 'dark'>(
     () => typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light'
@@ -8,8 +13,9 @@ export default function Comment() {
 
   useEffect(() => {
     const observer = new MutationObserver(() => {
-      const isDark = document.documentElement.classList.contains('dark');
-      setTheme(isDark ? 'dark' : 'light');
+      setTheme(
+        document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+      );
     });
 
     observer.observe(document.documentElement, {
@@ -20,13 +26,17 @@ export default function Comment() {
     return () => observer.disconnect();
   }, []);
 
+  if (!REPO || !REPO_ID || !CATEGORY || !CATEGORY_ID) {
+    return null;
+  }
+
   return (
     <div className="mt-8">
       <GiscusComponent
-        repo={(import.meta.env.PUBLIC_GISCUS_REPO || 'bbinya1224/bbinya1224.github.io') as `${string}/${string}`}
-        repoId={import.meta.env.PUBLIC_GISCUS_REPO_ID || ''}
-        category={import.meta.env.PUBLIC_GISCUS_CATEGORY || ''}
-        categoryId={import.meta.env.PUBLIC_GISCUS_CATEGORY_ID || ''}
+        repo={REPO as `${string}/${string}`}
+        repoId={REPO_ID}
+        category={CATEGORY}
+        categoryId={CATEGORY_ID}
         mapping="pathname"
         strict="0"
         reactionsEnabled="1"
