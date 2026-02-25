@@ -44,7 +44,7 @@
   </div>
 
   <script is:inline>
-    function initProfileImage() {
+    (function() {
       const img = document.getElementById('profile-image');
       const skeleton = document.getElementById('profile-skeleton');
       if (!img) return;
@@ -55,9 +55,7 @@
       }
       if (img.complete && img.naturalWidth > 0) onLoaded();
       else img.addEventListener('load', onLoaded);
-    }
-    initProfileImage();
-    document.addEventListener('astro:page-load', initProfileImage);
+    })();
   </script>
 
   <!-- Sidebar Footer -->
