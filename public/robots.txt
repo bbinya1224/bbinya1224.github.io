@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 Disallow: /exclude
 
-Sitemap: https://bbinya1224.github.io/sitemap-index.xml
+Sitemap: https://bbinya1224.github.io/sitemap.xml
