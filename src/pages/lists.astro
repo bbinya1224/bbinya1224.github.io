@@ -17,13 +17,13 @@ const categories = Object.entries(counts)
 ---
 
 <BlogLayout title="Lists" canonicalUrl={`${Astro.site?.origin}/lists`}>
-  <section class="w-full">
+  <section class="w-full mt-8">
     {categories.length === 0 ? (
       <div class="flex h-60 w-full items-center justify-center text-gray-500">
         <p>카테고리가 없습니다.</p>
       </div>
     ) : (
-      <div class="mt-8 grid grid-cols-1 gap-6">
+      <div class="grid grid-cols-1 gap-6">
         {categories.map(({ name, count }) => (
           <a
             href={`/?category=${encodeURIComponent(name)}`}

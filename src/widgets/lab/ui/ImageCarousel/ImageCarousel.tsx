@@ -9,7 +9,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/shared/ui/Carousel";
-import { Dialog, DialogContent, DialogTitle } from "@/shared/ui/Dialog";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/Dialog";
 
 interface ImageCarouselProps {
   images: string[];
@@ -73,6 +73,7 @@ export const ImageCarousel = ({
       >
         <DialogContent className="max-w-7xl border-none bg-transparent p-0 shadow-none [&>button]:hidden">
           <DialogTitle className="sr-only">Image Gallery Modal</DialogTitle>
+          <DialogDescription className="sr-only">이미지를 좌우로 넘겨 볼 수 있습니다.</DialogDescription>
           <div className="relative flex h-[80vh] w-full items-center justify-center">
             {selectedIndex !== null && (
               <div className="relative w-full">
