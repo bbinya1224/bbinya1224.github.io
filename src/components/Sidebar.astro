@@ -44,7 +44,7 @@
   </div>
 
   <script is:inline>
-    (function() {
+    function initProfileImage() {
       const img = document.getElementById('profile-image');
       const skeleton = document.getElementById('profile-skeleton');
       if (!img) return;
@@ -53,9 +53,11 @@
         img.classList.add('opacity-100');
         if (skeleton) skeleton.remove();
       }
-      if (img.complete) onLoaded();
+      if (img.complete && img.naturalWidth > 0) onLoaded();
       else img.addEventListener('load', onLoaded);
-    })();
+    }
+    initProfileImage();
+    document.addEventListener('astro:page-load', initProfileImage);
   </script>
 
   <!-- Sidebar Footer -->
