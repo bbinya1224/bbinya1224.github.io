@@ -7,6 +7,8 @@ tag: "React, Component Design, Composition"
 published: true
 ---
 
+import AsChildDemo from "@/islands/lab/as-child-demo/AsChildDemo";
+
 처음 Radix UI의 `asChild` 패턴을 마주했을 때, 솔직히 약간 혼란스러웠습니다.
 
 ```tsx
@@ -68,7 +70,7 @@ Styled Components, Chakra UI 등에서 익숙한 `as` prop 패턴이 있습니�
 
 아래 데모에서 asChild 패턴이 어떻게 동작하는지 직접 확인해보세요.
 
-<AsChildDemo />
+<AsChildDemo client:only="react" />
 
 <aside data-type="info">
 **이렇게 확인해보세요!**

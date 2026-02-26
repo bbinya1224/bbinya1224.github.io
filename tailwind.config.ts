@@ -1,8 +1,8 @@
 import typography from "@tailwindcss/typography";
+import type { Config } from "tailwindcss";
 
-module.exports = {
+export default {
   darkMode: "class",
-  content: ["./app/**/*.{js,ts,jsx,tsx}", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -10,7 +10,6 @@ module.exports = {
       },
       fontFamily: {
         apple: ["AppleSDGothicNeo-main", "sans-serif"],
-        bitcount: ["Bitcount_Prop_Double_Ink", "monospace"],
       },
       typography: () => ({
         DEFAULT: {
@@ -639,4 +638,4 @@ module.exports = {
     },
   },
   plugins: [typography],
-};
+} satisfies Config;

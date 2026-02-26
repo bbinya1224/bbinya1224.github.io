@@ -8,6 +8,8 @@ tag: "React, Rendering, Performance"
 published: true
 ---
 
+import ContextRerenderDemo from "@/islands/lab/context-rerender-demo/ContextRerenderDemo";
+
 사실 저는 `React.memo` 같은 메모이제이션을 쓰는 데 조심스러운 편입니다.  
 어설프게 알고 써서 비용이 더 드느니, 안 쓰는 게 낫다고 생각했습니다.
 
@@ -173,7 +175,7 @@ Context 리렌더링: value 변경 → Fiber 순회 → 구독자 직접 dirty �
 위 세 가지 시나리오의 차이를 직접 확인해보세요.  
 각 패널의 테마 변경 버튼을 누르면 Provider와 Page의 렌더 횟수가 어떻게 달라지는지 관찰할 수 있습니다.
 
-<ContextRerenderDemo />
+<ContextRerenderDemo client:visible />
 
 <aside data-type="info">
 **이렇게 확인해보세요.**

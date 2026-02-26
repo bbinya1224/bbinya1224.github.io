@@ -8,6 +8,9 @@ tag: "Next.js, i18n, Server Components, Concurrency"
 thumbnail: ""
 ---
 
+import FlickeringDemo from "@/islands/lab/flickering-demo/FlickeringDemo";
+import RaceConditionDemo from "@/islands/lab/race-condition/RaceConditionDemo";
+
 > Next.js App Router 환경에서 i18n Provider를 구현할 때 발생할 수 있는 두 가지 주요 문제와 해결 방법을 다룹니다.
 
 **문제점**
@@ -126,7 +129,7 @@ const TranslationProvider = ({ children }) => {
 
 아래 데모에서 useEffect 방식과 Server Props 방식의 렌더링 차이를 확인할 수 있습니다.
 
-<FlickeringDemo />
+<FlickeringDemo client:only="react" />
 
 ## 문제 1: useEffect 기반 언어 감지의 UX 문제
 
@@ -318,7 +321,7 @@ Node.js 프로세스 (단 하나!)
 
 **"싱글톤 (위험)"** 모드로 시뮬레이션을 실행하면 동시성 이슈가 발생하는 과정을 타임라인으로 확인할 수 있습니다.
 
-<RaceConditionDemo />
+<RaceConditionDemo client:load />
 
 ---
 

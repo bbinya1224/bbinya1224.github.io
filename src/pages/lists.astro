@@ -1,0 +1,47 @@
+---
+import BlogLayout from '@/layouts/BlogLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('blog', ({ data }) => data.published !== false);
+
+const counts: Record<string, number> = {};
+allPosts.forEach((post) => {
+  if (post.data.category) {
+    counts[post.data.category] = (counts[post.data.category] || 0) + 1;
+  }
+});
+
+const categories = Object.entries(counts)
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+---
+
+<BlogLayout title="Lists" canonicalUrl={`${Astro.site?.origin}/lists`}>
+  <section class="w-full mt-8">
+    {categories.length === 0 ? (
+      <div class="flex h-60 w-full items-center justify-center text-gray-500">
+        <p>카테고리가 없습니다.</p>
+      </div>
+    ) : (
+      <div class="grid grid-cols-1 gap-6">
+        {categories.map(({ name, count }) => (
+          <a
+            href={`/?category=${encodeURIComponent(name)}`}
+            class="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-[#1c242c]"
+          >
+            <div>
+              <h3 class="mb-2 text-xl font-bold text-gray-900 group-hover:text-amber-400 dark:text-white dark:group-hover:text-amber-400">
+                {name}
+              </h3>
+            </div>
+            <div class="mt-4">
+              <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                {count} {count === 1 ? 'story' : 'stories'}
+              </span>
+            </div>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+</BlogLayout>

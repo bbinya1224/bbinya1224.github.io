@@ -1,0 +1,104 @@
+---
+import '@/global.css';
+import { ClientRouter } from 'astro:transitions';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalUrl?: string;
+  publishedTime?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title = "삔야's Blog",
+  description = '프론트엔드 개발자 삔야 기술 블로그',
+  image = '/img/main/img_cover.png',
+  canonicalUrl,
+  publishedTime,
+  type = 'website',
+} = Astro.props;
+
+const siteUrl = Astro.site?.origin || 'https://bbinya1224.github.io';
+const gaId = import.meta.env.PUBLIC_GA_ID || '';
+const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION || '';
+const fullTitle = title === "삔야's Blog" ? title : `${title} | 삔야's Blog`;
+const resolvedCanonical = canonicalUrl || Astro.url.href;
+const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+---
+
+<html lang="ko" class="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={resolvedCanonical} />
+
+    <!-- Favicons -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={type} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:url" content={resolvedCanonical} />
+    <meta property="og:site_name" content="삔야's Blog" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={resolvedImage} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={resolvedImage} />
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+    <!-- Google Site Verification -->
+    {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+
+    <!-- Dark mode FOUC prevention -->
+    <script is:inline>
+      (function() {
+        const theme = localStorage.getItem('theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      })();
+      document.addEventListener('astro:before-swap', function(e) {
+        var isDark = document.documentElement.classList.contains('dark');
+        if (isDark) e.newDocument.documentElement.classList.add('dark');
+        else e.newDocument.documentElement.classList.remove('dark');
+      });
+    </script>
+
+    <!-- Google Analytics -->
+    {gaId && (
+      <script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+      <script is:inline define:vars={{ gaId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId);
+      </script>
+    )}
+
+    <!-- View Transitions -->
+    <ClientRouter />
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

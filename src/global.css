@@ -1,0 +1,109 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap");
+@import "tailwindcss";
+
+@import "tailwindcss/theme" layer(theme);
+
+@config "../tailwind.config.ts";
+
+@theme {
+  --font-family-apple:
+    "Pretendard", "AppleSDGothicNeo", "Noto Sans", sans-serif;
+  --font-family-Pretendard: "Pretendard", "Noto Sans", sans-serif;
+}
+
+@font-face {
+  font-family: "Pretendard";
+  src: url("/fonts/PretendardVariable.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "AppleSDGothicNeo";
+  src: url("/fonts/AppleSDGothicNeo-Medium.woff2") format("woff2");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #171717;
+    --primary: #171e23;
+    --card-bg: #ffffff;
+    --card-bg-dark: #171e23;
+    --page-width: 75rem;
+  }
+
+  .dark {
+    --background: #171717;
+    --foreground: #ededed;
+    --primary: #171e23;
+    --card-bg: #171e23;
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: var(--font-family-apple);
+    transition:
+      background-color 0.3s,
+      color 0.3s;
+  }
+
+  .card-base {
+    overflow: hidden;
+    border-radius: 1.5rem;
+    background-color: var(--card-bg);
+    transition-property:
+      color,
+      background-color,
+      border-color,
+      text-decoration-color,
+      fill,
+      stroke,
+      opacity,
+      box-shadow,
+      transform,
+      filter,
+      backdrop-filter,
+      -webkit-backdrop-filter;
+    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+    transition-duration: 0.15s;
+  }
+
+  /* Prose 내 이미지 스타일 고정 */
+  .prose img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 2rem auto;
+    border-radius: 0.5rem;
+  }
+
+  .prose :where(img):not(:where([class~="not-prose"] *)) {
+    max-width: 100% !important;
+    height: auto !important;
+    width: auto !important;
+  }
+
+  .prose pre {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  .prose code {
+    white-space: pre-wrap !important;
+    word-break: break-word !important;
+    overflow-wrap: anywhere !important;
+  }
+
+  /* Force readable syntax colors when rehype-pretty-code injects inline token styles */
+  .prose pre code span[style*="#6A737D"],
+  .prose pre code span[style*="rgb(106, 115, 125)"] {
+    color: #9ca3af !important;
+  }
+}

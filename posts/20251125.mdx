@@ -7,6 +7,8 @@ category: "사이드프로젝트"
 description: "사이드프로젝트를 진행 일지, 첫번째 페이지 입니다. ✨"
 ---
 
+import Mermaid from "@/islands/lab/Mermaid/Mermaid";
+
 > 내 블로그 톤을 분석하여 짧은 글을 작성하거나 몇가지 입력사항을 작성하면 퀄리티 높게 만들어주는 도구를 만들어보자.
 
 # 사이드 프로젝트를 시작하게 된 계기
@@ -53,7 +55,7 @@ AI 에게 나의 말투를 학습시켜 "이 리뷰를 좀 더 퀄리티 높게 
 RSS를 통해 블로그 데이터를 수집하고,  
 이를 **분석용**과 **따라하기용(샘플)** 으로 이원화하여 저장합니다.
 
-<Mermaid chart={`
+<Mermaid client:only="react" chart={`
 flowchart TD
     User["사용자: RSS URL 입력"] --> API_RSS["/api/fetch-rss"]
     API_RSS --> Crawler("Node.js Crawler")
@@ -72,7 +74,7 @@ flowchart TD
 ### B. 리뷰 생성 단계 (매회 실행)
 사용자 입력과 검색 결과(Fact), 그리고 내 말투(Style)를 조합하여 최종 글을 완성합니다.
 
-<Mermaid chart={`
+<Mermaid client:only="react" chart={`
 flowchart TD
     User_Input["입력: 가게명/위치/장단점"] --> API_Gen["/api/generate-review"]
 
@@ -188,7 +190,7 @@ POST /api/generate-review
 
 **Internal Logic**
 
-<Mermaid chart={` sequenceDiagram participant Client participant API as /api/generate-review participant Search as Tavily API participant FS as File System participant AI as Claude Haiku
+<Mermaid client:only="react" chart={` sequenceDiagram participant Client participant API as /api/generate-review participant Search as Tavily API participant FS as File System participant AI as Claude Haiku
 
 Client->>API: 요청 (가게명, 위치 등)
 
