@@ -1,4 +1,3 @@
-"use client";
 
 import { useMemo, useRef, useState, useTransition } from "react";
 

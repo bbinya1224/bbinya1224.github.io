@@ -1,4 +1,3 @@
-"use client";
 
 import { useRef, useState } from "react";
 import { Slot } from "@radix-ui/react-slot";

@@ -1,4 +1,3 @@
-"use client";
 
 import { useEffect, useLayoutEffect } from "react";
 import type { Logger } from "@/widgets/lab/model/type";
