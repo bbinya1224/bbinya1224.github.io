@@ -1,6 +1,6 @@
 
 import { useEffect, useLayoutEffect } from "react";
-import type { Logger } from "@/widgets/lab/model/type";
+import type { Logger } from "./type";
 
 type ChildLifecycleProbeProps = {
   count: number;

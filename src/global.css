@@ -3,13 +3,11 @@
 
 @import "tailwindcss/theme" layer(theme);
 
-@config "../../tailwind.config.ts";
+@config "../tailwind.config.ts";
 
 @theme {
   --font-family-apple:
     "Pretendard", "AppleSDGothicNeo", "Noto Sans", sans-serif;
-  --font-family-bitcount:
-    "Bitcount", "AppleSDGothicNeo", "Noto Sans", sans-serif;
   --font-family-Pretendard: "Pretendard", "Noto Sans", sans-serif;
 }
 
@@ -18,6 +16,7 @@
   src: url("/fonts/PretendardVariable.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
+  font-display: swap;
 }
 
 @font-face {
@@ -25,13 +24,7 @@
   src: url("/fonts/AppleSDGothicNeo-Medium.woff2") format("woff2");
   font-weight: normal;
   font-style: normal;
-}
-
-@font-face {
-  font-family: "Bitcount";
-  src: url("/fonts/BitcountGridDouble.ttf") format("truetype");
-  font-weight: normal;
-  font-style: normal;
+  font-display: swap;
 }
 
 @layer base {
@@ -58,10 +51,6 @@
     transition:
       background-color 0.3s,
       color 0.3s;
-  }
-
-  .Bitcount {
-    font-family: var(--font-family-bitcount);
   }
 
   .card-base {

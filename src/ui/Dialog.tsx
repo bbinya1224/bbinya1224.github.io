@@ -2,7 +2,7 @@ import type { ComponentProps, ComponentRef, HTMLAttributes, Ref } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
-import cn from "@/shared/utils/cn";
+import cn from "@/lib/cn";
 
 const Dialog = DialogPrimitive.Root;
 

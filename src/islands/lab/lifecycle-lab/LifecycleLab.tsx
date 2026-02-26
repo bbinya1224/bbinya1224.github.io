@@ -7,8 +7,8 @@ import {
   useState,
   useTransition,
 } from "react";
-import { formatEntry } from "@/widgets/lab/lib/formatEntry";
-import type { Logger } from "@/widgets/lab/model/type";
+import { formatEntry } from "./formatEntry";
+import type { Logger } from "./type";
 import ChildLifecycleProbe from "./ChildLifecycleProbe";
 
 const LifecycleLab = () => {

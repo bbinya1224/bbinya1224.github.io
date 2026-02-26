@@ -10,10 +10,10 @@ import {
   type KeyboardEvent,
   type Ref,
 } from "react";
-import { CarouselContext, useCarousel } from "@/shared/hooks/useCarousel";
-import type { CarouselApi, CarouselProps } from "@/shared/model/carousel.types";
-import { Button } from "@/shared/ui/Button";
-import cn from "@/shared/utils/cn";
+import { CarouselContext, useCarousel } from "./useCarousel";
+import type { CarouselApi, CarouselProps } from "./carousel.types";
+import { Button } from "@/ui/Button";
+import cn from "@/lib/cn";
 
 const Carousel = ({
   orientation = "horizontal",

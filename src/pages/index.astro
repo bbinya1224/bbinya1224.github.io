@@ -20,5 +20,5 @@ const sortedPosts = allPosts
 ---
 
 <BlogLayout canonicalUrl={Astro.site?.href}>
-  <PostListIsland client:load posts={sortedPosts} />
+  <PostListIsland client:visible posts={sortedPosts} />
 </BlogLayout>

@@ -1,6 +1,6 @@
 import { type ButtonHTMLAttributes } from "react";
 import { Slot } from "@radix-ui/react-slot";
-import cn from "@/shared/utils/cn";
+import cn from "@/lib/cn";
 
 const buttonVariants = {
   variant: {

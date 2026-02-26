@@ -31,24 +31,28 @@
 </header>
 
 <script>
-  const btn = document.getElementById('theme-toggle');
-  btn?.addEventListener('click', () => {
-    const isDark = document.documentElement.classList.toggle('dark');
-    localStorage.setItem('theme', isDark ? 'dark' : 'light');
-  });
+  function initHeader() {
+    const btn = document.getElementById('theme-toggle');
+    btn?.addEventListener('click', () => {
+      const isDark = document.documentElement.classList.toggle('dark');
+      localStorage.setItem('theme', isDark ? 'dark' : 'light');
+    });
 
-  let lastScrollY = window.scrollY;
-  const header = document.getElementById('site-header');
-  window.addEventListener('scroll', () => {
-    const currentScrollY = window.scrollY;
-    if (!header) return;
-    if (currentScrollY < lastScrollY) {
-      header.classList.remove('-translate-y-full');
-      header.classList.add('translate-y-0');
-    } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-      header.classList.remove('translate-y-0');
-      header.classList.add('-translate-y-full');
-    }
-    lastScrollY = currentScrollY;
-  }, { passive: true });
+    let lastScrollY = window.scrollY;
+    const header = document.getElementById('site-header');
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      if (!header) return;
+      if (currentScrollY < lastScrollY) {
+        header.classList.remove('-translate-y-full');
+        header.classList.add('translate-y-0');
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        header.classList.remove('translate-y-0');
+        header.classList.add('-translate-y-full');
+      }
+      lastScrollY = currentScrollY;
+    }, { passive: true });
+  }
+
+  document.addEventListener('astro:page-load', initHeader);
 </script>

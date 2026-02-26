@@ -3,7 +3,6 @@ import type { Config } from "tailwindcss";
 
 export default {
   darkMode: "class",
-  content: ["./src/**/*.{astro,js,ts,jsx,tsx}"],
   theme: {
     extend: {
       colors: {
@@ -11,7 +10,6 @@ export default {
       },
       fontFamily: {
         apple: ["AppleSDGothicNeo-main", "sans-serif"],
-        bitcount: ["Bitcount_Prop_Double_Ink", "monospace"],
       },
       typography: () => ({
         DEFAULT: {

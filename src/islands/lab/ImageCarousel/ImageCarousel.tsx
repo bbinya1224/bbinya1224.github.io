@@ -1,15 +1,15 @@
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
-import type { CarouselApi } from "@/shared/model/carousel.types";
-import { Button } from "@/shared/ui/Button";
+import type { CarouselApi } from "@/ui/carousel/carousel.types";
+import { Button } from "@/ui/Button";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "@/shared/ui/Carousel";
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/shared/ui/Dialog";
+} from "@/ui/carousel/Carousel";
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from "@/ui/Dialog";
 
 interface ImageCarouselProps {
   images: string[];

@@ -40,7 +40,7 @@ const Mermaid = ({ chart }: MermaidProps) => {
     if (hasMounted && ref.current) {
       setIsRendered(false);
       ref.current.removeAttribute("data-processed");
-      ref.current.innerHTML = chart.trim();
+      ref.current.textContent = chart.trim();
 
       mermaid
         .run({ nodes: [ref.current] })

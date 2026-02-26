@@ -1,5 +1,5 @@
 import { createContext, useContext } from "react";
-import type { CarouselContextProps } from "@/shared/model/carousel.types";
+import type { CarouselContextProps } from "./carousel.types";
 
 export const CarouselContext = createContext<CarouselContextProps | null>(null);
 
