@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useCallback, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useId, type ReactNode } from 'react';
 
 interface Props {
   title: string;
@@ -15,6 +15,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
   const [isOpen, setIsOpen] = useState(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const close = useCallback(() => setIsOpen(false), []);
+  const dialogTitleId = useId();
 
   useEffect(() => {
     setPortalTarget(document.body);
@@ -42,12 +43,15 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
       onClick={close}
     >
       <div
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={dialogTitleId}
         className="relative m-4 w-full max-w-4xl rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-[#1a1a1a]"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between border-b border-gray-100 p-6 dark:border-gray-800">
           <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
+            <h2 id={dialogTitleId} className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
           </div>
           <button
@@ -85,7 +89,9 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
 
   return (
     <>
-      <div
+      <button
+        type="button"
+        aria-haspopup="dialog"
         className="group cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-[#1a1a1a]"
         onClick={() => setIsOpen(true)}
       >
@@ -105,7 +111,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
             ))}
           </div>
         </div>
-      </div>
+      </button>
 
       {portalTarget ? createPortal(modalContent, portalTarget) : modalContent}
     </>

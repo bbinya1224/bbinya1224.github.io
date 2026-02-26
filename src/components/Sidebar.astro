@@ -9,7 +9,7 @@
       <img
         id="profile-image"
         src="/img/main/img_profile.png"
-        alt="profile Image"
+        alt="삔야 프로필 사진"
         class="h-full w-full object-cover opacity-0 transition-opacity duration-500"
         loading="eager"
       />
@@ -47,13 +47,16 @@
     const img = document.getElementById('profile-image') as HTMLImageElement | null;
     const skeleton = document.getElementById('profile-skeleton');
     if (img) {
-      function onLoaded() {
+      function revealImage() {
         img!.classList.remove('opacity-0');
         img!.classList.add('opacity-100');
         skeleton?.remove();
       }
-      if (img.complete && img.naturalWidth > 0) onLoaded();
-      else img.addEventListener('load', onLoaded);
+      if (img.complete) revealImage();
+      else {
+        img.addEventListener('load', revealImage, { once: true });
+        img.addEventListener('error', revealImage, { once: true });
+      }
     }
   </script>
 

@@ -25,6 +25,12 @@ export const ImageCarousel = ({
   const [modalApi, setModalApi] = useState<CarouselApi>();
 
   useEffect(() => {
+    if (selectedIndex !== null) {
+      setCurrentSlide(selectedIndex + 1);
+    }
+  }, [selectedIndex]);
+
+  useEffect(() => {
     if (!modalApi) return;
     const updateSlide = () => {
       setCurrentSlide(modalApi.selectedScrollSnap() + 1);
@@ -42,7 +48,11 @@ export const ImageCarousel = ({
     return null;
   }
 
-  const renderThumbnail = (src: string, index: number) => (
+  const renderThumbnail = (
+    src: string,
+    index: number,
+    loading: "eager" | "lazy" = "lazy",
+  ) => (
     <div
       className="group relative aspect-[16/9] w-full cursor-pointer overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-900"
       onClick={() => setSelectedIndex(index)}
@@ -60,7 +70,7 @@ export const ImageCarousel = ({
         src={src}
         alt={`${alt} ${index + 1}`}
         className="absolute inset-0 h-full w-full object-contain transition-transform duration-300 group-hover:scale-105"
-        loading="lazy"
+        loading={loading}
       />
     </div>
   );
@@ -93,6 +103,8 @@ export const ImageCarousel = ({
                             src={image}
                             alt={`${alt} ${index + 1}`}
                             className="absolute inset-0 h-full w-full object-contain"
+                            loading={index === currentSlide - 1 ? "eager" : "lazy"}
+                            decoding="async"
                           />
                         </div>
                       </CarouselItem>
@@ -129,7 +141,7 @@ export const ImageCarousel = ({
 
       {images.length === 1 ? (
         <div className="not-prose relative mx-auto my-8 w-full max-w-4xl overflow-hidden rounded-lg border border-gray-200 dark:border-gray-800">
-          {renderThumbnail(images[0], 0)}
+          {renderThumbnail(images[0], 0, "eager")}
         </div>
       ) : (
         <div className="not-prose mx-auto my-8 w-full max-w-4xl px-12">
@@ -144,7 +156,7 @@ export const ImageCarousel = ({
               {images.map((image, index) => (
                 <CarouselItem key={`thumbnail-${index}`}>
                   <div className="relative overflow-hidden rounded-lg border border-gray-200 shadow-sm dark:border-gray-800">
-                    {renderThumbnail(image, index)}
+                    {renderThumbnail(image, index, index === 0 ? "eager" : "lazy")}
                   </div>
                 </CarouselItem>
               ))}
