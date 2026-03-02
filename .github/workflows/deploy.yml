@@ -36,8 +36,11 @@ jobs:
           PUBLIC_GISCUS_REPO_ID: ${{ secrets.GISCUS_REPO_ID }}
           PUBLIC_GISCUS_CATEGORY: ${{ secrets.GISCUS_CATEGORY }}
           PUBLIC_GISCUS_CATEGORY_ID: ${{ secrets.GISCUS_CATEGORY_ID }}
-          PUBLIC_GA_ID: ${{ secrets.GA_ID }}
-          PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ secrets.GOOGLE_SITE_VERIFICATION }}
+          PUBLIC_GA_ID: ${{ vars.PUBLIC_GA_ID }}
+          PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.PUBLIC_GOOGLE_SITE_VERIFICATION }}
+          GA_PROPERTY_ID: ${{ secrets.GA_PROPERTY_ID }}
+          GA_CLIENT_EMAIL: ${{ secrets.GA_CLIENT_EMAIL }}
+          GA_PRIVATE_KEY: ${{ secrets.GA_PRIVATE_KEY }}
         run: npm run build
 
       - name: Add .nojekyll
