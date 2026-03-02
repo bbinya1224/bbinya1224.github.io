@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useCallback, useId, type ReactNode } from 'react';
+import { useState, useEffect, useCallback, useId, type ReactNode, type MouseEvent } from 'react';
 
 interface Props {
   title: string;
@@ -11,10 +11,25 @@ interface Props {
   children?: ReactNode;
 }
 
+const preventBodyScroll = (body: HTMLElement) => {
+  body.style.overflow = 'hidden';
+};
+
+const restoreBodyScroll = (body: HTMLElement) => {
+  body.style.overflow = '';
+};
+
+const isEscapeKey = (event: KeyboardEvent) => event.key === 'Escape' && !event.defaultPrevented;
+
+const stopPropagation = (event: MouseEvent<HTMLDivElement>) => {
+  event.stopPropagation();
+};
+
 export function ProjectCard({ title, description, period, techStack, repoUrl, demoUrl, children }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
   const close = useCallback(() => setIsOpen(false), []);
+  const open = useCallback(() => setIsOpen(true), []);
   const dialogTitleId = useId();
 
   useEffect(() => {
@@ -23,16 +38,17 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
 
   useEffect(() => {
     if (!isOpen) return;
-    document.body.style.overflow = 'hidden';
+
+    preventBodyScroll(document.body);
     const onEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && !e.defaultPrevented) {
-        e.preventDefault();
-        close();
-      }
+      if (!isEscapeKey(e)) return;
+      e.preventDefault();
+      close();
     };
+
     document.addEventListener('keydown', onEsc);
     return () => {
-      document.body.style.overflow = '';
+      restoreBodyScroll(document.body);
       document.removeEventListener('keydown', onEsc);
     };
   }, [isOpen, close]);
@@ -47,7 +63,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
         aria-modal="true"
         aria-labelledby={dialogTitleId}
         className="relative m-4 w-full max-w-4xl rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-[#1a1a1a]"
-        onClick={(e) => e.stopPropagation()}
+        onClick={stopPropagation}
       >
         <div className="flex items-center justify-between border-b border-gray-100 p-6 dark:border-gray-800">
           <div>
@@ -93,7 +109,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
         type="button"
         aria-haspopup="dialog"
         className="group cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-[#1a1a1a]"
-        onClick={() => setIsOpen(true)}
+        onClick={open}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>

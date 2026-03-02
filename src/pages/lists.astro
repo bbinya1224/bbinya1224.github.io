@@ -1,8 +1,12 @@
 ---
-import BlogLayout from '@/layouts/BlogLayout.astro';
-import { getCollection } from 'astro:content';
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getSortedPosts, parseTags } from '@/lib/posts';
+import { getPopularPosts } from '@/lib/analytics';
+import { resolveSiteOrigin } from '@/lib/site';
+import { toRouteSegment } from '@/lib/taxonomy';
 
-const allPosts = await getCollection('blog', ({ data }) => data.published !== false);
+const allPosts = await getSortedPosts();
+const popularPosts = await getPopularPosts(3);
 
 const counts: Record<string, number> = {};
 allPosts.forEach((post) => {
@@ -14,28 +18,63 @@ allPosts.forEach((post) => {
 const categories = Object.entries(counts)
   .map(([name, count]) => ({ name, count }))
   .sort((a, b) => b.count - a.count);
+
+const tags = allPosts
+  .flatMap((post) => parseTags(post.data.tag))
+  .reduce<Record<string, number>>((acc, tag) => {
+    acc[tag] = (acc[tag] || 0) + 1;
+    return acc;
+  }, {});
+
+const sortedTags = Object.entries(tags)
+  .map(([name, count]) => ({ name, count }))
+  .sort((a, b) => b.count - a.count);
+
+const siteOrigin = resolveSiteOrigin(Astro.site);
 ---
 
-<BlogLayout title="Lists" canonicalUrl={`${Astro.site?.origin}/lists`}>
-  <section class="w-full mt-8">
+<BaseLayout title="Lists" canonicalUrl={`${siteOrigin}/lists`}>
+  <h1 class="mb-8 text-3xl font-bold text-ink">Lists</h1>
+
+  <section class="mb-10">
+    <h2 class="mb-4 text-xl font-semibold text-ink">많이 본 게시물</h2>
+    <div class="grid grid-cols-1 gap-3">
+      {popularPosts.map((post) => (
+        <a
+          href={`/posts/${post.slug}`}
+          class="group rounded-xl border border-line bg-surface px-5 py-4 transition-colors hover:border-ink"
+        >
+          <p class="text-sm text-subtle">
+            {post.date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </p>
+          <h3 class="mt-1 text-base font-semibold text-ink transition-colors group-hover:text-accent sm:text-lg">
+            {post.title}
+          </h3>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="w-full mb-10">
+    <h2 class="mb-4 text-xl font-semibold text-ink">카테고리</h2>
     {categories.length === 0 ? (
-      <div class="flex h-60 w-full items-center justify-center text-gray-500">
+      <div class="flex h-60 w-full items-center justify-center text-subtle">
         <p>카테고리가 없습니다.</p>
       </div>
     ) : (
-      <div class="grid grid-cols-1 gap-6">
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {categories.map(({ name, count }) => (
           <a
-            href={`/?category=${encodeURIComponent(name)}`}
-            class="group flex flex-col justify-between rounded-2xl border border-gray-100 bg-gray-50 p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-[#1c242c]"
+            href={`/category/${encodeURIComponent(name)}`}
+            class="group flex flex-col justify-between rounded-xl border border-line bg-surface p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
           >
             <div>
-              <h3 class="mb-2 text-xl font-bold text-gray-900 group-hover:text-amber-400 dark:text-white dark:group-hover:text-amber-400">
+              <h3 class="mb-2 text-xl font-bold text-ink transition-colors group-hover:text-accent">
                 {name}
               </h3>
             </div>
             <div class="mt-4">
-              <span class="text-sm font-medium text-gray-500 dark:text-gray-400">
+              <span class="text-sm text-subtle">
                 {count} {count === 1 ? 'story' : 'stories'}
               </span>
             </div>
@@ -44,4 +83,24 @@ const categories = Object.entries(counts)
       </div>
     )}
   </section>
-</BlogLayout>
+
+  <section class="w-full">
+    <h2 class="mb-4 text-xl font-semibold text-ink">태그</h2>
+    {sortedTags.length === 0 ? (
+      <div class="flex h-32 w-full items-center justify-center text-subtle">
+        <p>태그가 없습니다.</p>
+      </div>
+    ) : (
+      <div class="flex flex-wrap gap-2">
+        {sortedTags.map(({ name, count }) => (
+          <a
+            href={`/tag/${toRouteSegment(name)}`}
+            class="rounded-full border border-line bg-surface px-3 py-1.5 text-xs text-ink transition-colors hover:border-ink hover:text-accent sm:text-sm"
+          >
+            #{name} <span class="text-subtle">({count})</span>
+          </a>
+        ))}
+      </div>
+    )}
+  </section>
+</BaseLayout>

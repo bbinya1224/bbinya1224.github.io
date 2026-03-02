@@ -29,49 +29,30 @@
 
 @layer base {
   :root {
-    --background: #ffffff;
-    --foreground: #171717;
-    --primary: #171e23;
-    --card-bg: #ffffff;
-    --card-bg-dark: #171e23;
+    --background: #FAFAF7;
+    --foreground: #2D2A26;
+    --primary: #2D2A26;
+    --accent: #B8860B;
+    --card-bg: #FFFFFF;
+    --muted: #8A8578;
+    --border: #E8E5DE;
     --page-width: 75rem;
   }
 
   .dark {
-    --background: #171717;
-    --foreground: #ededed;
-    --primary: #171e23;
-    --card-bg: #171e23;
+    --background: #1A1918;
+    --foreground: #E8E6E3;
+    --primary: #E8E6E3;
+    --accent: #D4A843;
+    --card-bg: #242220;
+    --muted: #9C9890;
+    --border: #3A3733;
   }
 
   body {
     background-color: var(--background);
     color: var(--foreground);
     font-family: var(--font-family-apple);
-    transition:
-      background-color 0.3s,
-      color 0.3s;
-  }
-
-  .card-base {
-    overflow: hidden;
-    border-radius: 1.5rem;
-    background-color: var(--card-bg);
-    transition-property:
-      color,
-      background-color,
-      border-color,
-      text-decoration-color,
-      fill,
-      stroke,
-      opacity,
-      box-shadow,
-      transform,
-      filter,
-      backdrop-filter,
-      -webkit-backdrop-filter;
-    transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-    transition-duration: 0.15s;
   }
 
   /* Prose 내 이미지 스타일 고정 */
@@ -105,5 +86,33 @@
   .prose pre code span[style*="#6A737D"],
   .prose pre code span[style*="rgb(106, 115, 125)"] {
     color: #9ca3af !important;
+  }
+
+  /* Table horizontal scroll */
+  .prose table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Mobile typography adjustments */
+@media (max-width: 639px) {
+  .prose p,
+  .prose li {
+    font-size: 1rem !important;
+  }
+
+  .prose h1 {
+    font-size: 1.75rem !important;
+  }
+
+  .prose pre {
+    padding-inline: 1em !important;
+    padding-top: 1.25em !important;
+  }
+
+  .prose pre::before {
+    display: none !important;
   }
 }

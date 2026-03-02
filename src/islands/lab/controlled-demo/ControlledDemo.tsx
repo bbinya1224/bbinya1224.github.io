@@ -5,21 +5,17 @@ type DemoMode = "controlled" | "uncontrolled" | "optimized";
 
 const HeavyComponent = ({ value }: { value: string }) => {
   const items = useMemo(() => {
-    const result = [];
     // 성능 저하를 유발하기 위해 반복 횟수 증가 (예: 5000번)
     const startTime = performance.now();
     while (performance.now() - startTime < 50) {
       // 50ms 동안 메인 스레드 차단 (Blocking)
     }
 
-    for (let i = 0; i < 50; i++) {
-      result.push(
-        <div key={i} className="text-xs text-slate-400 dark:text-slate-600">
-          Heavy Item #{i + 1} : {value}
-        </div>,
-      );
-    }
-    return result;
+    return Array.from({ length: 50 }, (_, index) => (
+      <div key={index} className="text-xs text-slate-400 dark:text-slate-600">
+        Heavy Item #{index + 1} : {value}
+      </div>
+    ));
   }, [value]);
 
   return (

@@ -6,7 +6,13 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#171e23",
+        accent: "var(--accent)",
+        canvas: "var(--background)",
+        ink: "var(--foreground)",
+        line: "var(--border)",
+        primary: "var(--primary)",
+        subtle: "var(--muted)",
+        surface: "var(--card-bg)",
       },
       fontFamily: {
         apple: ["AppleSDGothicNeo-main", "sans-serif"],
@@ -14,14 +20,14 @@ export default {
       typography: () => ({
         DEFAULT: {
           css: {
-            // 기본 텍스트 색상
-            color: "#37352F",
+            color: "#2D2A26",
             lineHeight: "1.8",
 
             // 제목 스타일
             "h1, h2, h3, h4, h5, h6": {
-              color: "#000000",
+              color: "#2D2A26",
               fontWeight: "600",
+              lineHeight: "1.35",
               marginTop: "1em",
               marginBottom: "0.3em",
               borderBottom: 0,
@@ -40,17 +46,18 @@ export default {
             h3: {
               fontSize: "1.25rem",
               background:
-                "linear-gradient(to top, rgba(221, 214, 254, 0.45) 40%, transparent 40%)",
+                "linear-gradient(to top, rgba(221, 214, 254, 0.5) 40%, transparent 40%)",
               width: "fit-content",
               boxDecorationBreak: "clone",
             },
             h4: {
-              fontSize: "1.1rem",
+              fontSize: "1.15rem",
+              fontWeight: "700",
             },
 
             // 기울기
             em: {
-              color: "#333",
+              color: "#2D2A26",
               fontStyle: "italic",
             },
 
@@ -78,7 +85,7 @@ export default {
 
             // 강조
             strong: {
-              color: "#000000",
+              color: "#2D2A26",
               fontWeight: "600",
             },
 
@@ -134,7 +141,7 @@ export default {
             // 코드
             code: {
               color: "#E03B8D",
-              backgroundColor: "#F5F4F3",
+              backgroundColor: "#F5F3EE",
               padding: "0.2em 0.4em",
               borderRadius: "0.3em",
               fontWeight: "400",
@@ -330,19 +337,19 @@ export default {
               marginBottom: "1.5em",
             },
             "thead th": {
-              backgroundColor: "#F5F4F3",
-              color: "#37352F",
+              backgroundColor: "#F5F3EE",
+              color: "#2D2A26",
               fontWeight: "600",
               padding: "0.75em",
-              border: "1px solid #E5E5E5",
+              border: "1px solid #E8E5DE",
             },
             "tbody td": {
               padding: "0.75em",
-              border: "1px solid #E5E5E5",
-              color: "#37352F",
+              border: "1px solid #E8E5DE",
+              color: "#2D2A26",
             },
             "tbody tr:nth-child(odd)": {
-              backgroundColor: "#FAFAF9",
+              backgroundColor: "#FAFAF7",
             },
             "thead th:first-child": {
               paddingLeft: "0.75em",
@@ -384,20 +391,20 @@ export default {
         // 다크 모드
         invert: {
           css: {
-            color: "#E8E8E8",
+            color: "#E8E6E3",
 
             "h1, h2, h3, h4, h5, h6": {
-              color: "#FFFFFF",
+              color: "#E8E6E3",
             },
             h2: {
               background:
-                "linear-gradient(to top, rgba(167, 139, 250, 0.35) 40%, transparent 40%)",
+                "linear-gradient(to top, rgba(139, 92, 246, 0.3) 40%, transparent 40%)",
               width: "fit-content",
               boxDecorationBreak: "clone",
             },
             h3: {
               background:
-                "linear-gradient(to top, rgba(167, 139, 250, 0.18) 40%, transparent 40%)",
+                "linear-gradient(to top, rgba(139, 92, 246, 0.15) 40%, transparent 40%)",
               width: "fit-content",
               boxDecorationBreak: "clone",
             },

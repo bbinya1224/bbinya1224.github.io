@@ -6,17 +6,17 @@ const REPO_ID = import.meta.env.PUBLIC_GISCUS_REPO_ID;
 const CATEGORY = import.meta.env.PUBLIC_GISCUS_CATEGORY;
 const CATEGORY_ID = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
 
+const resolveTheme = (isDark: boolean): 'light' | 'dark' => (isDark ? 'dark' : 'light');
+const isDarkMode = (root: Element) => root.classList.contains('dark');
+const readDocumentTheme = () => resolveTheme(isDarkMode(document.documentElement));
+
 export default function Comment() {
-  const [theme, setTheme] = useState<'light' | 'dark'>(
-    () => typeof document !== 'undefined' && document.documentElement.classList.contains('dark') ? 'dark' : 'light'
+  const [theme, setTheme] = useState<'light' | 'dark'>(() =>
+    typeof document === 'undefined' ? 'light' : readDocumentTheme(),
   );
 
   useEffect(() => {
-    const observer = new MutationObserver(() => {
-      setTheme(
-        document.documentElement.classList.contains('dark') ? 'dark' : 'light'
-      );
-    });
+    const observer = new MutationObserver(() => setTheme(readDocumentTheme()));
 
     observer.observe(document.documentElement, {
       attributes: true,
