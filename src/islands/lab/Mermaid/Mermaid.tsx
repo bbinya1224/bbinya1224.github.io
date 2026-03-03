@@ -49,8 +49,7 @@ const Mermaid = ({ chart }: MermaidProps) => {
       mermaid
         .run({ nodes: [ref.current] })
         .then(() => setIsRendered(true))
-        .catch((err: unknown) => {
-          console.error("Mermaid rendering failed:", err);
+        .catch(() => {
           setRenderError(true);
           setIsRendered(true);
         });

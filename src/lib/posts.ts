@@ -9,11 +9,15 @@ export async function getSortedPosts() {
   );
 }
 
-export function toPostData(post: Awaited<ReturnType<typeof getSortedPosts>>[number]) {
+type Post = Awaited<ReturnType<typeof getSortedPosts>>[number];
+
+export const resolveSlug = (post: Post) => post.data.slug || post.id;
+
+export function toPostData(post: Post) {
   return {
     title: post.data.title,
     date: post.data.date instanceof Date ? post.data.date : new Date(post.data.date),
-    slug: post.data.slug || post.id,
+    slug: resolveSlug(post),
     category: post.data.category,
     description: post.data.description,
   };

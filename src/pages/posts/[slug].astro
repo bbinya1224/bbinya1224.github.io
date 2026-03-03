@@ -2,13 +2,13 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Comment from '@/islands/Comment';
 import { getCollection, render } from 'astro:content';
-import { parseTags } from '@/lib/posts';
+import { parseTags, resolveSlug } from '@/lib/posts';
 import { resolveSiteOrigin } from '@/lib/site';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => data.published !== false);
   return posts.map((post) => ({
-    params: { slug: post.data.slug || post.id },
+    params: { slug: resolveSlug(post) },
     props: { post, allPosts: posts },
   }));
 }
@@ -49,7 +49,7 @@ const formattedDate = new Date(post.data.date).toLocaleDateString('ko-KR', {
   day: 'numeric',
 });
 
-const slug = post.data.slug || post.id;
+const slug = resolveSlug(post);
 const siteOrigin = resolveSiteOrigin(Astro.site);
 const url = `${siteOrigin}/posts/${slug}`;
 
@@ -139,7 +139,7 @@ const jsonLd = {
           {relatedPosts.map((related) => (
             <li>
               <a
-                href={`/posts/${related.data.slug || related.id}`}
+                href={`/posts/${resolveSlug(related)}`}
                 class="text-base text-subtle transition-colors hover:text-accent"
               >
                 {related.data.title}

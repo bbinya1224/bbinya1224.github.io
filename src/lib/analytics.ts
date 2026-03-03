@@ -1,5 +1,5 @@
 import { createSign } from 'node:crypto';
-import { getSortedPosts, toPostData } from './posts';
+import { getSortedPosts, toPostData, resolveSlug } from './posts';
 
 const GA_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GA_REPORT_URL = (propertyId: string) =>
@@ -137,7 +137,7 @@ export async function getPopularPosts(limit = 3) {
     if (popularSlugs.length === 0) return fallbackPosts;
 
     const postMap = new Map(
-      sortedPosts.map((post) => [post.data.slug || post.id, toPostData(post)]),
+      sortedPosts.map((post) => [resolveSlug(post), toPostData(post)]),
     );
     const gaPosts = popularSlugs
       .map((slug) => postMap.get(slug))
