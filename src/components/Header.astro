@@ -80,7 +80,12 @@ const navItems = [
 
     btn.dataset.init = 'true';
     btn.addEventListener('click', () => {
-      localStorage.setItem('theme', toggleTheme(document.documentElement));
+      const nextTheme = toggleTheme(document.documentElement);
+      try {
+        localStorage.setItem('theme', nextTheme);
+      } catch {
+        // no-op: localStorage may be unavailable in private or restricted modes
+      }
     });
   };
 

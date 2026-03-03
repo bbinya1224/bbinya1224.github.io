@@ -45,16 +45,55 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
     preventBodyScroll(document.body);
     dialogRef.current?.focus();
 
-    const onEsc = (e: KeyboardEvent) => {
-      if (!isEscapeKey(e)) return;
-      e.preventDefault();
-      close();
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (isEscapeKey(e)) {
+        e.preventDefault();
+        close();
+        return;
+      }
+
+      if (e.key !== 'Tab') return;
+      const dialog = dialogRef.current;
+      if (!dialog) return;
+
+      const focusables = Array.from(
+        dialog.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ),
+      );
+
+      if (focusables.length === 0) {
+        e.preventDefault();
+        dialog.focus();
+        return;
+      }
+
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      const active = document.activeElement;
+
+      if (!dialog.contains(active)) {
+        e.preventDefault();
+        first.focus();
+        return;
+      }
+
+      if (e.shiftKey && active === first) {
+        e.preventDefault();
+        last.focus();
+        return;
+      }
+
+      if (!e.shiftKey && active === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
 
-    document.addEventListener('keydown', onEsc);
+    document.addEventListener('keydown', onKeyDown);
     return () => {
       restoreBodyScroll(document.body);
-      document.removeEventListener('keydown', onEsc);
+      document.removeEventListener('keydown', onKeyDown);
       triggerElement?.focus();
     };
   }, [isOpen, close]);

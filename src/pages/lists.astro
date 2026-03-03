@@ -6,7 +6,10 @@ import { resolveSiteOrigin } from '@/lib/site';
 import { toRouteSegment } from '@/lib/taxonomy';
 
 const allPosts = await getSortedPosts();
-const popularPosts = await getPopularPosts(3);
+const popularPosts = await getPopularPosts(3).catch((error) => {
+  console.error('Failed to load popular posts:', error);
+  return [];
+});
 
 const counts: Record<string, number> = {};
 allPosts.forEach((post) => {
@@ -41,7 +44,7 @@ const siteOrigin = resolveSiteOrigin(Astro.site);
     <div class="grid grid-cols-1 gap-3">
       {popularPosts.map((post) => (
         <a
-          href={`/posts/${post.slug}`}
+          href={`/posts/${encodeURIComponent(post.slug)}`}
           class="group rounded-xl border border-line bg-surface px-5 py-4 transition-colors hover:border-ink"
         >
           <p class="text-sm text-subtle">

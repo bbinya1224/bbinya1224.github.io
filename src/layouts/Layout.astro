@@ -78,9 +78,17 @@ const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
         root.classList.toggle('dark', theme === 'dark');
       };
 
+      const safeGetStoredTheme = () => {
+        try {
+          return localStorage.getItem('theme');
+        } catch {
+          return null;
+        }
+      };
+
       const getPreferredTheme = () =>
         resolveTheme({
-          storedTheme: localStorage.getItem('theme'),
+          storedTheme: safeGetStoredTheme(),
           prefersDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
         });
 

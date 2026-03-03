@@ -1,9 +1,10 @@
 import { createSign } from 'node:crypto';
-import { getSortedPosts, toPostData, resolveSlug } from './posts';
+import { getSortedPosts, toPostData, resolveSlug } from '@/lib/posts';
 
 const GA_TOKEN_URL = 'https://oauth2.googleapis.com/token';
 const GA_REPORT_URL = (propertyId: string) =>
   `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`;
+const FETCH_TIMEOUT_MS = 8000;
 
 const base64UrlEncode = (value: string) =>
   Buffer.from(value)
@@ -31,6 +32,17 @@ const signJwt = (payload: Record<string, unknown>, privateKey: string) => {
   return `${unsignedToken}.${signature}`;
 };
 
+const fetchWithTimeout = async (url: string, init: RequestInit) => {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timeoutId);
+  }
+};
+
 const getGoogleAccessToken = async ({
   clientEmail,
   privateKey,
@@ -50,7 +62,7 @@ const getGoogleAccessToken = async ({
     privateKey,
   );
 
-  const response = await fetch(GA_TOKEN_URL, {
+  const response = await fetchWithTimeout(GA_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({
@@ -74,7 +86,12 @@ const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const extractPostSlug = (path: string) => {
   const matched = path.match(/^\/posts\/([^/?#]+)\/?$/);
-  return matched?.[1] ?? null;
+  if (!matched?.[1]) return null;
+  try {
+    return decodeURIComponent(matched[1]);
+  } catch {
+    return matched[1];
+  }
 };
 
 const getPopularPostSlugsFromGA = async (): Promise<string[]> => {
@@ -91,7 +108,7 @@ const getPopularPostSlugsFromGA = async (): Promise<string[]> => {
   const accessToken = await getGoogleAccessToken({ clientEmail, privateKey });
   if (!accessToken) return [];
 
-  const response = await fetch(GA_REPORT_URL(propertyId), {
+  const response = await fetchWithTimeout(GA_REPORT_URL(propertyId), {
     method: 'POST',
     headers: {
       Authorization: `Bearer ${accessToken}`,
