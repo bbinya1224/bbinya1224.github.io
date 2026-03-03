@@ -6,7 +6,11 @@ const GA_REPORT_URL = (propertyId: string) =>
   `https://analyticsdata.googleapis.com/v1beta/properties/${propertyId}:runReport`;
 
 const base64UrlEncode = (value: string) =>
-  Buffer.from(value).toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+  Buffer.from(value)
+    .toString('base64')
+    .replace(/\+/g, '-')
+    .replace(/\//g, '_')
+    .replace(/=+$/g, '');
 
 const signJwt = (payload: Record<string, unknown>, privateKey: string) => {
   const header = { alg: 'RS256', typ: 'JWT' };
@@ -65,12 +69,18 @@ const getGoogleAccessToken = async ({
   }
 };
 
+let cachedSlugs: { data: string[]; expiresAt: number } | null = null;
+const CACHE_TTL_MS = 5 * 60 * 1000;
+
 const extractPostSlug = (path: string) => {
   const matched = path.match(/^\/posts\/([^/?#]+)\/?$/);
   return matched?.[1] ?? null;
 };
 
 const getPopularPostSlugsFromGA = async (): Promise<string[]> => {
+  if (cachedSlugs && Date.now() < cachedSlugs.expiresAt)
+    return cachedSlugs.data;
+
   const propertyId = import.meta.env.GA_PROPERTY_ID;
   const clientEmail = import.meta.env.GA_CLIENT_EMAIL;
   const privateKeyRaw = import.meta.env.GA_PRIVATE_KEY;
@@ -100,14 +110,19 @@ const getPopularPostSlugsFromGA = async (): Promise<string[]> => {
 
   try {
     const data = await response.json();
-    const rows = Array.isArray(data.rows) ? data.rows : [];
+    const rows: unknown[] = Array.isArray(data.rows) ? data.rows : [];
     const slugs = rows
-      .map((row: Record<string, unknown[]>) => (row?.dimensionValues?.[0] as Record<string, unknown>)?.value)
-      .filter((value: unknown): value is string => typeof value === 'string')
+      .map((row) => {
+        const dims = (row as Record<string, unknown[]>)?.dimensionValues;
+        return (dims?.[0] as Record<string, unknown>)?.value;
+      })
+      .filter((v): v is string => typeof v === 'string')
       .map(extractPostSlug)
-      .filter((value: string | null): value is string => Boolean(value));
+      .filter((v): v is string => v !== null);
 
-    return Array.from(new Set(slugs));
+    const result = Array.from(new Set(slugs));
+    cachedSlugs = { data: result, expiresAt: Date.now() + CACHE_TTL_MS };
+    return result;
   } catch {
     return [];
   }
@@ -121,7 +136,9 @@ export async function getPopularPosts(limit = 3) {
     const popularSlugs = await getPopularPostSlugsFromGA();
     if (popularSlugs.length === 0) return fallbackPosts;
 
-    const postMap = new Map(sortedPosts.map((post) => [post.data.slug || post.id, toPostData(post)]));
+    const postMap = new Map(
+      sortedPosts.map((post) => [post.data.slug || post.id, toPostData(post)]),
+    );
     const gaPosts = popularSlugs
       .map((slug) => postMap.get(slug))
       .filter((post): post is ReturnType<typeof toPostData> => Boolean(post));

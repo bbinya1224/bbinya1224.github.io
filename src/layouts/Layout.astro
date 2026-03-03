@@ -2,6 +2,7 @@
 import '@/global.css';
 import { ClientRouter } from 'astro:transitions';
 import { resolveSiteOrigin } from '@/lib/site';
+import NavigationProgress from '@/components/NavigationProgress.astro';
 
 interface Props {
   title?: string;
@@ -110,6 +111,7 @@ const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
     <slot name="head" />
   </head>
   <body>
+    <NavigationProgress />
     <slot />
   </body>
 </html>

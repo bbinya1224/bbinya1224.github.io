@@ -1,0 +1,42 @@
+<div
+  id="nav-progress"
+  class="fixed top-0 left-0 z-9999 h-0.5 w-0 bg-accent opacity-0 pointer-events-none transition-opacity duration-200"
+  aria-hidden="true"
+  transition:persist
+></div>
+
+<script is:inline>
+  (() => {
+    const bar = document.getElementById('nav-progress');
+    if (!bar || bar.dataset.init) return;
+    bar.dataset.init = 'true';
+
+    const timers = [];
+
+    document.addEventListener('astro:before-preparation', () => {
+      timers.forEach(clearTimeout);
+      timers.length = 0;
+      bar.style.transition = '';
+      bar.style.width = '';
+      bar.style.opacity = '';
+      bar.classList.remove('animate-nav-progress', 'opacity-100');
+      void bar.offsetWidth;
+      bar.classList.add('animate-nav-progress', 'opacity-100');
+    });
+
+    document.addEventListener('astro:after-swap', () => {
+      bar.style.transition = 'width 0.2s, opacity 0.3s';
+      bar.style.width = '100%';
+      timers.push(setTimeout(() => {
+        bar.classList.remove('animate-nav-progress');
+        bar.style.opacity = '0';
+        timers.push(setTimeout(() => {
+          bar.style.transition = '';
+          bar.style.width = '0';
+          bar.style.opacity = '';
+          bar.classList.remove('opacity-100');
+        }, 300));
+      }, 150));
+    });
+  })();
+</script>

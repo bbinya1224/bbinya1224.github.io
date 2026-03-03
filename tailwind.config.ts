@@ -5,15 +5,6 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
-      colors: {
-        accent: "var(--accent)",
-        canvas: "var(--background)",
-        ink: "var(--foreground)",
-        line: "var(--border)",
-        primary: "var(--primary)",
-        subtle: "var(--muted)",
-        surface: "var(--card-bg)",
-      },
       fontFamily: {
         apple: ["AppleSDGothicNeo-main", "sans-serif"],
       },
