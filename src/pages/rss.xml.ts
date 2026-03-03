@@ -21,7 +21,7 @@ export async function GET(context: APIContext) {
       title: post.data.title,
       pubDate: new Date(post.data.date),
       description: post.data.description || '',
-      link: `/posts/${post.data.slug || post.id}/`,
+      link: `/posts/${post.data.slug || post.id}`,
       categories: post.data.category ? [post.data.category] : [],
     })),
   });

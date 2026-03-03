@@ -15,6 +15,7 @@ const Mermaid = ({ chart }: MermaidProps) => {
   const ref = useRef<HTMLDivElement>(null);
   const [hasMounted, setHasMounted] = useState(false);
   const [isRendered, setIsRendered] = useState(false);
+  const [renderError, setRenderError] = useState(false);
   const [theme, setTheme] = useState<string>("default");
 
   useEffect(() => {
@@ -41,6 +42,7 @@ const Mermaid = ({ chart }: MermaidProps) => {
   useEffect(() => {
     if (hasMounted && ref.current) {
       setIsRendered(false);
+      setRenderError(false);
       ref.current.removeAttribute("data-processed");
       ref.current.textContent = chart.trim();
 
@@ -49,6 +51,8 @@ const Mermaid = ({ chart }: MermaidProps) => {
         .then(() => setIsRendered(true))
         .catch((err: unknown) => {
           console.error("Mermaid rendering failed:", err);
+          setRenderError(true);
+          setIsRendered(true);
         });
     }
   }, [hasMounted, chart, theme]);
@@ -65,7 +69,9 @@ const Mermaid = ({ chart }: MermaidProps) => {
       ref={ref}
       key={theme}
     >
-      {chart}
+      {renderError
+        ? <p role="alert" className="text-sm text-gray-500">다이어그램을 렌더링할 수 없습니다.</p>
+        : chart}
     </div>
   );
 };

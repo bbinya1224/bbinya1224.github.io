@@ -43,6 +43,7 @@ const navItems = [
                 ? 'text-ink'
                 : 'text-subtle hover:text-ink',
             ]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
           >
             {item.label}
           </a>

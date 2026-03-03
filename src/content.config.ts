@@ -26,8 +26,8 @@ const projects = defineCollection({
     period: z.string().optional(),
     description: z.string(),
     techStack: z.array(z.string()).default([]),
-    repoUrl: z.string().optional(),
-    demoUrl: z.string().optional(),
+    repoUrl: z.string().url().optional(),
+    demoUrl: z.string().url().optional(),
     imageUrl: z.string().optional(),
   }),
 });

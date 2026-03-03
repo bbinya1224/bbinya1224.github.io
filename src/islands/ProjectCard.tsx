@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useCallback, useId, type ReactNode, type MouseEvent } from 'react';
+import { useState, useEffect, useCallback, useId, useRef, type ReactNode, type MouseEvent } from 'react';
 
 interface Props {
   title: string;
@@ -28,6 +28,8 @@ const stopPropagation = (event: MouseEvent<HTMLDivElement>) => {
 export function ProjectCard({ title, description, period, techStack, repoUrl, demoUrl, children }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
   const close = useCallback(() => setIsOpen(false), []);
   const open = useCallback(() => setIsOpen(true), []);
   const dialogTitleId = useId();
@@ -39,7 +41,10 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
   useEffect(() => {
     if (!isOpen) return;
 
+    const triggerElement = triggerRef.current;
     preventBodyScroll(document.body);
+    dialogRef.current?.focus();
+
     const onEsc = (e: KeyboardEvent) => {
       if (!isEscapeKey(e)) return;
       e.preventDefault();
@@ -50,6 +55,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
     return () => {
       restoreBodyScroll(document.body);
       document.removeEventListener('keydown', onEsc);
+      triggerElement?.focus();
     };
   }, [isOpen, close]);
 
@@ -59,10 +65,12 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
       onClick={close}
     >
       <div
+        ref={dialogRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={dialogTitleId}
-        className="relative m-4 w-full max-w-4xl rounded-2xl border border-gray-200 bg-white shadow-2xl dark:border-gray-800 dark:bg-[#1a1a1a]"
+        tabIndex={-1}
+        className="relative m-4 w-full max-w-4xl rounded-2xl border border-gray-200 bg-white shadow-2xl outline-none dark:border-gray-800 dark:bg-[#1a1a1a]"
         onClick={stopPropagation}
       >
         <div className="flex items-center justify-between border-b border-gray-100 p-6 dark:border-gray-800">
@@ -71,6 +79,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
             <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
           </div>
           <button
+            type="button"
             className="shrink-0 cursor-pointer rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
             onClick={close}
             aria-label="닫기"
@@ -106,6 +115,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
   return (
     <>
       <button
+        ref={triggerRef}
         type="button"
         aria-haspopup="dialog"
         className="group cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-[#1a1a1a]"
