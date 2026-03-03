@@ -111,6 +111,10 @@ const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
         gtag('config', gaId);
+
+        document.addEventListener('astro:after-swap', () => {
+          gtag('event', 'page_view', { page_path: window.location.pathname });
+        });
       </script>
     )}
 

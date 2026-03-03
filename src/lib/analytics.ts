@@ -83,6 +83,12 @@ const getGoogleAccessToken = async ({
 
 let cachedSlugs: { data: string[]; expiresAt: number } | null = null;
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const FAILURE_TTL_MS = 30 * 1000;
+
+const cacheEmpty = () => {
+  cachedSlugs = { data: [], expiresAt: Date.now() + FAILURE_TTL_MS };
+  return [];
+};
 
 const extractPostSlug = (path: string) => {
   const matched = path.match(/^\/posts\/([^/?#]+)\/?$/);
@@ -102,11 +108,11 @@ const getPopularPostSlugsFromGA = async (): Promise<string[]> => {
   const clientEmail = import.meta.env.GA_CLIENT_EMAIL;
   const privateKeyRaw = import.meta.env.GA_PRIVATE_KEY;
 
-  if (!propertyId || !clientEmail || !privateKeyRaw) return [];
+  if (!propertyId || !clientEmail || !privateKeyRaw) return cacheEmpty();
 
   const privateKey = String(privateKeyRaw).replace(/\\n/g, '\n');
   const accessToken = await getGoogleAccessToken({ clientEmail, privateKey });
-  if (!accessToken) return [];
+  if (!accessToken) return cacheEmpty();
 
   const response = await fetchWithTimeout(GA_REPORT_URL(propertyId), {
     method: 'POST',
@@ -123,7 +129,7 @@ const getPopularPostSlugsFromGA = async (): Promise<string[]> => {
     }),
   });
 
-  if (!response.ok) return [];
+  if (!response.ok) return cacheEmpty();
 
   try {
     const data = await response.json();
@@ -141,7 +147,7 @@ const getPopularPostSlugsFromGA = async (): Promise<string[]> => {
     cachedSlugs = { data: result, expiresAt: Date.now() + CACHE_TTL_MS };
     return result;
   } catch {
-    return [];
+    return cacheEmpty();
   }
 };
 

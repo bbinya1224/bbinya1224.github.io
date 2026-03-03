@@ -41,6 +41,7 @@ const Mermaid = ({ chart }: MermaidProps) => {
 
   useEffect(() => {
     if (hasMounted && ref.current) {
+      let stale = false;
       setIsRendered(false);
       setRenderError(false);
       ref.current.removeAttribute("data-processed");
@@ -48,11 +49,17 @@ const Mermaid = ({ chart }: MermaidProps) => {
 
       mermaid
         .run({ nodes: [ref.current] })
-        .then(() => setIsRendered(true))
+        .then(() => {
+          if (!stale) setIsRendered(true);
+        })
         .catch(() => {
-          setRenderError(true);
-          setIsRendered(true);
+          if (!stale) {
+            setRenderError(true);
+            setIsRendered(true);
+          }
         });
+
+      return () => { stale = true; };
     }
   }, [hasMounted, chart, theme]);
 
