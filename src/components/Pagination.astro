@@ -28,9 +28,9 @@ const pages = Array.from({ length: windowEnd - windowStart + 1 }, (_, idx) => wi
         Prev
       </a>
     ) : (
-      <span class="rounded-lg border border-line px-3 py-2 text-sm text-line" aria-disabled="true">
+      <button disabled class="rounded-lg border border-line px-3 py-2 text-sm text-line" type="button">
         Prev
-      </span>
+      </button>
     )}
 
     {pages.map((page) => (
@@ -53,9 +53,9 @@ const pages = Array.from({ length: windowEnd - windowStart + 1 }, (_, idx) => wi
         Next
       </a>
     ) : (
-      <span class="rounded-lg border border-line px-3 py-2 text-sm text-line" aria-disabled="true">
+      <button disabled class="rounded-lg border border-line px-3 py-2 text-sm text-line" type="button">
         Next
-      </span>
+      </button>
     )}
   </nav>
 )}

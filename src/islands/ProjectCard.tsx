@@ -1,5 +1,5 @@
 import { createPortal } from 'react-dom';
-import { useState, useEffect, useCallback, useId, useRef, type ReactNode, type MouseEvent } from 'react';
+import { useState, useEffect, useRef, type ReactNode } from 'react';
 
 interface Props {
   title: string;
@@ -11,28 +11,11 @@ interface Props {
   children?: ReactNode;
 }
 
-const preventBodyScroll = (body: HTMLElement) => {
-  body.style.overflow = 'hidden';
-};
-
-const restoreBodyScroll = (body: HTMLElement) => {
-  body.style.overflow = '';
-};
-
-const isEscapeKey = (event: KeyboardEvent) => event.key === 'Escape' && !event.defaultPrevented;
-
-const stopPropagation = (event: MouseEvent<HTMLDivElement>) => {
-  event.stopPropagation();
-};
 
 export function ProjectCard({ title, description, period, techStack, repoUrl, demoUrl, children }: Props) {
   const [isOpen, setIsOpen] = useState(false);
   const [portalTarget, setPortalTarget] = useState<HTMLElement | null>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const dialogRef = useRef<HTMLDivElement>(null);
-  const close = useCallback(() => setIsOpen(false), []);
-  const open = useCallback(() => setIsOpen(true), []);
-  const dialogTitleId = useId();
 
   useEffect(() => {
     setPortalTarget(document.body);
@@ -41,86 +24,45 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
   useEffect(() => {
     if (!isOpen) return;
 
-    const triggerElement = triggerRef.current;
-    preventBodyScroll(document.body);
+    document.body.style.overflow = 'hidden';
     dialogRef.current?.focus();
 
     const onKeyDown = (e: KeyboardEvent) => {
-      if (isEscapeKey(e)) {
+      if (e.key === 'Escape' && !e.defaultPrevented) {
         e.preventDefault();
-        close();
-        return;
-      }
-
-      if (e.key !== 'Tab') return;
-      const dialog = dialogRef.current;
-      if (!dialog) return;
-
-      const focusables = Array.from(
-        dialog.querySelectorAll<HTMLElement>(
-          'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        ),
-      );
-
-      if (focusables.length === 0) {
-        e.preventDefault();
-        dialog.focus();
-        return;
-      }
-
-      const first = focusables[0];
-      const last = focusables[focusables.length - 1];
-      const active = document.activeElement;
-
-      if (!dialog.contains(active)) {
-        e.preventDefault();
-        first.focus();
-        return;
-      }
-
-      if (e.shiftKey && active === first) {
-        e.preventDefault();
-        last.focus();
-        return;
-      }
-
-      if (!e.shiftKey && active === last) {
-        e.preventDefault();
-        first.focus();
+        setIsOpen(false);
       }
     };
 
     document.addEventListener('keydown', onKeyDown);
     return () => {
-      restoreBodyScroll(document.body);
+      document.body.style.overflow = '';
       document.removeEventListener('keydown', onKeyDown);
-      triggerElement?.focus();
     };
-  }, [isOpen, close]);
+  }, [isOpen]);
 
   const modalContent = (
     <div
       className={`fixed inset-0 z-50 items-center justify-center bg-black/60 backdrop-blur-sm ${isOpen ? 'flex' : 'hidden'}`}
-      onClick={close}
+      onClick={() => setIsOpen(false)}
     >
       <div
         ref={dialogRef}
         role="dialog"
         aria-modal="true"
-        aria-labelledby={dialogTitleId}
         tabIndex={-1}
-        className="relative m-4 w-full max-w-4xl rounded-2xl border border-gray-200 bg-white shadow-2xl outline-none dark:border-gray-800 dark:bg-[#1a1a1a]"
-        onClick={stopPropagation}
+        className="relative m-4 w-full max-w-4xl rounded-2xl border border-line bg-surface shadow-2xl outline-none"
+        onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-gray-100 p-6 dark:border-gray-800">
+        <div className="flex items-center justify-between border-b border-line p-6">
           <div>
-            <h2 id={dialogTitleId} className="text-2xl font-bold text-gray-900 dark:text-white">{title}</h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
+            <h2 className="text-2xl font-bold text-ink">{title}</h2>
+            <p className="mt-1 text-sm text-subtle">{description}</p>
           </div>
           <button
             type="button"
-            className="shrink-0 cursor-pointer rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-800 dark:hover:text-gray-300"
-            onClick={close}
+            className="shrink-0 cursor-pointer rounded-full p-2 text-subtle transition-colors hover:bg-canvas hover:text-ink"
+            onClick={() => setIsOpen(false)}
             aria-label="닫기"
           >
             <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -132,7 +74,7 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
           {(repoUrl || demoUrl) && (
             <div className="mb-4 flex flex-wrap gap-3">
               {repoUrl && (
-                <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="rounded-md border border-gray-300 px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-100 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">
+                <a href={repoUrl} target="_blank" rel="noopener noreferrer" className="rounded-md border border-line px-3 py-1 text-sm text-ink transition hover:bg-canvas">
                   GitHub 저장소
                 </a>
               )}
@@ -154,23 +96,21 @@ export function ProjectCard({ title, description, period, techStack, repoUrl, de
   return (
     <>
       <button
-        ref={triggerRef}
         type="button"
-        aria-haspopup="dialog"
-        className="group cursor-pointer rounded-2xl border border-gray-200 bg-white p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg dark:border-gray-800 dark:bg-[#1a1a1a]"
-        onClick={open}
+        className="group cursor-pointer rounded-2xl border border-line bg-surface p-4 text-left transition-all duration-300 hover:-translate-y-1 hover:shadow-lg"
+        onClick={() => setIsOpen(true)}
       >
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900 group-hover:text-amber-500 dark:text-gray-100 dark:group-hover:text-amber-400">
+            <h2 className="text-xl font-semibold text-ink group-hover:text-amber-500 dark:group-hover:text-amber-400">
               {title}
             </h2>
-            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">{description}</p>
-            {period && <p className="mt-1 text-xs text-gray-400 dark:text-gray-500">기간: {period}</p>}
+            <p className="mt-1 text-sm text-subtle">{description}</p>
+            {period && <p className="mt-1 text-xs text-subtle">기간: {period}</p>}
           </div>
           <div className="flex flex-wrap gap-2">
             {techStack.map((tech) => (
-              <span key={tech} className="rounded-full bg-gray-100 px-2 py-0.5 text-xs text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+              <span key={tech} className="rounded-full bg-canvas px-2 py-0.5 text-xs text-ink">
                 {tech}
               </span>
             ))}

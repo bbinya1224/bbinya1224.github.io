@@ -138,9 +138,9 @@ const ComparisonDemo = () => {
     }
   };
 
-  useState(() => {
+  useEffect(() => {
     setTimeout(updateHTML, 100);
-  });
+  }, []);
 
   return (
     <div className="space-y-6">

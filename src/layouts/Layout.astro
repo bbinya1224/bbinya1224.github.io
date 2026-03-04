@@ -40,6 +40,11 @@ const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
     <meta name="description" content={description} />
     <link rel="canonical" href={resolvedCanonical} />
 
+    <!-- Google Fonts (non-blocking) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" />
+
     <!-- Favicons -->
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />

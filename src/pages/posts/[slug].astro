@@ -2,52 +2,26 @@
 import BaseLayout from '@/layouts/BaseLayout.astro';
 import Comment from '@/islands/Comment';
 import { getCollection, render } from 'astro:content';
-import { parseTags, resolveSlug } from '@/lib/posts';
+import { resolveSlug, formatDate, computeRelatedPosts } from '@/lib/posts';
+import { toRouteSegment } from '@/lib/taxonomy';
 import { resolveSiteOrigin } from '@/lib/site';
 
 export async function getStaticPaths() {
   const posts = await getCollection('blog', ({ data }) => data.published !== false);
   return posts.map((post) => ({
     params: { slug: resolveSlug(post) },
-    props: { post, allPosts: posts },
+    props: { post, relatedPosts: computeRelatedPosts(post, posts, 5) },
   }));
 }
 
-const { post, allPosts } = Astro.props;
+const { post, relatedPosts } = Astro.props;
 const { Content } = await render(post);
 
-const tags = parseTags(post.data.tag);
-const currentTags = new Set(tags);
-const candidates = allPosts
-  .filter((p) => p.id !== post.id)
-  .sort((a, b) => new Date(b.data.date).getTime() - new Date(a.data.date).getTime());
+const tags = (post.data.tag ?? '').split(',').map((t: string) => t.trim()).filter(Boolean);
 
-const tagMatched = candidates
-  .map((p) => ({
-    post: p,
-    overlap: parseTags(p.data.tag).filter((t) => currentTags.has(t)).length,
-  }))
-  .filter(({ overlap }) => overlap > 0)
-  .sort((a, b) => b.overlap - a.overlap)
-  .map(({ post }) => post);
-
-const sameCategory = candidates.filter((p) => p.data.category === post.data.category);
-
-const seen = new Set<string>();
-const relatedPosts = (currentTags.size > 0
-  ? [...tagMatched, ...sameCategory, ...candidates]
-  : candidates
-).filter((p) => {
-  if (seen.has(p.id)) return false;
-  seen.add(p.id);
-  return true;
-}).slice(0, 5);
-
-const formattedDate = new Date(post.data.date).toLocaleDateString('ko-KR', {
-  year: 'numeric',
-  month: 'long',
-  day: 'numeric',
-});
+const formattedDate = formatDate(
+  post.data.date instanceof Date ? post.data.date : new Date(post.data.date),
+);
 
 const slug = resolveSlug(post);
 const siteOrigin = resolveSiteOrigin(Astro.site);
@@ -107,7 +81,7 @@ const jsonLd = {
         </div>
 
         {post.data.category && (
-          <a href={`/category/${encodeURIComponent(post.data.category)}`} class="flex items-center gap-1 transition-colors hover:text-accent">
+          <a href={`/category/${toRouteSegment(post.data.category)}`} class="flex items-center gap-1 transition-colors hover:text-accent">
             <svg class="size-4 text-accent" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M19.8978 16H7.89778C6.96781 16 6.50282 16 6.12132 16.1022C5.08604 16.3796 4.2774 17.1883 4 18.2235" stroke="currentColor" stroke-width="1.5"/>
               <path d="M7 16V2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>

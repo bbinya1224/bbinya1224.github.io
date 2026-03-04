@@ -4,13 +4,13 @@ import cn from "@/lib/cn";
 
 const buttonVariants = {
   variant: {
-    default: "bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200",
+    default: "bg-primary text-canvas hover:bg-primary/90 shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200",
     destructive:
-      "bg-destructive text-destructive-foreground hover:bg-destructive/90 shadow-sm",
+      "bg-red-600 text-white hover:bg-red-700 shadow-sm",
     outline:
-      "border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm hover:shadow-md transition-all",
-    secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-    ghost: "hover:bg-accent hover:text-accent-foreground",
+      "border border-line bg-canvas hover:bg-surface hover:text-ink shadow-sm hover:shadow-md transition-all",
+    secondary: "bg-surface text-ink hover:bg-surface/80",
+    ghost: "hover:bg-surface hover:text-ink",
     link: "text-primary underline-offset-4 hover:underline",
   },
   size: {
@@ -26,7 +26,7 @@ export interface ButtonProps
   asChild?: boolean;
   variant?: keyof typeof buttonVariants.variant;
   size?: keyof typeof buttonVariants.size;
-  ref?: React.Ref<HTMLButtonElement>; // Explicitly adding ref for now as plain prop
+  ref?: React.Ref<HTMLButtonElement>;
 }
 
 const Button = ({
@@ -41,7 +41,7 @@ const Button = ({
   return (
     <Comp
       className={cn(
-        "ring-offset-background focus-visible:ring-ring inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
+        "ring-offset-canvas focus-visible:ring-accent inline-flex items-center justify-center rounded-md text-sm font-medium whitespace-nowrap focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50",
         buttonVariants.variant[variant],
         buttonVariants.size[size],
         className,

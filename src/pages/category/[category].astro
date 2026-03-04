@@ -3,6 +3,7 @@ import BaseLayout from '@/layouts/BaseLayout.astro';
 import PostCard from '@/components/PostCard.astro';
 import { getSortedPosts, toPostData } from '@/lib/posts';
 import { resolveSiteOrigin } from '@/lib/site';
+import { toRouteSegment } from '@/lib/taxonomy';
 
 export async function getStaticPaths() {
   const allPosts = await getSortedPosts();
@@ -27,7 +28,7 @@ const { posts, categoryName } = Astro.props;
 const siteOrigin = resolveSiteOrigin(Astro.site);
 ---
 
-<BaseLayout title={categoryName} canonicalUrl={`${siteOrigin}/category/${encodeURIComponent(categoryName)}`}>
+<BaseLayout title={categoryName} canonicalUrl={`${siteOrigin}/category/${toRouteSegment(categoryName)}`}>
   <div class="mb-8">
     <h1 class="text-3xl font-bold text-ink">{categoryName}</h1>
     <p class="mt-2 text-subtle">{posts.length}개의 포스트</p>

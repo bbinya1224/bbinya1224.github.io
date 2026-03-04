@@ -1,15 +1,14 @@
 ---
 import BaseLayout from '@/layouts/BaseLayout.astro';
-import { getSortedPosts, parseTags } from '@/lib/posts';
+import { getSortedPosts, parseTags, formatDate } from '@/lib/posts';
 import { getPopularPosts } from '@/lib/analytics';
 import { resolveSiteOrigin } from '@/lib/site';
 import { toRouteSegment } from '@/lib/taxonomy';
 
-const allPosts = await getSortedPosts();
-const popularPosts = await getPopularPosts(3).catch((error) => {
-  console.error('Failed to load popular posts:', error);
-  return [];
-});
+const [allPosts, popularPosts] = await Promise.all([
+  getSortedPosts(),
+  getPopularPosts(3).catch(() => []),
+]);
 
 const counts: Record<string, number> = {};
 allPosts.forEach((post) => {
@@ -44,11 +43,11 @@ const siteOrigin = resolveSiteOrigin(Astro.site);
     <div class="grid grid-cols-1 gap-3">
       {popularPosts.map((post) => (
         <a
-          href={`/posts/${encodeURIComponent(post.slug)}`}
+          href={`/posts/${toRouteSegment(post.slug)}`}
           class="group rounded-xl border border-line bg-surface px-5 py-4 transition-colors hover:border-ink"
         >
           <p class="text-sm text-subtle">
-            {post.date.toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' })}
+            {formatDate(post.date)}
           </p>
           <h3 class="mt-1 text-base font-semibold text-ink transition-colors group-hover:text-accent sm:text-lg">
             {post.title}
@@ -68,7 +67,7 @@ const siteOrigin = resolveSiteOrigin(Astro.site);
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {categories.map(({ name, count }) => (
           <a
-            href={`/category/${encodeURIComponent(name)}`}
+            href={`/category/${toRouteSegment(name)}`}
             class="group flex flex-col justify-between rounded-xl border border-line bg-surface p-6 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-md"
           >
             <div>
