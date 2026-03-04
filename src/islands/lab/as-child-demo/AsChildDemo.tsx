@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Slot } from "@radix-ui/react-slot";
 
 type DemoMode = "comparison" | "props-merge" | "semantic";
