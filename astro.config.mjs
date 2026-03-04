@@ -12,7 +12,9 @@ export default defineConfig({
   integrations: [
     react(),
     mdx(),
-    sitemap(),
+    sitemap({
+      filter: (page) => page !== 'https://bbinya1224.github.io/blog/',
+    }),
   ],
   vite: {
     plugins: [tailwindcss()],

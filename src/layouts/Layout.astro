@@ -2,6 +2,7 @@
 import '@/global.css';
 import { ClientRouter } from 'astro:transitions';
 import { resolveSiteOrigin } from '@/lib/site';
+import { DEFAULT_OG_IMAGE_PATH, normalizeCanonicalUrl } from '@/lib/seo';
 import NavigationProgress from '@/components/NavigationProgress.astro';
 
 interface Props {
@@ -26,8 +27,9 @@ const siteUrl = resolveSiteOrigin(Astro.site);
 const gaId = import.meta.env.PUBLIC_GA_ID || '';
 const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION || '';
 const fullTitle = title === "삔야's Blog" ? title : `${title} | 삔야's Blog`;
-const resolvedCanonical = canonicalUrl || Astro.url.href;
-const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+const resolvedCanonical = normalizeCanonicalUrl(canonicalUrl || Astro.url.href, siteUrl);
+const normalizedImage = image.trim() ? image : DEFAULT_OG_IMAGE_PATH;
+const resolvedImage = normalizedImage.startsWith('http') ? normalizedImage : `${siteUrl}${normalizedImage}`;
 ---
 
 <html lang="ko" class="">

@@ -1,12 +1,17 @@
 ---
+import { resolveSiteOrigin } from '@/lib/site';
+
+const siteOrigin = resolveSiteOrigin(Astro.site);
+const homeUrl = `${siteOrigin}/`;
 ---
 
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta http-equiv="refresh" content="0;url=/" />
-    <link rel="canonical" href="/" />
-    <script is:inline>window.location.replace('/');</script>
+    <meta name="robots" content="noindex, follow" />
+    <meta http-equiv="refresh" content={`0;url=${homeUrl}`} />
+    <link rel="canonical" href={homeUrl} />
+    <script is:inline define:vars={{ homeUrl }}>window.location.replace(homeUrl);</script>
   </head>
   <body></body>
 </html>
