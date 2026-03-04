@@ -1,0 +1,27 @@
+---
+import Layout from './Layout.astro';
+import Header from '@/components/Header.astro';
+import Footer from '@/components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalUrl?: string;
+  publishedTime?: string;
+  type?: 'website' | 'article';
+}
+
+const layoutProps = Astro.props;
+---
+
+<Layout {...layoutProps}>
+  <slot name="head" slot="head" />
+  <div class="min-h-screen flex flex-col">
+    <Header />
+    <main class="mx-auto w-full max-w-[860px] flex-1 px-5 pt-24 pb-12 sm:px-6" transition:animate="fade">
+      <slot />
+    </main>
+    <Footer />
+  </div>
+</Layout>

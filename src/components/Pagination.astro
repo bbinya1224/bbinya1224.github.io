@@ -1,0 +1,61 @@
+---
+interface Props {
+  currentPage: number;
+  totalPages: number;
+  basePath?: string;
+}
+
+const { currentPage, totalPages, basePath = '' } = Astro.props;
+const PAGE_WINDOW_SIZE = 5;
+
+const getPageUrl = (page: number) => {
+  if (page === 1) return basePath ? `${basePath}` : '/';
+  return basePath ? `${basePath}/page/${page}` : `/page/${page}`;
+};
+
+const prevUrl = currentPage > 1 ? getPageUrl(currentPage - 1) : null;
+const nextUrl = currentPage < totalPages ? getPageUrl(currentPage + 1) : null;
+
+const windowStart = Math.floor((currentPage - 1) / PAGE_WINDOW_SIZE) * PAGE_WINDOW_SIZE + 1;
+const windowEnd = Math.min(windowStart + PAGE_WINDOW_SIZE - 1, totalPages);
+const pages = Array.from({ length: windowEnd - windowStart + 1 }, (_, idx) => windowStart + idx);
+---
+
+{totalPages > 1 && (
+  <nav class="mt-12 flex items-center justify-center gap-2" aria-label="페이지 네비게이션">
+    {prevUrl ? (
+      <a href={prevUrl} class="rounded-lg border border-line px-3 py-2 text-sm text-subtle transition-colors hover:border-ink hover:text-ink">
+        Prev
+      </a>
+    ) : (
+      <button disabled class="rounded-lg border border-line px-3 py-2 text-sm text-line" type="button">
+        Prev
+      </button>
+    )}
+
+    {pages.map((page) => (
+      <a
+        href={getPageUrl(page)}
+        class:list={[
+          'flex size-9 items-center justify-center rounded-lg text-sm transition-colors',
+          page === currentPage
+            ? 'border border-ink font-semibold text-ink'
+            : 'border border-line text-subtle hover:border-ink hover:text-ink',
+        ]}
+        aria-current={page === currentPage ? 'page' : undefined}
+      >
+        {page}
+      </a>
+    ))}
+
+    {nextUrl ? (
+      <a href={nextUrl} class="rounded-lg border border-line px-3 py-2 text-sm text-subtle transition-colors hover:border-ink hover:text-ink">
+        Next
+      </a>
+    ) : (
+      <button disabled class="rounded-lg border border-line px-3 py-2 text-sm text-line" type="button">
+        Next
+      </button>
+    )}
+  </nav>
+)}

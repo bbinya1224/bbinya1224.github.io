@@ -1,0 +1,134 @@
+---
+import '@/global.css';
+import { ClientRouter } from 'astro:transitions';
+import { resolveSiteOrigin } from '@/lib/site';
+import NavigationProgress from '@/components/NavigationProgress.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  canonicalUrl?: string;
+  publishedTime?: string;
+  type?: 'website' | 'article';
+}
+
+const {
+  title = "삔야's Blog",
+  description = '프론트엔드 개발자 삔야 기술 블로그',
+  image = '/img/main/img_cover.png',
+  canonicalUrl,
+  publishedTime,
+  type = 'website',
+} = Astro.props;
+
+const siteUrl = resolveSiteOrigin(Astro.site);
+const gaId = import.meta.env.PUBLIC_GA_ID || '';
+const googleVerification = import.meta.env.PUBLIC_GOOGLE_SITE_VERIFICATION || '';
+const fullTitle = title === "삔야's Blog" ? title : `${title} | 삔야's Blog`;
+const resolvedCanonical = canonicalUrl || Astro.url.href;
+const resolvedImage = image.startsWith('http') ? image : `${siteUrl}${image}`;
+---
+
+<html lang="ko" class="">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="generator" content={Astro.generator} />
+
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={resolvedCanonical} />
+
+    <!-- Google Fonts (non-blocking) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap" />
+
+    <!-- Favicons -->
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={type} />
+    <meta property="og:locale" content="ko_KR" />
+    <meta property="og:url" content={resolvedCanonical} />
+    <meta property="og:site_name" content="삔야's Blog" />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={resolvedImage} />
+    {publishedTime && <meta property="article:published_time" content={publishedTime} />}
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={fullTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={resolvedImage} />
+
+    <!-- Robots -->
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1" />
+
+    <!-- Google Site Verification -->
+    {googleVerification && <meta name="google-site-verification" content={googleVerification} />}
+
+    <!-- Dark mode FOUC prevention -->
+    <script is:inline>
+      const resolveTheme = ({ storedTheme, prefersDark }) =>
+        storedTheme === 'dark' || (!storedTheme && prefersDark) ? 'dark' : 'light';
+
+      const applyTheme = ({ root, theme }) => {
+        root.classList.toggle('dark', theme === 'dark');
+      };
+
+      const safeGetStoredTheme = () => {
+        try {
+          return localStorage.getItem('theme');
+        } catch {
+          return null;
+        }
+      };
+
+      const getPreferredTheme = () =>
+        resolveTheme({
+          storedTheme: safeGetStoredTheme(),
+          prefersDark: window.matchMedia('(prefers-color-scheme: dark)').matches,
+        });
+
+      applyTheme({ root: document.documentElement, theme: getPreferredTheme() });
+
+      document.addEventListener('astro:before-swap', (event) => {
+        const isDark = document.documentElement.classList.contains('dark');
+        applyTheme({
+          root: event.newDocument.documentElement,
+          theme: isDark ? 'dark' : 'light',
+        });
+      });
+    </script>
+
+    <!-- Google Analytics -->
+    {gaId && (
+      <script is:inline src={`https://www.googletagmanager.com/gtag/js?id=${gaId}`}></script>
+      <script is:inline define:vars={{ gaId }}>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', gaId);
+
+        document.addEventListener('astro:after-swap', () => {
+          gtag('event', 'page_view', { page_path: window.location.pathname });
+        });
+      </script>
+    )}
+
+    <!-- View Transitions -->
+    <ClientRouter />
+    <slot name="head" />
+  </head>
+  <body>
+    <NavigationProgress />
+    <slot />
+  </body>
+</html>

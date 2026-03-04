@@ -1,0 +1,50 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import PostCard from '@/components/PostCard.astro';
+import { getSortedPosts, toPostData, parseTags } from '@/lib/posts';
+import { resolveSiteOrigin } from '@/lib/site';
+import { toRouteSegment } from '@/lib/taxonomy';
+
+export async function getStaticPaths() {
+
+  const allPosts = await getSortedPosts();
+
+  const tagMap = allPosts.reduce<Map<string, typeof allPosts>>((acc, post) => {
+    parseTags(post.data.tag).forEach((tag) => {
+      if (!acc.has(tag)) acc.set(tag, []);
+      acc.get(tag)!.push(post);
+    });
+    return acc;
+  }, new Map());
+
+  return Array.from(tagMap, ([tag, posts]) => ({
+    params: { tag: toRouteSegment(tag) },
+    props: { tagName: tag, posts },
+  }));
+}
+
+const { tagName, posts } = Astro.props;
+const siteOrigin = resolveSiteOrigin(Astro.site);
+---
+
+<BaseLayout title={`#${tagName}`} canonicalUrl={`${siteOrigin}/tag/${toRouteSegment(tagName)}`}>
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-ink">#{tagName}</h1>
+    <p class="mt-2 text-subtle">{posts.length}개의 포스트</p>
+  </div>
+
+  <div>
+    {posts.map((post) => {
+      const data = toPostData(post);
+      return (
+        <PostCard
+          title={data.title}
+          description={data.description}
+          date={data.date}
+          slug={data.slug}
+          category={data.category}
+        />
+      );
+    })}
+  </div>
+</BaseLayout>

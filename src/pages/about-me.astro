@@ -1,0 +1,166 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import { getCollection, render } from 'astro:content';
+import { ProjectCard } from '@/islands/ProjectCard';
+import { resolveSiteOrigin } from '@/lib/site';
+import { EmailIcon, LinkedInIcon } from '@/components/icons';
+
+const projectEntries = await getCollection('projects');
+
+const projects = await Promise.all(
+  projectEntries.map(async (entry) => {
+    const { Content } = await render(entry);
+    return {
+      id: entry.id,
+      title: entry.data.title,
+      description: entry.data.description,
+      techStack: entry.data.techStack,
+      imageUrl: entry.data.imageUrl,
+      demoUrl: entry.data.demoUrl,
+      repoUrl: entry.data.repoUrl,
+      period: entry.data.period,
+      Content,
+    };
+  }),
+);
+
+const myTechStacks = [
+  'React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'GSAP',
+  'Storybook', 'Jotai', 'Zustand', 'FSD', 'Sentry', 'Vue3',
+];
+
+const traits = [
+  { label: '높은 수용성', className: 'bg-amber-200 dark:bg-amber-700' },
+  { label: '투철한 책임감', className: 'bg-blue-300 dark:bg-blue-700' },
+  { label: '강한 인정 욕심', className: 'bg-red-300 dark:bg-red-700' },
+  { label: '능숙한 커뮤니케이션', className: 'bg-green-300 dark:bg-green-700' },
+];
+
+const sectionTitleClass = 'relative ml-[5px] text-3xl font-bold before:absolute before:top-[5px] before:left-[-10px] before:h-7 before:w-1 before:rounded-md before:bg-accent';
+
+const badgeColors: Record<string, string> = {
+  React: 'bg-blue-100 dark:bg-blue-900',
+  'Next.js': 'bg-gray-100 dark:bg-gray-800',
+  TypeScript: 'bg-blue-100 dark:bg-blue-900',
+  'Tailwind CSS': 'bg-cyan-100 dark:bg-cyan-900',
+  GSAP: 'bg-purple-100 dark:bg-purple-900',
+  Storybook: 'bg-pink-100 dark:bg-pink-900',
+  Jotai: 'bg-orange-100 dark:bg-orange-900',
+  FSD: 'bg-yellow-100 dark:bg-yellow-900',
+  Sentry: 'bg-red-100 dark:bg-red-900',
+  Zustand: 'bg-purple-100 dark:bg-purple-900',
+  Vue3: 'bg-green-100 dark:bg-green-900',
+};
+
+const siteOrigin = resolveSiteOrigin(Astro.site);
+---
+
+<BaseLayout title="About Me" canonicalUrl={`${siteOrigin}/about-me`}>
+  <section class="w-full">
+    <article class="mb-4 flex flex-row-reverse items-center justify-between gap-4 border-b border-line pb-5">
+      <div class="flex size-full flex-col gap-4">
+        <h1 class={sectionTitleClass}>
+          We Have Today!
+        </h1>
+        <div class="flex flex-row flex-wrap items-center gap-x-4 gap-y-2">
+          {traits.map((trait) => (
+            <span class={`inline-flex cursor-default items-center justify-center rounded-full px-1 py-0.5 text-sm font-medium whitespace-nowrap sm:px-2 sm:text-base ${trait.className}`}>
+              {trait.label}
+            </span>
+          ))}
+        </div>
+        <div class="flex flex-row flex-wrap justify-between gap-4">
+          <div class="flex flex-1 flex-col flex-wrap gap-1">
+            <h3 class="text-2xl font-bold text-ink">My Blog History</h3>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="https://bbinya.tistory.com" target="_blank" rel="noopener noreferrer" class="relative inline-flex items-center gap-2" aria-label="go to my tistory blog">
+                <svg class="size-6" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" style="fill-rule:evenodd;clip-rule:evenodd;">
+                  <g transform="matrix(1.04895,0,0,1.04895,38.4615,44.7552)">
+                    <g transform="matrix(1.00704,0,0,1.00704,-13.169,30.1761)"><circle cx="166" cy="117" r="142" style="fill:rgb(234,82,32);"/></g>
+                    <g><g transform="matrix(0.986042,0,0,0.986042,0.428741,-1.92393)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,62.2981,-1.92393)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,62.2981,59.9454)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,62.2981,121.815)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g><g transform="matrix(0.986042,0,0,0.986042,124.167,-1.92393)"><circle cx="93" cy="103" r="25" style="fill:white;"/></g></g>
+                  </g>
+                </svg>
+                <span class="font-bold text-ink">https://bbinya.tistory.com/</span>
+              </a>
+            </p>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="https://velog.io/@subin1224/posts" target="_blank" rel="noopener noreferrer" class="relative inline-flex items-center gap-2" aria-label="go to my Velog">
+                <svg class="size-6" role="img" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M3 0C1.338 0 0 1.338 0 3v18c0 1.662 1.338 3 3 3h18c1.662 0 3-1.338 3-3V3c0-1.662-1.338-3-3-3H3Zm6.883 6.25c0.63 0 1.005 0.3 1.125 0.9l1.463 8.303c0.465-0.615 0.846-1.133 1.146-1.553 0.465-0.66 0.893-1.418 1.283-2.273 0.405-0.855 0.608-1.62 0.608-2.295 0-0.405-0.113-0.727-0.338-0.967-0.21-0.255-0.608-0.577-1.193-0.967 0.6-0.765 1.35-1.148 2.25-1.148 0.48 0 0.878 0.143 1.193 0.428 0.33 0.285 0.494 0.704 0.494 1.26 0 0.93-0.39 2.093-1.17 3.488-0.765 1.38-2.241 3.457-4.431 6.232l-2.227 0.156-1.711-9.628h-2.25V7.24c0.6-0.195 1.305-0.406 2.115-0.63 0.81-0.24 1.358-0.36 1.643-0.36Z"/>
+                </svg>
+                <span class="font-bold text-ink">https://velog.io/@subin1224</span>
+              </a>
+            </p>
+          </div>
+          <div class="flex flex-1 flex-col gap-1">
+            <h3 class="text-2xl font-bold text-ink">Contact</h3>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="mailto:bbinya1224@gmail.com" class="relative inline-flex items-center gap-2" aria-label="Send email to bbinya1224@gmail.com">
+                <EmailIcon class="size-5" />
+                <span class="font-bold text-ink">bbinya1224@gmail.com</span>
+              </a>
+            </p>
+            <p class="transition-opacity hover:opacity-50">
+              <a href="https://www.linkedin.com/in/bbinya" target="_blank" rel="noopener noreferrer" class="relative inline-flex items-center gap-2" aria-label="go to my LinkedIn">
+                <LinkedInIcon class="size-5" />
+                <span class="font-bold text-ink">LinkedIn</span>
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+    </article>
+
+    <article class="relative mb-4 border-b border-line pb-5">
+      <h1 class={`${sectionTitleClass} mb-1`}>
+        About Me
+      </h1>
+      <div class="prose dark:prose-invert mt-2 max-w-full text-base break-keep">
+        <p>프론트엔드 개발은 화면을 그리는 일을 넘어, 팀과 서비스의 흐름을 연결하는 역할이라고 생각합니다.</p>
+        <p>저는 혼자 빠르게 구현하는 개발자보다, 팀 전체의 생산성을 끌어올리는 개발자가 되고 싶었습니다. 그래서 필요한 프로세스가 없으면 직접 만들었고, 협업 방식이 불편하면 먼저 개선을 제안했습니다.</p>
+        <p>기술을 도입할 때는 "왜 필요한지"를 먼저 설명합니다. 작은 범위에서 검증하고, 팀과 합의한 뒤에 적용하는 과정을 가장 중요하게 여깁니다. 단순한 기능 구현이 아니라, "왜 이 구조여야 하는지"를 함께 고민하는 것이 개발의 핵심이라고 생각합니다.</p>
+        <p>앞으로도 코드의 품질뿐 아니라, 함께 일하는 방식까지 고민하는 개발자로 성장하고자 합니다.</p>
+        <p class="text-subtle">저에 대해 자세하게 알고 싶으시다면 이메일 주세요!</p>
+      </div>
+    </article>
+
+    <article class="relative mb-4 border-b border-line pb-5">
+      <h1 class={sectionTitleClass}>
+        Tech Stacks
+      </h1>
+      <span class="text-subtle">제가 주로 사용했던 기술 스택들 입니다.</span>
+      <div class="mt-2">
+        <ul class="flex flex-wrap gap-2 sm:gap-3 md:gap-3">
+          {myTechStacks.map((skill) => (
+            <li class="cursor-default">
+              <span class={`inline-flex cursor-default items-center justify-center rounded-full px-1 py-0.5 text-sm font-medium whitespace-nowrap transition-[shadow] duration-200 hover:shadow-md sm:px-2 sm:text-base ${badgeColors[skill] || 'bg-blue-100 dark:bg-blue-900'}`}>
+                {skill}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </article>
+
+    <article class="border-b border-line pb-5 lg:border-b-0 lg:pb-0">
+      <h1 class={sectionTitleClass}>
+        Side Projects
+      </h1>
+      <div class="mt-4 grid grid-cols-1 gap-4 sm:gap-6">
+        {projects.map((project) => (
+          <ProjectCard
+            client:visible
+            title={project.title}
+            description={project.description}
+            period={project.period}
+            techStack={project.techStack}
+            repoUrl={project.repoUrl}
+            demoUrl={project.demoUrl}
+          >
+            <project.Content />
+          </ProjectCard>
+        ))}
+      </div>
+    </article>
+  </section>
+</BaseLayout>

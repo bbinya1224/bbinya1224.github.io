@@ -1,28 +1,57 @@
 import typography from "@tailwindcss/typography";
+import type { Config } from "tailwindcss";
 
-module.exports = {
+interface AsideVariant {
+  border: string;
+  bg: string;
+  text: string;
+  strong: string;
+  codeBg: string;
+  codeText: string;
+  codeBorder?: string;
+  preBg?: string;
+}
+
+const asideVariant = (type: string, v: AsideVariant) => ({
+  [`aside[data-type='${type}']`]: {
+    borderLeftColor: v.border,
+    backgroundColor: v.bg,
+    color: v.text,
+  },
+  [`aside[data-type='${type}'] strong`]: { color: v.strong },
+  [`aside[data-type='${type}'] code`]: {
+    backgroundColor: v.codeBg,
+    color: v.codeText,
+    ...(v.codeBorder ? { border: `1px solid ${v.codeBorder}` } : {}),
+  },
+  [`aside[data-type='${type}'] pre code`]: {
+    backgroundColor: "transparent !important",
+    color: "inherit !important",
+    border: "0 !important",
+  },
+  ...(v.preBg
+    ? { [`aside[data-type='${type}'] pre`]: { backgroundColor: `${v.preBg} !important` } }
+    : {}),
+});
+
+export default {
   darkMode: "class",
-  content: ["./app/**/*.{js,ts,jsx,tsx}", "./src/**/*.{js,ts,jsx,tsx}"],
   theme: {
     extend: {
-      colors: {
-        primary: "#171e23",
-      },
       fontFamily: {
         apple: ["AppleSDGothicNeo-main", "sans-serif"],
-        bitcount: ["Bitcount_Prop_Double_Ink", "monospace"],
       },
       typography: () => ({
         DEFAULT: {
           css: {
-            // 기본 텍스트 색상
-            color: "#37352F",
+            color: "#2D2A26",
             lineHeight: "1.8",
 
             // 제목 스타일
             "h1, h2, h3, h4, h5, h6": {
-              color: "#000000",
+              color: "#2D2A26",
               fontWeight: "600",
+              lineHeight: "1.35",
               marginTop: "1em",
               marginBottom: "0.3em",
               borderBottom: 0,
@@ -41,17 +70,18 @@ module.exports = {
             h3: {
               fontSize: "1.25rem",
               background:
-                "linear-gradient(to top, rgba(221, 214, 254, 0.45) 40%, transparent 40%)",
+                "linear-gradient(to top, rgba(221, 214, 254, 0.5) 40%, transparent 40%)",
               width: "fit-content",
               boxDecorationBreak: "clone",
             },
             h4: {
-              fontSize: "1.1rem",
+              fontSize: "1.15rem",
+              fontWeight: "700",
             },
 
             // 기울기
             em: {
-              color: "#333",
+              color: "#2D2A26",
               fontStyle: "italic",
             },
 
@@ -79,7 +109,7 @@ module.exports = {
 
             // 강조
             strong: {
-              color: "#000000",
+              color: "#2D2A26",
               fontWeight: "600",
             },
 
@@ -135,7 +165,7 @@ module.exports = {
             // 코드
             code: {
               color: "#E03B8D",
-              backgroundColor: "#F5F4F3",
+              backgroundColor: "#F5F3EE",
               padding: "0.2em 0.4em",
               borderRadius: "0.3em",
               fontWeight: "400",
@@ -214,97 +244,26 @@ module.exports = {
               boxShadow: "none !important",
             },
 
-            // 경고 (빨간색 계열)
-            "aside[data-type='warning']": {
-              borderLeftColor: "#DC2626",
-              backgroundColor: "#FEF2F2",
-              color: "#7F1D1D",
-            },
-            "aside[data-type='warning'] strong": {
-              color: "#7F1D1D",
-            },
-            "aside[data-type='warning'] code": {
-              backgroundColor: "#FEE2E2",
-              color: "#991B1B",
-              border: "1px solid #FCA5A5",
-            },
-            "aside[data-type='warning'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
-            "aside[data-type='warning'] pre": {
-              backgroundColor: "#111827 !important",
-            },
-
-            // 정보 (파란색 계열)
-            "aside[data-type='info']": {
-              borderLeftColor: "#2563EB",
-              backgroundColor: "#EFF6FF",
-              color: "#1E40AF",
-            },
-            "aside[data-type='info'] strong": {
-              color: "#1E3A8A",
-            },
-            "aside[data-type='info'] code": {
-              backgroundColor: "#DBEAFE",
-              color: "#1D4ED8",
-              border: "1px solid #93C5FD",
-            },
-            "aside[data-type='info'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
-            "aside[data-type='info'] pre": {
-              backgroundColor: "#111827 !important",
-            },
-
-            // 주의 (노란색 계열)
-            "aside[data-type='note']": {
-              borderLeftColor: "#D97706",
-              backgroundColor: "#FFFBEB",
-              color: "#92400E",
-            },
-            "aside[data-type='note'] strong": {
-              color: "#78350F",
-            },
-            "aside[data-type='note'] code": {
-              backgroundColor: "#FEF3C7",
-              color: "#B45309",
-              border: "1px solid #FCD34D",
-            },
-            "aside[data-type='note'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
-            "aside[data-type='note'] pre": {
-              backgroundColor: "#111827 !important",
-            },
-
-            // 성공 (녹색 계열)
-            "aside[data-type='success']": {
-              borderLeftColor: "#16A34A",
-              backgroundColor: "#F0FDF4",
-              color: "#166534",
-            },
-            "aside[data-type='success'] strong": {
-              color: "#14532D",
-            },
-            "aside[data-type='success'] code": {
-              backgroundColor: "#DCFCE7",
-              color: "#15803D",
-              border: "1px solid #86EFAC",
-            },
-            "aside[data-type='success'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
-            "aside[data-type='success'] pre": {
-              backgroundColor: "#111827 !important",
-            },
+            ...asideVariant("warning", {
+              border: "#DC2626", bg: "#FEF2F2", text: "#7F1D1D",
+              strong: "#7F1D1D", codeBg: "#FEE2E2", codeText: "#991B1B",
+              codeBorder: "#FCA5A5", preBg: "#111827",
+            }),
+            ...asideVariant("info", {
+              border: "#2563EB", bg: "#EFF6FF", text: "#1E40AF",
+              strong: "#1E3A8A", codeBg: "#DBEAFE", codeText: "#1D4ED8",
+              codeBorder: "#93C5FD", preBg: "#111827",
+            }),
+            ...asideVariant("note", {
+              border: "#D97706", bg: "#FFFBEB", text: "#92400E",
+              strong: "#78350F", codeBg: "#FEF3C7", codeText: "#B45309",
+              codeBorder: "#FCD34D", preBg: "#111827",
+            }),
+            ...asideVariant("success", {
+              border: "#16A34A", bg: "#F0FDF4", text: "#166534",
+              strong: "#14532D", codeBg: "#DCFCE7", codeText: "#15803D",
+              codeBorder: "#86EFAC", preBg: "#111827",
+            }),
 
             // 형광펜 (mark)
             mark: {
@@ -331,19 +290,19 @@ module.exports = {
               marginBottom: "1.5em",
             },
             "thead th": {
-              backgroundColor: "#F5F4F3",
-              color: "#37352F",
+              backgroundColor: "#F5F3EE",
+              color: "#2D2A26",
               fontWeight: "600",
               padding: "0.75em",
-              border: "1px solid #E5E5E5",
+              border: "1px solid #E8E5DE",
             },
             "tbody td": {
               padding: "0.75em",
-              border: "1px solid #E5E5E5",
-              color: "#37352F",
+              border: "1px solid #E8E5DE",
+              color: "#2D2A26",
             },
             "tbody tr:nth-child(odd)": {
-              backgroundColor: "#FAFAF9",
+              backgroundColor: "#FAFAF7",
             },
             "thead th:first-child": {
               paddingLeft: "0.75em",
@@ -385,20 +344,20 @@ module.exports = {
         // 다크 모드
         invert: {
           css: {
-            color: "#E8E8E8",
+            color: "#E8E6E3",
 
             "h1, h2, h3, h4, h5, h6": {
-              color: "#FFFFFF",
+              color: "#E8E6E3",
             },
             h2: {
               background:
-                "linear-gradient(to top, rgba(167, 139, 250, 0.35) 40%, transparent 40%)",
+                "linear-gradient(to top, rgba(139, 92, 246, 0.3) 40%, transparent 40%)",
               width: "fit-content",
               boxDecorationBreak: "clone",
             },
             h3: {
               background:
-                "linear-gradient(to top, rgba(167, 139, 250, 0.18) 40%, transparent 40%)",
+                "linear-gradient(to top, rgba(139, 92, 246, 0.15) 40%, transparent 40%)",
               width: "fit-content",
               boxDecorationBreak: "clone",
             },
@@ -488,81 +447,22 @@ module.exports = {
               boxShadow: "none !important",
             },
 
-            // 경고 (빨간색 계열)
-            "aside[data-type='warning']": {
-              borderLeftColor: "#F87171",
-              backgroundColor: "#2D1B1B",
-              color: "#FCA5A5",
-            },
-            "aside[data-type='warning'] strong": {
-              color: "#FECACA",
-            },
-            "aside[data-type='warning'] code": {
-              backgroundColor: "#3D2626",
-              color: "#FCA5A5",
-            },
-            "aside[data-type='warning'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
-
-            // 정보 (파란색 계열)
-            "aside[data-type='info']": {
-              borderLeftColor: "#60A5FA",
-              backgroundColor: "#1E293B",
-              color: "#BFDBFE",
-            },
-            "aside[data-type='info'] strong": {
-              color: "#DBEAFE",
-            },
-            "aside[data-type='info'] code": {
-              backgroundColor: "#1E3A5F",
-              color: "#BFDBFE",
-            },
-            "aside[data-type='info'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
-
-            // 주의 (노란색 계열)
-            "aside[data-type='note']": {
-              borderLeftColor: "#FBBF24",
-              backgroundColor: "#2D2518",
-              color: "#FDE68A",
-            },
-            "aside[data-type='note'] strong": {
-              color: "#FEF3C7",
-            },
-            "aside[data-type='note'] code": {
-              backgroundColor: "#3D3118",
-              color: "#FDE68A",
-            },
-            "aside[data-type='note'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
-
-            // 성공 (녹색 계열)
-            "aside[data-type='success']": {
-              borderLeftColor: "#4ADE80",
-              backgroundColor: "#1A2E1A",
-              color: "#BBF7D0",
-            },
-            "aside[data-type='success'] strong": {
-              color: "#DCFCE7",
-            },
-            "aside[data-type='success'] code": {
-              backgroundColor: "#1F3D1F",
-              color: "#BBF7D0",
-            },
-            "aside[data-type='success'] pre code": {
-              backgroundColor: "transparent !important",
-              color: "inherit !important",
-              border: "0 !important",
-            },
+            ...asideVariant("warning", {
+              border: "#F87171", bg: "#2D1B1B", text: "#FCA5A5",
+              strong: "#FECACA", codeBg: "#3D2626", codeText: "#FCA5A5",
+            }),
+            ...asideVariant("info", {
+              border: "#60A5FA", bg: "#1E293B", text: "#BFDBFE",
+              strong: "#DBEAFE", codeBg: "#1E3A5F", codeText: "#BFDBFE",
+            }),
+            ...asideVariant("note", {
+              border: "#FBBF24", bg: "#2D2518", text: "#FDE68A",
+              strong: "#FEF3C7", codeBg: "#3D3118", codeText: "#FDE68A",
+            }),
+            ...asideVariant("success", {
+              border: "#4ADE80", bg: "#1A2E1A", text: "#BBF7D0",
+              strong: "#DCFCE7", codeBg: "#1F3D1F", codeText: "#BBF7D0",
+            }),
 
             mark: {
               background:
@@ -639,4 +539,4 @@ module.exports = {
     },
   },
   plugins: [typography],
-};
+} satisfies Config;

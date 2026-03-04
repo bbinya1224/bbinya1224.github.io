@@ -1,0 +1,144 @@
+---
+import Logo from './Logo.astro';
+
+const pathname = Astro.url.pathname;
+
+const isActive = (path: string) => {
+  if (path === '/') return pathname === '/';
+  if (path === '/lists') {
+    return pathname.startsWith('/lists') || pathname.startsWith('/category/') || pathname.startsWith('/tag/');
+  }
+  return pathname.startsWith(path);
+};
+
+const navItems = [
+  { label: 'Lists', href: '/lists' },
+  { label: 'About', href: '/about-me' },
+];
+---
+
+<header
+  id="site-header"
+  class="fixed top-0 left-0 right-0 z-50 border-b border-line bg-glass backdrop-blur-md transition-transform duration-300"
+>
+  <div class="mx-auto flex h-14 max-w-215 items-center justify-between px-4 sm:px-6">
+    <div class="flex items-center gap-6">
+      {pathname === '/' ? (
+        <span class="shrink-0 text-ink" role="img" aria-label="Bbinya's Blog">
+          <Logo />
+        </span>
+      ) : (
+        <a href="/" class="shrink-0 text-ink" aria-label="Bbinya's Blog">
+          <Logo />
+        </a>
+      )}
+
+      <nav class="flex items-center gap-1">
+        {navItems.map((item) => (
+          <a
+            href={item.href}
+            class:list={[
+              'rounded-md px-3 py-1.5 text-sm font-medium transition-colors',
+              isActive(item.href)
+                ? 'text-ink'
+                : 'text-subtle hover:text-ink',
+            ]}
+            aria-current={isActive(item.href) ? 'page' : undefined}
+          >
+            {item.label}
+          </a>
+        ))}
+      </nav>
+    </div>
+
+    <button
+      id="theme-toggle"
+      class="cursor-pointer rounded-full p-2 transition-colors hover:bg-line"
+      aria-label="테마 변경"
+      title="테마 변경"
+    >
+      <svg id="icon-light" class="hidden size-5 dark:block" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M11 3V2q0-.425.288-.712T12 1t.713.288T13 2v1q0 .425-.288.713T12 4t-.712-.288T11 3m0 19v-1q0-.425.288-.712T12 20t.713.288T13 21v1q0 .425-.288.713T12 23t-.712-.288T11 22m11-9h-1q-.425 0-.712-.288T20 12t.288-.712T21 11h1q.425 0 .713.288T23 12t-.288.713T22 13M3 13H2q-.425 0-.712-.288T1 12t.288-.712T2 11h1q.425 0 .713.288T4 12t-.288.713T3 13m16.75-7.325l-.35.35q-.275.275-.687.275T18 6q-.275-.275-.288-.687t.263-.713l.375-.375q.275-.3.7-.3t.725.3t.288.725t-.313.725M6.025 19.4l-.375.375q-.275.3-.7.3t-.725-.3t-.288-.725t.313-.725l.35-.35q.275-.275.688-.275T6 18q.275.275.288.688t-.263.712m12.3.35l-.35-.35q-.275-.275-.275-.687T18 18q.275-.275.688-.287t.712.262l.375.375q.3.275.3.7t-.3.725t-.725.288t-.725-.313M4.6 6.025l-.375-.375q-.3-.275-.3-.7t.3-.725t.725-.288t.725.313l.35.35q.275.275.275.688T6 6q-.275.275-.687.288T4.6 6.025M12 18q-2.5 0-4.25-1.75T6 12t1.75-4.25T12 6t4.25 1.75T18 12t-1.75 4.25T12 18m0-2q1.675 0 2.838-1.162T16 12t-1.162-2.838T12 8T9.162 9.163T8 12t1.163 2.838T12 16m0-4"></path></svg>
+      <svg id="icon-dark" class="block size-5 dark:hidden" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="currentColor" d="M12 21q-3.775 0-6.387-2.613T3 12q0-3.45 2.25-5.988T11 3.05q.325-.05.575.088t.4.362t.163.525t-.188.575q-.425.65-.638 1.375T11.1 7.5q0 2.25 1.575 3.825T16.5 12.9q.775 0 1.538-.225t1.362-.625q.275-.175.563-.162t.512.137q.25.125.388.375t.087.6q-.35 3.45-2.937 5.725T12 21m0-2q2.2 0 3.95-1.213t2.55-3.162q-.5.125-1 .2t-1 .075q-3.075 0-5.238-2.163T9.1 7.5q0-.5.075-1t.2-1q-1.95.8-3.163 2.55T5 12q0 2.9 2.05 4.95T12 19m-.25-6.75"></path></svg>
+    </button>
+  </div>
+</header>
+
+<script>
+  type HeaderVisibility = 'show' | 'hide' | 'keep';
+
+  let scrollController: AbortController | null = null;
+
+  const computeThemeName = (isDark: boolean) => (isDark ? 'dark' : 'light');
+  const toggleTheme = (root: HTMLElement) => {
+    const isDark = root.classList.toggle('dark');
+    return computeThemeName(isDark);
+  };
+
+  const attachThemeToggle = () => {
+    const btn = document.getElementById('theme-toggle');
+    if (!btn || btn.dataset.init) return;
+
+    btn.dataset.init = 'true';
+    btn.addEventListener('click', () => {
+      const nextTheme = toggleTheme(document.documentElement);
+      try {
+        localStorage.setItem('theme', nextTheme);
+      } catch {
+        // no-op: localStorage may be unavailable in private or restricted modes
+      }
+    });
+  };
+
+  const computeHeaderVisibility = ({ currentY, lastY, threshold }: { currentY: number; lastY: number; threshold: number }): HeaderVisibility => {
+    if (currentY < lastY) return 'show';
+    if (currentY > lastY && currentY > threshold) return 'hide';
+    return 'keep';
+  };
+
+  const applyHeaderVisibility = (header: HTMLElement | null, visibility: HeaderVisibility) => {
+    if (!header) return;
+
+    if (visibility === 'show') {
+      header.classList.remove('-translate-y-full');
+      header.classList.add('translate-y-0');
+      return;
+    }
+
+    if (visibility === 'hide') {
+      header.classList.remove('translate-y-0');
+      header.classList.add('-translate-y-full');
+    }
+  };
+
+  const bindHeaderScroll = () => {
+    scrollController?.abort();
+    scrollController = new AbortController();
+
+    const scrollState = { lastY: window.scrollY };
+    const header = document.getElementById('site-header');
+
+    window.addEventListener('scroll', () => {
+      const currentScrollY = window.scrollY;
+      const visibility = computeHeaderVisibility({
+        currentY: currentScrollY,
+        lastY: scrollState.lastY,
+        threshold: 100,
+      });
+
+      applyHeaderVisibility(header, visibility);
+      scrollState.lastY = currentScrollY;
+    }, { passive: true, signal: scrollController.signal });
+
+    document.addEventListener('astro:before-swap', () => {
+      scrollController?.abort();
+      scrollController = null;
+    }, { once: true });
+  };
+
+  function initHeader() {
+    attachThemeToggle();
+    bindHeaderScroll();
+  }
+
+  document.addEventListener('astro:page-load', initHeader);
+</script>

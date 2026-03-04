@@ -1,0 +1,129 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import Comment from '@/islands/Comment';
+import { getCollection, render } from 'astro:content';
+import { resolveSlug, formatDate, computeRelatedPosts } from '@/lib/posts';
+import { toRouteSegment } from '@/lib/taxonomy';
+import { resolveSiteOrigin } from '@/lib/site';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('blog', ({ data }) => data.published !== false);
+  return posts.map((post) => ({
+    params: { slug: resolveSlug(post) },
+    props: { post, relatedPosts: computeRelatedPosts(post, posts, 5) },
+  }));
+}
+
+const { post, relatedPosts } = Astro.props;
+const { Content } = await render(post);
+
+const tags = (post.data.tag ?? '').split(',').map((t: string) => t.trim()).filter(Boolean);
+
+const formattedDate = formatDate(
+  post.data.date instanceof Date ? post.data.date : new Date(post.data.date),
+);
+
+const slug = resolveSlug(post);
+const siteOrigin = resolveSiteOrigin(Astro.site);
+const url = `${siteOrigin}/posts/${slug}`;
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: post.data.title,
+  description: post.data.description,
+  datePublished: post.data.date instanceof Date ? post.data.date.toISOString() : String(post.data.date),
+  author: {
+    '@type': 'Person',
+    name: '삔야',
+    url: `${siteOrigin}/about-me`,
+  },
+  publisher: {
+    '@type': 'Person',
+    name: '삔야',
+  },
+  image: post.data.thumbnail
+    ? `${siteOrigin}${post.data.thumbnail}`
+    : undefined,
+  mainEntityOfPage: {
+    '@type': 'WebPage',
+    '@id': url,
+  },
+};
+---
+
+<BaseLayout
+  title={post.data.title}
+  description={post.data.description || post.data.title}
+  image={post.data.thumbnail}
+  canonicalUrl={url}
+  publishedTime={post.data.date instanceof Date ? post.data.date.toISOString() : String(post.data.date)}
+  type="article"
+>
+  <script type="application/ld+json" set:html={JSON.stringify(jsonLd).replace(/&/g, '\\u0026').replace(/</g, '\\u003c').replace(/>/g, '\\u003e')} />
+
+  <article class="relative">
+    <header class="mb-8 border-b border-line pb-6">
+      <h1 class="mb-3 text-3xl font-bold break-keep text-ink sm:text-4xl md:text-5xl">
+        {post.data.title}
+      </h1>
+
+      {post.data.description && (
+        <p class="mb-3 text-lg text-subtle">{post.data.description}</p>
+      )}
+
+      <div class="flex flex-wrap gap-4 text-sm text-subtle">
+        <div class="flex items-center gap-1">
+          <svg class="size-4 text-accent" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M3 10H21M7 3V5M17 3V5M6.2 21H17.8C18.9201 21 19.4802 21 19.908 20.782C20.2843 20.5903 20.5903 20.2843 20.782 19.908C21 19.4802 21 18.9201 21 17.8V8.2C21 7.07989 21 6.51984 20.782 6.09202C20.5903 5.71569 20.2843 5.40973 19.908 5.21799C19.4802 5 18.9201 5 17.8 5H6.2C5.0799 5 4.51984 5 4.09202 5.21799C3.71569 5.40973 3.40973 5.71569 3.21799 6.09202C3 6.51984 3 7.07989 3 8.2V17.8C3 18.9201 3 19.4802 3.21799 19.908C3.40973 20.2843 3.71569 20.5903 4.09202 20.782C4.51984 21 5.07989 21 6.2 21Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <time datetime={post.data.date instanceof Date ? post.data.date.toISOString() : String(post.data.date)}>{formattedDate}</time>
+        </div>
+
+        {post.data.category && (
+          <a href={`/category/${toRouteSegment(post.data.category)}`} class="flex items-center gap-1 transition-colors hover:text-accent">
+            <svg class="size-4 text-accent" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M19.8978 16H7.89778C6.96781 16 6.50282 16 6.12132 16.1022C5.08604 16.3796 4.2774 17.1883 4 18.2235" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M7 16V2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M10 22C7.17157 22 5.75736 22 4.87868 21.1213C4 20.2426 4 18.8284 4 16V8C4 5.17157 4 3.75736 4.87868 2.87868C5.75736 2 7.17157 2 10 2H14C16.8284 2 18.2426 2 19.1213 2.87868C20 3.75736 20 5.17157 20 8M14 22C16.8284 22 18.2426 22 19.1213 21.1213C20 20.2426 20 18.8284 20 16V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            <span>{post.data.category}</span>
+          </a>
+        )}
+
+        {tags.length > 0 && (
+          <div class="flex items-center gap-1">
+            <svg class="size-4 text-accent" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M7.0498 7.0498H7.0598M10.5118 3H7.8C6.11984 3 5.27976 3 4.63803 3.32698C4.07354 3.6146 3.6146 4.07354 3.32698 4.63803C3 5.27976 3 6.11984 3 7.8V10.5118C3 11.2455 3 11.6124 3.08289 11.9577C3.15638 12.2638 3.27759 12.5564 3.44208 12.8249C3.6276 13.1276 3.88703 13.387 4.40589 13.9059L9.10589 18.6059C10.2939 19.7939 10.888 20.388 11.5729 20.6105C12.1755 20.8063 12.8245 20.8063 13.4271 20.6105C14.112 20.388 14.7061 19.7939 15.8941 18.6059L18.6059 15.8941C19.7939 14.7061 20.388 14.112 20.6105 13.4271C20.8063 12.8245 20.8063 12.1755 20.6105 11.5729C20.388 10.888 19.7939 10.2939 18.6059 9.10589L13.9059 4.40589C13.387 3.88703 13.1276 3.6276 12.8249 3.44208C12.5564 3.27759 12.2638 3.15638 11.9577 3.08289C11.6124 3 11.2455 3 10.5118 3ZM7.5498 7.0498C7.5498 7.32595 7.32595 7.5498 7.0498 7.5498C6.77366 7.5498 6.5498 7.32595 6.5498 7.0498C6.5498 6.77366 6.77366 6.5498 7.0498 6.5498C7.32595 6.5498 7.5498 6.77366 7.5498 7.0498Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <span>{tags.join(', ')}</span>
+          </div>
+        )}
+      </div>
+    </header>
+
+    <div class="prose dark:prose-invert max-w-none">
+      <Content />
+    </div>
+
+    {relatedPosts.length > 0 && (
+      <section class="mt-12 border-t border-line pt-8">
+        <h2 class="mb-4 text-xl font-semibold text-ink">관련 글</h2>
+        <ul class="space-y-3">
+          {relatedPosts.map((related) => (
+            <li>
+              <a
+                href={`/posts/${resolveSlug(related)}`}
+                class="text-base text-subtle transition-colors hover:text-accent"
+              >
+                {related.data.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <Comment client:idle />
+  </article>
+</BaseLayout>

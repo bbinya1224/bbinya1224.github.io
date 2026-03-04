@@ -1,0 +1,17 @@
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+import ProfileIntro from '@/components/ProfileIntro.astro';
+import HomeContent from '@/components/HomeContent.astro';
+import { getSortedPosts, toPostData, POSTS_PER_PAGE } from '@/lib/posts';
+import { resolveSiteOrigin } from '@/lib/site';
+
+const sortedPosts = await getSortedPosts();
+const totalPages = Math.max(1, Math.ceil(sortedPosts.length / POSTS_PER_PAGE));
+const posts = sortedPosts.slice(0, POSTS_PER_PAGE).map(toPostData);
+const siteOrigin = resolveSiteOrigin(Astro.site);
+---
+
+<BaseLayout canonicalUrl={`${siteOrigin}/`}>
+  <ProfileIntro />
+  <HomeContent posts={posts} currentPage={1} totalPages={totalPages} />
+</BaseLayout>
