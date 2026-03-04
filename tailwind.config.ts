@@ -62,17 +62,19 @@ export default {
             },
             h2: {
               fontSize: "1.5rem",
-              background:
-                "linear-gradient(to top, #DDD6FE 40%, transparent 40%)",
-              width: "fit-content",
-              boxDecorationBreak: "clone",
+              textDecorationLine: "underline",
+              textDecorationColor: "#DDD6FE",
+              textDecorationThickness: "0.4em",
+              textUnderlineOffset: "-0.2em",
+              textDecorationSkipInk: "none",
             },
             h3: {
               fontSize: "1.25rem",
-              background:
-                "linear-gradient(to top, rgba(221, 214, 254, 0.5) 40%, transparent 40%)",
-              width: "fit-content",
-              boxDecorationBreak: "clone",
+              textDecorationLine: "underline",
+              textDecorationColor: "rgba(221, 214, 254, 0.6)",
+              textDecorationThickness: "0.3em",
+              textUnderlineOffset: "-0.18em",
+              textDecorationSkipInk: "none",
             },
             h4: {
               fontSize: "1.15rem",
@@ -272,7 +274,10 @@ export default {
               color: "inherit",
               padding: "0.05em 0.15em",
               borderRadius: "0.2em",
+              display: "inline",
+              lineHeight: "inherit",
               boxDecorationBreak: "clone",
+              WebkitBoxDecorationBreak: "clone",
             },
 
             // 이미지
@@ -350,16 +355,18 @@ export default {
               color: "#E8E6E3",
             },
             h2: {
-              background:
-                "linear-gradient(to top, rgba(139, 92, 246, 0.3) 40%, transparent 40%)",
-              width: "fit-content",
-              boxDecorationBreak: "clone",
+              textDecorationLine: "underline",
+              textDecorationColor: "rgba(139, 92, 246, 0.35)",
+              textDecorationThickness: "0.4em",
+              textUnderlineOffset: "-0.2em",
+              textDecorationSkipInk: "none",
             },
             h3: {
-              background:
-                "linear-gradient(to top, rgba(139, 92, 246, 0.15) 40%, transparent 40%)",
-              width: "fit-content",
-              boxDecorationBreak: "clone",
+              textDecorationLine: "underline",
+              textDecorationColor: "rgba(139, 92, 246, 0.2)",
+              textDecorationThickness: "0.3em",
+              textUnderlineOffset: "-0.18em",
+              textDecorationSkipInk: "none",
             },
 
             a: {
@@ -468,6 +475,10 @@ export default {
               background:
                 "linear-gradient(to top, rgba(253, 230, 138, 0.45) 40%, transparent 40%)",
               color: "inherit",
+              display: "inline",
+              lineHeight: "inherit",
+              boxDecorationBreak: "clone",
+              WebkitBoxDecorationBreak: "clone",
             },
 
             pre: {
