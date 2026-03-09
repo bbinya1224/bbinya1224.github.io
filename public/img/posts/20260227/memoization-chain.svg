@@ -1,0 +1,138 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 340" fill="none">
+  <style>
+    text { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    .title { font-size: 13px; font-weight: 700; }
+    .label { font-size: 12px; font-weight: 600; }
+    .desc { font-size: 11px; fill: #6b7280; }
+    .result { font-size: 13px; font-weight: 700; }
+    .box { rx: 10; ry: 10; stroke-width: 2; }
+    .arrow { stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .badge { rx: 6; ry: 6; }
+    @media (prefers-color-scheme: dark) {
+      .bg { fill: #1e1e2e; }
+      .panel { fill: #2a2a3c; stroke: #3a3a4c; }
+      .box-parent { fill: #3b3654; stroke: #8b5cf6; }
+      .box-child { fill: #1e3a4a; stroke: #22d3ee; }
+      .box-memo { fill: #1a3328; stroke: #22c55e; }
+      .box-callback { fill: #3b2e1a; stroke: #f59e0b; }
+      .arrow-normal { stroke: #6b7280; }
+      .arrow-memo { stroke: #22c55e; }
+      .arrow-broken { stroke: #ef4444; stroke-dasharray: 6 4; }
+      .title { fill: #e2e8f0; }
+      .label { fill: #e2e8f0; }
+      .desc { fill: #94a3b8; }
+      .result-fail { fill: #f87171; }
+      .result-pass { fill: #4ade80; }
+      .divider { stroke: #3a3a4c; }
+      .watermark { fill: #94a3b8; }
+    }
+    @media (prefers-color-scheme: light) {
+      .bg { fill: #ffffff; }
+      .panel { fill: #f8fafc; stroke: #e2e8f0; }
+      .box-parent { fill: #ede9fe; stroke: #8b5cf6; }
+      .box-child { fill: #ecfeff; stroke: #06b6d4; }
+      .box-memo { fill: #f0fdf4; stroke: #22c55e; }
+      .box-callback { fill: #fffbeb; stroke: #f59e0b; }
+      .arrow-normal { stroke: #9ca3af; }
+      .arrow-memo { stroke: #22c55e; }
+      .arrow-broken { stroke: #ef4444; stroke-dasharray: 6 4; }
+      .title { fill: #1e293b; }
+      .label { fill: #334155; }
+      .desc { fill: #64748b; }
+      .result-fail { fill: #dc2626; }
+      .result-pass { fill: #16a34a; }
+      .divider { stroke: #e2e8f0; }
+      .watermark { fill: #94a3b8; }
+    }
+  </style>
+
+  <rect width="900" height="340" class="bg" rx="12" ry="12"/>
+
+
+  <text x="888" y="14" text-anchor="end" class="watermark" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 10px; font-weight: 500; opacity: 0.4;">bbinyaslog</text>
+
+  <g transform="translate(16, 16)">
+    <rect x="0" y="0" width="272" height="308" class="panel box" stroke-width="1.5"/>
+
+    <text x="136" y="30" text-anchor="middle" class="title">useCallback만</text>
+    <text x="136" y="47" text-anchor="middle" class="result result-fail">효과 없음</text>
+
+    <rect x="56" y="65" width="160" height="50" class="box box-parent"/>
+    <text x="136" y="86" text-anchor="middle" class="label">Parent</text>
+    <text x="136" y="102" text-anchor="middle" class="desc">리렌더링 발생</text>
+
+    <rect x="72" y="128" width="128" height="30" class="box box-callback"/>
+    <text x="136" y="148" text-anchor="middle" class="label">useCallback</text>
+
+    <line x1="136" y1="158" x2="136" y2="178" class="arrow arrow-memo"/>
+    <polygon points="130,174 136,182 142,174" class="arrow-memo" fill="currentColor" style="fill: #22c55e;"/>
+
+    <text x="136" y="196" text-anchor="middle" class="desc">onClick (같은 참조)</text>
+
+    <line x1="136" y1="202" x2="136" y2="224" class="arrow arrow-broken"/>
+
+    <rect x="56" y="228" width="160" height="50" class="box box-child"/>
+    <text x="136" y="249" text-anchor="middle" class="label">Child</text>
+    <text x="136" y="265" text-anchor="middle" class="desc">그래도 리렌더링 됨</text>
+
+    <text x="232" y="256" class="result result-fail" font-size="20">&#x2716;</text>
+  </g>
+
+  <line x1="300" y1="30" x2="300" y2="310" class="divider" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <g transform="translate(314, 16)">
+    <rect x="0" y="0" width="272" height="308" class="panel box" stroke-width="1.5"/>
+
+    <text x="136" y="30" text-anchor="middle" class="title">React.memo만</text>
+    <text x="136" y="47" text-anchor="middle" class="result result-fail">효과 없음</text>
+
+    <rect x="56" y="65" width="160" height="50" class="box box-parent"/>
+    <text x="136" y="86" text-anchor="middle" class="label">Parent</text>
+    <text x="136" y="102" text-anchor="middle" class="desc">리렌더링 발생</text>
+
+    <rect x="72" y="128" width="128" height="30" class="box" style="fill: none; stroke: #9ca3af; stroke-dasharray: 4 3;"/>
+    <text x="136" y="148" text-anchor="middle" class="desc">일반 함수</text>
+
+    <line x1="136" y1="158" x2="136" y2="178" class="arrow arrow-broken"/>
+
+    <text x="136" y="196" text-anchor="middle" class="desc">onClick (매번 새 참조)</text>
+
+    <line x1="136" y1="202" x2="136" y2="224" class="arrow arrow-broken"/>
+
+    <rect x="40" y="228" width="192" height="50" class="box box-memo"/>
+    <text x="136" y="249" text-anchor="middle" class="label">React.memo(Child)</text>
+    <text x="136" y="265" text-anchor="middle" class="desc">props 달라서 리렌더링</text>
+
+    <text x="248" y="256" class="result result-fail" font-size="20">&#x2716;</text>
+  </g>
+
+  <line x1="598" y1="30" x2="598" y2="310" class="divider" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <g transform="translate(612, 16)">
+    <rect x="0" y="0" width="272" height="308" class="panel box" stroke-width="1.5"/>
+
+    <text x="136" y="30" text-anchor="middle" class="title">useCallback + React.memo</text>
+    <text x="136" y="47" text-anchor="middle" class="result result-pass">리렌더링 방지!</text>
+
+    <rect x="56" y="65" width="160" height="50" class="box box-parent"/>
+    <text x="136" y="86" text-anchor="middle" class="label">Parent</text>
+    <text x="136" y="102" text-anchor="middle" class="desc">리렌더링 발생</text>
+
+    <rect x="72" y="128" width="128" height="30" class="box box-callback"/>
+    <text x="136" y="148" text-anchor="middle" class="label">useCallback</text>
+
+    <line x1="136" y1="158" x2="136" y2="178" class="arrow arrow-memo"/>
+    <polygon points="130,174 136,182 142,174" style="fill: #22c55e;"/>
+
+    <text x="136" y="196" text-anchor="middle" class="desc">onClick (같은 참조)</text>
+
+    <line x1="136" y1="202" x2="136" y2="224" class="arrow arrow-memo"/>
+    <polygon points="130,220 136,228 142,220" style="fill: #22c55e;"/>
+
+    <rect x="40" y="228" width="192" height="50" class="box box-memo"/>
+    <text x="136" y="249" text-anchor="middle" class="label">React.memo(Child)</text>
+    <text x="136" y="265" text-anchor="middle" class="desc">props 같으니 건너뜀</text>
+
+    <text x="248" y="256" class="result result-pass" font-size="20">&#x2714;</text>
+  </g>
+</svg>

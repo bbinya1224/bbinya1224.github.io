@@ -5,6 +5,7 @@ import sitemap from '@astrojs/sitemap';
 import tailwindcss from '@tailwindcss/vite';
 import remarkGfm from 'remark-gfm';
 import rehypePrettyCode from 'rehype-pretty-code';
+import rehypeExternalLinks from 'rehype-external-links';
 
 export default defineConfig({
   output: 'static',
@@ -23,6 +24,10 @@ export default defineConfig({
     syntaxHighlight: false,
     remarkPlugins: [remarkGfm],
     rehypePlugins: [
+      [
+        rehypeExternalLinks,
+        { target: '_blank', rel: ['noopener', 'noreferrer'] },
+      ],
       [
         rehypePrettyCode,
         {
