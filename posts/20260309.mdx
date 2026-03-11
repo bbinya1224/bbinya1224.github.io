@@ -1,0 +1,582 @@
+---
+title: "AbortController, fetch 취소부터 React cleanup까지"
+description: "fetch 취소부터 이벤트 리스너 정리, 타임아웃, React cleanup까지. abort() 하나로 비동기 작업의 시작과 정리를 묶는 패턴을 정리합니다."
+date: "2026-03-09"
+slug: "20260309"
+category: "Frontend"
+tag: "JavaScript, AbortController, React, Web API"
+published: true
+---
+
+`AbortController`는 보통 "fetch 취소할 때 쓰는 것" 정도로 알려져있습니다.  
+그 뿐만 아니라, 이벤트 리스너 정리, 타임아웃, 커스텀 비동기 작업 취소, React useEffect cleanup까지 비동기 작업의 생명주기를 관리하는 범용 도구로 사용되기도 합니다.
+
+이번 글 에서는 `AbortController`의 동작 원리부터 프로젝트에서 바로 쓸 수 있는 패턴, 그리고 운영 환경에서 자주 오해하는 한계까지 함께 다루어보려고합니다.
+
+---
+
+## AbortController와 AbortSignal. 역할 분리
+
+`AbortController`는 두 객체로 구성됩니다.
+
+```ts
+const controller = new AbortController();
+const signal = controller.signal;
+
+// controller: 취소를 "트리거"하는 쪽
+controller.abort();
+
+// signal: 취소를 "감지"하는 쪽
+signal.aborted; // true
+signal.addEventListener('abort', () => { /* 정리 로직 */ });
+```
+
+이 분리가 핵심입니다.
+
+| | AbortController | AbortSignal |
+|---|---|---|
+| 역할 | 취소를 **명령**한다 | 취소를 **수신**한다 |
+| 누가 가지나 | 취소를 결정하는 쪽 (호출자) | 취소를 당하는 쪽 (실행자) |
+| 주요 API | `abort()` | `aborted`, `reason`, `addEventListener('abort')` |
+| 비유 | 리모컨 | TV |
+
+`controller`는 호출하는 쪽이 가지고, `signal`만 실행하는 쪽에 넘깁니다.  
+실행하는 쪽은 취소를 **트리거할 수 없고**, 오직 **감지만** 할 수 있습니다.  
+이 단방향 설계 덕분에 관심사가 깔끔하게 분리됩니다.
+
+---
+
+## fetch 취소 기본 사용법
+
+`fetch`는 두 번째 인자로 `signal`을 받습니다.
+
+```ts
+const controller = new AbortController();
+
+fetch('/api/search?q=react', { signal: controller.signal })
+  .then(res => res.json())
+  .then(data => console.log(data))
+  .catch(err => {
+    if (err.name === 'AbortError') {
+      console.log('요청이 취소되었습니다.');
+    }
+  });
+
+// 나중에 취소
+controller.abort();
+```
+
+`abort()`를 호출하면 `fetch`는 `AbortError`를 throw합니다.
+
+### 잠깐, 이미 보낸 요청을 어떻게 "취소"하나요?
+
+HTTP 요청은 이미 서버로 떠났습니다. `abort()`가 서버까지 날아가서 요청을 되돌리는 걸까요?
+
+아닙니다. **`abort()`는 클라이언트 쪽 동작**입니다.
+
+![abort() 동작 원리: 클라이언트가 응답 대기를 중단하고 Promise를 reject하는 과정](/img/posts/20260309/abort-sequence.svg)
+
+
+1. **`abort()`는 클라이언트 측 취소 신호**입니다. 서버 비즈니스 로직에 "이 작업을 롤백하라"는 의미가 아닙니다.
+2. `fetch`는 더 이상 응답을 기다리지 않고 Promise를 reject합니다. 이때 **전송 계층의 정리 방식은 브라우저, 런타임, HTTP 버전에 따라 달라질 수 있습니다.**
+3. 서버는 이미 요청을 처리 중일 수 있습니다. 연결 종료를 감지할 수는 있어도, **업무 작업이 자동으로 취소된다고 가정하면 안 됩니다.**
+
+<mark>**`abort()`는 서버를 멈추는 게 아니라, 클라이언트가 응답을 기다리지 않게 하는 것입니다.**</mark>  
+DB write, 결제 처리, API 과금 같은 서버 쪽 부수효과는 이미 발생한 뒤일 수 있으므로 주의가 필요합니다.
+
+---
+
+## Race Condition 방지
+
+탭이나 라우트를 전환할 때, 이전 페이지의 데이터 fetch가 아직 끝나지 않았다면 어떻게 될까요?
+
+### AbortController 없이
+
+```ts
+// ❌ race condition 발생
+async function loadPage(pageId: string) {
+  const res = await fetch(`/api/pages/${pageId}`);
+  const data = await res.json();
+  setPageData(data); // 어떤 요청의 응답이 마지막에 올지 모름
+}
+
+// 사용자가 탭을 빠르게 전환: A → B → C
+loadPage('A');
+loadPage('B');
+loadPage('C');
+```
+
+세 요청이 거의 동시에 날아가고, **가장 늦게 도착한 응답**이 화면에 남습니다.  
+C 탭을 보고 있는데 A 탭의 응답이 뒤늦게 도착하면, 화면에는 A의 데이터가 표시됩니다.
+
+### AbortController 사용
+
+```ts
+// ✅ race condition 방지
+let controller: AbortController | null = null;
+
+async function loadPage(pageId: string) {
+  // 이전 요청 취소
+  controller?.abort();
+  controller = new AbortController();
+
+  try {
+    const res = await fetch(`/api/pages/${pageId}`, {
+      signal: controller.signal,
+    });
+    const data = await res.json();
+    setPageData(data); // 항상 최신 요청의 결과만 적용
+  } catch (err) {
+    if (err.name !== 'AbortError') throw err;
+  }
+}
+```
+
+새 요청을 보내기 전에 이전 `controller`를 `abort()`합니다.  
+취소된 요청은 `AbortError`를 throw하고, catch에서 무시합니다.  
+결과적으로 **마지막으로 살아남은 요청의 응답만** UI에 반영됩니다.
+
+같은 패턴이 적용되는 곳은 많습니다. **사용자 인터랙션이 새 데이터 요청을 트리거하는 곳**이면 이전 요청을 `abort()`하는 것이 안전합니다.
+
+- **필터/정렬 변경**: 필터를 연속으로 바꾸면 이전 필터의 느린 응답이 최신 결과를 덮어쓸 수 있습니다.
+- **모달/드롭다운 데이터 로드**: 모달을 열자마자 닫으면, 뒤늦게 도착한 응답이 닫힌 모달의 상태를 업데이트하려 합니다.
+
+아래 데모에서 직접 확인해보세요.
+
+import RaceConditionAbortDemo from "@/islands/lab/abort-controller-demo/RaceConditionAbortDemo";
+
+<RaceConditionAbortDemo client:visible />
+
+### TanStack Query는 이걸 대신 해줍니다
+
+TanStack Query는 쿼리 함수에 `signal`을 자동으로 전달합니다.  
+컴포넌트가 언마운트되거나 쿼리 키가 바뀌면 내부적으로 `abort()`를 호출해서, 위에서 다룬 race condition 방지를 프레임워크 레벨에서 처리합니다.
+
+```ts
+const { data } = useQuery({
+  queryKey: ['page', pageId],
+  queryFn: ({ signal }) =>
+    fetch(`/api/pages/${pageId}`, { signal }).then(res => res.json()),
+});
+```
+
+`queryFn`에 전달되는 `signal`을 `fetch`에 넘기기만 하면 됩니다.
+
+---
+
+## AbortSignal.timeout()
+
+앞서 본 타임아웃 패턴은 너무 자주 쓰여서, 브라우저가 내장 API로 제공합니다.
+
+```ts
+// 직접 구현
+const controller = new AbortController();
+const timeoutId = setTimeout(() => controller.abort(), 5000);
+try {
+  const res = await fetch(url, { signal: controller.signal });
+} finally {
+  clearTimeout(timeoutId);
+}
+
+// AbortSignal.timeout() — 한 줄
+const res = await fetch(url, {
+  signal: AbortSignal.timeout(5000),
+});
+```
+
+`AbortSignal.timeout()`은 지정한 시간이 지나면 자동으로 abort되는 signal을 반환합니다.  
+`controller` 생성, `setTimeout`, `clearTimeout` 같은 보일러플레이트가 전부 사라집니다.
+
+한 가지 차이점이 있는데,  
+`AbortSignal.timeout()`이 만든 signal이 abort되면, `signal.reason`은 보통 `TimeoutError` 이름을 가진 `DOMException`입니다.  
+즉, 단순한 수동 취소와 타임아웃을 **구분 가능한 형태**로 다룰 수 있습니다.
+
+```ts
+try {
+  const res = await fetch(url, { signal: AbortSignal.timeout(5000) });
+} catch (err) {
+  if (err.name === 'TimeoutError') {
+    console.log('타임아웃!');
+  }
+  if (err.name === 'AbortError') {
+    console.log('수동 취소!');
+  }
+}
+```
+
+아래 데모에서 응답 시간과 타임아웃을 조절하면서 동작을 확인해보세요.
+
+import FetchTimeoutDemo from "@/islands/lab/abort-controller-demo/FetchTimeoutDemo";
+
+<FetchTimeoutDemo client:visible />
+
+---
+
+## AbortSignal.any()
+
+여러 signal 중 **하나라도** abort되면 취소하고 싶을 때 사용합니다.
+
+```ts
+const userController = new AbortController();
+
+// 사용자가 취소하거나, 5초가 지나면 취소
+const signal = AbortSignal.any([
+  userController.signal,
+  AbortSignal.timeout(5000),
+]);
+
+fetch('/api/data', { signal });
+
+// 사용자가 취소 버튼 클릭
+cancelButton.onclick = () => userController.abort();
+```
+
+`AbortSignal.any()`는 여러 취소 조건을 하나의 signal로 합칩니다.  
+"사용자 취소 OR 타임아웃" 같은 조합을 깔끔하게 표현할 수 있습니다.  
+합성된 signal의 `reason`은 가장 먼저 abort된 signal의 reason을 따릅니다.
+
+프로젝트에서는 다음과 같이 자주 씁니다.
+
+- 사용자가 취소 버튼을 눌렀을 때
+- 페이지를 이탈했을 때
+- SLA를 넘긴 타임아웃을 강제로 종료할 때
+- 상위 작업이 실패해서 하위 작업을 연쇄 취소할 때
+
+---
+
+## 이벤트 리스너 정리: `{ signal }` 옵션
+
+`addEventListener`의 세 번째 인자에 `signal`을 전달하면, `abort()` 한 번으로 리스너를 제거할 수 있습니다.
+
+### 전통적인 방식
+
+```ts
+// 등록
+const onScroll = () => { /* ... */ };
+const onResize = () => { /* ... */ };
+const onMousemove = () => { /* ... */ };
+
+window.addEventListener('scroll', onScroll);
+window.addEventListener('resize', onResize);
+window.addEventListener('mousemove', onMousemove);
+
+// 정리 — 하나씩 제거해야 함
+window.removeEventListener('scroll', onScroll);
+window.removeEventListener('resize', onResize);
+window.removeEventListener('mousemove', onMousemove);
+```
+
+`removeEventListener`에 **정확히 같은 함수 참조**를 전달해야 합니다.
+익명 함수를 쓰면 제거가 불가능합니다. 리스너가 많아지면 관리가 어렵습니다.
+
+### AbortController 방식
+
+```ts
+const controller = new AbortController();
+
+// 등록 — 같은 signal 공유
+window.addEventListener('scroll', () => { /* ... */ }, { signal: controller.signal });
+window.addEventListener('resize', () => { /* ... */ }, { signal: controller.signal });
+window.addEventListener('mousemove', () => { /* ... */ }, { signal: controller.signal });
+
+// 정리 — 한 번에 전부 제거
+controller.abort();
+```
+
+하나의 `controller`로 여러 리스너를 묶어 관리합니다.  
+함수 참조를 변수에 저장할 필요도 없고, 익명 함수도 자유롭게 쓸 수 있습니다.
+
+이 패턴의 가치는 단순히 "코드가 짧아진다"가 아닙니다.  
+페이지 전환, 모달 open/close, 컴포넌트 mount/unmount처럼 **생명주기가 분명한 단위**에 리스너를 묶어둘 수 있다는 점이 중요합니다.
+
+### 저는 이렇게 사용했어요.
+
+이 블로그의 `Header.astro`에서도 이 패턴을 사용합니다.
+Astro의 View Transitions로 페이지를 이동할 때, 이전 페이지의 scroll 리스너를 정리합니다.
+
+```ts
+// src/components/Header.astro
+let scrollController: AbortController | null = null;
+
+const bindHeaderScroll = () => {
+  // 이전 리스너 정리
+  scrollController?.abort();
+  scrollController = new AbortController();
+
+  window.addEventListener('scroll', () => {
+    // 스크롤 방향에 따라 헤더 표시/숨김
+  }, { passive: true, signal: scrollController.signal });
+
+  // 페이지 전환 시 정리
+  document.addEventListener('astro:before-swap', () => {
+    scrollController?.abort();
+    scrollController = null;
+  }, { once: true });
+};
+```
+
+`scrollController?.abort()`로 이전 리스너를 제거하고, 새 controller를 만들어 새 리스너를 등록합니다.
+`astro:before-swap` 이벤트에서도 정리하여 페이지 전환 시 리스너가 누적되지 않습니다.
+
+아래 데모에서 "다음 페이지로 이동" 버튼을 눌러가며 리스너 수가 어떻게 변하는지 비교해보세요.
+
+import EventListenerCleanupDemo from "@/islands/lab/abort-controller-demo/EventListenerCleanupDemo";
+
+<EventListenerCleanupDemo client:visible />
+
+---
+
+## 커스텀 취소 가능한 작업
+
+`AbortController`는 fetch나 이벤트 리스너뿐 아니라, **어떤 비동기 작업이든** 취소 가능하게 만들 수 있습니다.
+
+### 취소 가능한 딜레이
+
+```ts
+function cancellableDelay(ms: number, signal: AbortSignal) {
+  return new Promise<void>((resolve, reject) => {
+    if (signal.aborted) {
+      reject(signal.reason);
+      return;
+    }
+
+    const timerId = setTimeout(resolve, ms);
+    signal.addEventListener('abort', () => {
+      clearTimeout(timerId);
+      reject(signal.reason);
+    });
+  });
+}
+
+// 사용
+const controller = new AbortController();
+await cancellableDelay(3000, controller.signal);
+
+// 취소
+controller.abort();
+```
+
+### 취소 가능한 폴링
+
+```ts
+async function poll(
+  fn: () => Promise<boolean>,
+  interval: number,
+  signal: AbortSignal,
+) {
+  while (!signal.aborted) {
+    const done = await fn();
+    if (done) return;
+    await cancellableDelay(interval, signal);
+  }
+}
+
+// 사용: 작업 완료 여부를 3초마다 확인
+const controller = new AbortController();
+poll(
+  () => fetch('/api/job/123').then(res => res.json()).then(d => d.done),
+  3000,
+  controller.signal,
+);
+
+// 페이지 이탈 시 폴링 중단
+window.addEventListener('beforeunload', () => controller.abort());
+```
+
+패턴은 동일합니다. `signal`을 인자로 받고, `signal.aborted`를 확인하거나 `abort` 이벤트를 구독합니다.
+
+### 스트리밍 응답 중단
+
+SSE나 `ReadableStream`으로 데이터를 스트리밍 받을 때도 같은 원리입니다.
+
+```ts
+const controller = new AbortController();
+
+const response = await fetch('/api/stream', {
+  signal: controller.signal,
+});
+
+const reader = response.body!.getReader();
+
+while (true) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  appendToUI(value);
+}
+
+// 페이지 이탈 시 스트림 중단
+window.addEventListener('beforeunload', () => controller.abort());
+```
+
+<mark>**취소 가능성이 있는 비동기 유틸리티는 가능하면 `signal`을 첫 클래스 입력값으로 받아야 합니다.**</mark>
+
+---
+
+## React useEffect와 AbortController
+
+React에서 `useEffect`의 cleanup 함수는 `AbortController`와 자연스럽게 맞물립니다.
+
+### 기본 패턴
+
+```tsx
+useEffect(() => {
+  const controller = new AbortController();
+
+  fetch('/api/data', { signal: controller.signal })
+    .then(res => res.json())
+    .then(setData)
+    .catch(err => {
+      if (err.name !== 'AbortError') setError(err);
+    });
+
+  return () => controller.abort();
+}, []);
+```
+
+컴포넌트가 언마운트되거나 의존성이 바뀔 때, cleanup 함수에서 `abort()`를 호출합니다.
+진행 중인 fetch가 자동으로 취소됩니다.
+
+다만 이것만으로 모든 경쟁 상태가 해결되지는 않습니다.
+
+- `fetch` 이후의 임의 비동기 후처리(`await transform()`, `await parse()`)는 직접 `signal.aborted`를 확인해야 할 수 있습니다.
+- 여러 요청을 병합하거나 재시도하는 데이터 계층에서는 `AbortController`만으로 정책이 충분하지 않을 수 있습니다.
+- 이미 React Query, SWR 같은 라이브러리를 쓰고 있다면, 취소와 캐시 일관성의 책임 경계를 분리해서 보는 편이 좋습니다.
+
+### 하나의 controller로 전부 정리
+
+`AbortController`의 진짜 힘은 **하나의 controller로 fetch, 이벤트 리스너, 타이머를 모두 관리**할 수 있다는 점입니다.
+
+```tsx
+useEffect(() => {
+  const controller = new AbortController();
+  const { signal } = controller;
+
+  // 1. fetch
+  fetch('/api/notifications', { signal })
+    .then(res => res.json())
+    .then(setNotifications)
+    .catch(err => {
+      if (err.name !== 'AbortError') setError(err);
+    });
+
+  // 2. 이벤트 리스너
+  window.addEventListener('focus', () => {
+    refetch();
+  }, { signal });
+
+  // 3. 폴링 타이머
+  const intervalId = setInterval(() => {
+    if (!signal.aborted) refetch();
+  }, 30000);
+  signal.addEventListener('abort', () => clearInterval(intervalId));
+
+  // cleanup 한 줄
+  return () => controller.abort();
+}, []);
+```
+
+`return () => controller.abort()` 한 줄이 세 가지를 동시에 정리합니다.
+
+1. 진행 중인 `fetch` 취소
+2. `focus` 이벤트 리스너 제거
+3. `setInterval` 해제
+
+cleanup 함수에 정리 로직을 하나씩 나열할 필요 없이, `abort()` 하나로 끝납니다.
+
+이 접근은 특히 "effect 안에서 시작한 것들을 effect 바깥으로 새게 두지 않는다"는 점에서 유지보수성이 좋습니다.
+
+---
+
+## abort()의 한계: 클라이언트 취소 ≠ 서버 취소
+
+여기까지 다양한 활용을 살펴봤지만, 한 가지 분명히 해야 할 점이 있습니다.
+
+`abort()`는 **서버 처리 중단을 보장하지 않습니다.**
+이미 전송이 시작된 요청은 서버에 도달했거나 처리 중일 수 있습니다.
+따라서 `abort()`를 서버 부하 감소를 위한 제어 수단으로 보면 안 됩니다.
+
+`AbortController`가 줄이는 건 **클라이언트 쪽 낭비**입니다:
+- stale 응답의 파싱/처리를 건너뜀
+- 잘못된 UI 업데이트 방지
+- 응답 데이터 버퍼링 중단
+
+서버 부하를 줄이려면 **요청 자체를 안 보내는 전략**이 필요합니다.  
+debounce/throttle로 요청 빈도를 줄이고, 그래도 겹치는 요청은 `abort()`로 클라이언트 쪽을 정리하는 식으로 조합하는 게 일반적입니다.
+
+### 서버에서 할 수 있는 것
+
+서버에서 이미 시작된 작업을 멈추려면 **별도 설계**가 필요합니다.  
+idempotency key, job ID 기반 상태 조회, 명시적 cancel API, 작업 큐 cancel 처리 같은 방식입니다.
+
+다만 서버 쪽에서도 클라이언트의 연결 종료를 감지해, 긴 작업 중간에 중단할 수는 있습니다.
+
+```ts
+// Next.js Route Handler 예시
+export async function GET(request: Request) {
+  const chunks = await getWorkChunks();
+  const results = [];
+
+  for (const chunk of chunks) {
+    // 각 단계마다 클라이언트 이탈 여부 확인
+    if (request.signal.aborted) {
+      return new Response(null, { status: 499 }); // 비표준, Nginx 관례
+    }
+    results.push(await processChunk(chunk));
+  }
+
+  return Response.json(results);
+}
+```
+
+결제, 주문, 파일 처리처럼 부수효과가 큰 API에서는 **"`abort()` 했으니 안전하다"는 가정이 가장 위험합니다.**
+
+---
+
+## 브라우저 지원 현황
+
+| API | Chrome | Firefox | Safari | Node.js |
+|---|---|---|---|---|
+| `AbortController` / `AbortSignal` | 66+ | 57+ | 12.1+ | 15+ |
+| `addEventListener({ signal })` | 90+ | 86+ | 15+ | - |
+| `AbortSignal.timeout()` | 103+ | 100+ | 16+ | 17.3+ |
+| `AbortSignal.any()` | 124+ | 124+ | 17.4+ | 21+ |
+
+`AbortController` 자체와 `addEventListener({ signal })`은 2021년 이후 모든 주요 브라우저에서 사용할 수 있습니다.  
+`AbortSignal.any()`가 가장 최근(2024년 상반기)이지만, 현시점에서는 대부분의 환경에서 지원됩니다.
+
+주의할 곳은 **사내 WebView나 JSDOM 같은 테스트 런타임**입니다.  
+이런 환경은 브라우저보다 지원이 느릴 수 있으므로, 공용 유틸리티에 넣을 때는 확인이 필요합니다.
+
+---
+
+## 정리
+
+| API | 용도 | 한 줄 요약 |
+|---|---|---|
+| `new AbortController()` | 취소 가능한 작업 생성 | controller로 signal을 만들고, abort()로 취소 |
+| `signal` 옵션 | fetch, addEventListener에 전달 | 취소를 감지하는 쪽에 넘기는 토큰 |
+| `AbortSignal.timeout(ms)` | 내장 타임아웃 | controller 없이 타임아웃 signal 생성 |
+| `AbortSignal.any([...])` | 여러 signal 합치기 | 하나라도 abort되면 취소 |
+| `{ signal }` in addEventListener | 리스너 일괄 정리 | abort() 한 번으로 모든 리스너 제거 |
+
+`AbortController`는 단순한 "fetch 취소 도구"가 아닙니다.  
+**"시작과 정리"를 하나의 흐름으로 묶는 비동기 생명주기 관리 패턴**입니다.
+
+### 1. **시작한 것은 정리해야 한다.**
+`AbortController`는 그 정리를 하나의 `abort()` 호출로 통합합니다.
+
+### 2. **클라이언트 취소와 서버 업무 취소를 같은 것으로 취급하지 말아야 합니다.**
+
+
+이 구분을 명확히 이해하면, `AbortController`를 UI 편의 기능이 아니라 운영 안정성을 높이는 도구로 쓸 수 있습니다.
+
+
+---
+
+## 참고 자료
+
+- [MDN — AbortController](https://developer.mozilla.org/ko/docs/Web/API/AbortController)
+- [MDN — AbortSignal](https://developer.mozilla.org/ko/docs/Web/API/AbortSignal)
+- [MDN — AbortSignal.timeout()](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/timeout_static)
+- [MDN — AbortSignal.any()](https://developer.mozilla.org/en-US/docs/Web/API/AbortSignal/any_static)
+- [JavaScript Info — Fetch: Abort](https://javascript.info/fetch-abort)
