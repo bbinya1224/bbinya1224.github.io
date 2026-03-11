@@ -1,4 +1,3 @@
-import mermaid from "mermaid";
 import { useEffect, useRef, useState } from "react";
 import { useDarkMode } from "@/lib/useDarkMode";
 
@@ -18,37 +17,56 @@ const Mermaid = ({ chart }: MermaidProps) => {
   const theme = isDark ? "dark" : "default";
 
   useEffect(() => {
-    mermaid.initialize({
-      startOnLoad: false,
-      theme,
-      securityLevel: "strict",
-      fontFamily: "inherit",
-    });
-    setHasMounted(true);
+    let stale = false;
+
+    import("mermaid")
+      .then(({ default: mermaid }) => {
+        if (stale) return;
+
+        mermaid.initialize({
+          startOnLoad: false,
+          theme,
+          securityLevel: "strict",
+          fontFamily: "inherit",
+        });
+        setHasMounted(true);
+      })
+      .catch(() => {
+        if (!stale) {
+          setRenderError(true);
+          setHasMounted(true);
+        }
+      });
+
+    return () => {
+      stale = true;
+    };
   }, [theme]);
 
   useEffect(() => {
-    if (hasMounted && ref.current) {
-      let stale = false;
-      setIsRendered(false);
-      setRenderError(false);
-      ref.current.removeAttribute("data-processed");
-      ref.current.textContent = chart.trim();
+    if (!hasMounted || !ref.current) return;
 
-      mermaid
-        .run({ nodes: [ref.current] })
-        .then(() => {
-          if (!stale) setIsRendered(true);
-        })
-        .catch(() => {
-          if (!stale) {
-            setRenderError(true);
-            setIsRendered(true);
-          }
-        });
+    let stale = false;
+    setIsRendered(false);
+    setRenderError(false);
+    ref.current.removeAttribute("data-processed");
+    ref.current.textContent = chart.trim();
 
-      return () => { stale = true; };
-    }
+    import("mermaid")
+      .then(({ default: mermaid }) => mermaid.run({ nodes: [ref.current!] }))
+      .then(() => {
+        if (!stale) setIsRendered(true);
+      })
+      .catch(() => {
+        if (!stale) {
+          setRenderError(true);
+          setIsRendered(true);
+        }
+      });
+
+    return () => {
+      stale = true;
+    };
   }, [hasMounted, chart, theme]);
 
   if (!hasMounted) {
