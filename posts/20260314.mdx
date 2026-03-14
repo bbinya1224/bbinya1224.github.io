@@ -1,0 +1,473 @@
+---
+title: "Astro vs Next.js: 블로그를 마이그레이션하며 느낀 차이"
+description: "Next.js에서 Astro로 블로그를 옮기며 체감한 두 프레임워크의 철학 차이. 렌더링, 라우팅, 데이터 페칭까지 코드로 비교합니다."
+date: "2026-03-14"
+slug: "20260302-astro-vs-nextjs"
+category: "Frontend"
+tag: "Astro, Next.js, SSG, SSR, Framework"
+published: true
+---
+
+이 블로그를 Next.js에서 Astro로 마이그레이션했습니다.
+
+State of JS 서베이에서 Astro의 만족도가 해마다 치고 올라오는 걸 보고 궁금해졌습니다.  
+콘텐츠 중심 사이트에 특화된 프레임워크라길래 장단점을 살펴봤더니 제 블로그에 딱 맞아 보였고, 실제로 옮기고 나니 두 프레임워크의 철학 자체가 다르다는 걸 체감했습니다.
+
+이 글에서는 마이그레이션하며 직접 느낀 차이를 코드 예제와 함께 정리합니다.
+
+---
+
+## 핵심 철학부터 다릅니다
+
+가장 먼저 느낀 차이는 JavaScript에 대한 태도입니다.
+
+**Next.js**는 React 기반의 풀스택 프레임워크입니다.  
+Server Components로 서버에서만 실행되는 컴포넌트를 분리할 수 있지만, 클라이언트 컴포넌트가 하나라도 있으면 React 런타임이 함께 전송됩니다.  
+대시보드, E-commerce, SaaS처럼 인터랙션이 풍부한 애플리케이션에 최적화되어 있습니다.
+
+**Astro**는 콘텐츠 중심 웹사이트를 위한 프레임워크입니다.  
+공식 문서에서 "Astro로 느린 웹사이트를 만드는 것은 거의 불가능해야 한다"고 말할 정도로 성능을 강조합니다.  
+기본적으로 **JavaScript를 0바이트** 전송하고, 필요한 부분만 선택적으로 추가합니다.
+
+| | Astro | Next.js |
+|---|---|---|
+| 지향점 | 콘텐츠 중심 웹사이트 | 풀스택 웹 애플리케이션 |
+| 기본 모델 | MPA (Multi-Page App) | SPA + Server Components |
+| JS 전략 | Zero JS by default | Server Components로 번들 감소 |
+| UI 프레임워크 | React, Vue, Svelte 혼용 가능 | React 전용 |
+
+블로그처럼 대부분의 페이지가 읽기 전용인 사이트에서, 이 차이가 성능에 직접적으로 드러납니다.
+
+---
+
+## 컴포넌트 문법
+
+처음 `.astro` 파일을 열었을 때 Vue의 SFC가 떠올랐습니다.  
+두 프레임워크의 컴포넌트 작성 방식은 꽤 다릅니다.
+
+### Astro 컴포넌트
+
+Astro는 `.astro` 파일에 **서버 로직, 템플릿, 스타일, 클라이언트 스크립트**가 한 파일에 공존합니다.  
+`---` 사이의 frontmatter 영역이 서버에서만 실행되고, 그 아래가 HTML 템플릿입니다.
+
+```astro
+---
+// 서버에서만 실행되는 영역
+interface Props {
+  title: string;
+  posts: Array<{ id: number; title: string }>;
+}
+
+const { title, posts } = Astro.props;
+
+// DB 접근, API 호출 등 서버 사이드 작업
+const response = await fetch('https://api.example.com/data');
+const data = await response.json();
+---
+
+<!-- HTML 템플릿 -->
+<h1>{title}</h1>
+<ul>
+  {posts.map(post => <li>{post.title}</li>)}
+</ul>
+
+<!-- children 대신 slot -->
+<slot />
+
+<style>
+  /* 이 컴포넌트에만 적용되는 Scoped 스타일 */
+  h1 { color: var(--foreground); }
+</style>
+
+<script>
+  // 클라이언트에서 실행되는 JS (필요할 때만)
+  console.log('loaded');
+</script>
+```
+
+한 가지 특이한 점은 `<style>`이 기본적으로 **scoped**라는 겁니다.  
+별도의 CSS Modules 설정 없이도, 작성한 스타일이 해당 컴포넌트에만 적용됩니다.
+
+### Next.js 컴포넌트
+
+Next.js는 React 문법을 그대로 사용합니다.  
+기본이 Server Component이고, 인터랙션이 필요하면 `'use client'`를 선언합니다.
+
+```tsx
+// Server Component (기본값)
+export default async function BlogList({ title }: { title: string }) {
+  const data = await fetch('https://api.example.com/data')
+    .then(r => r.json());
+
+  return (
+    <div>
+      <h1>{title}</h1>
+      <ul>
+        {data.map(item => <li key={item.id}>{item.name}</li>)}
+      </ul>
+    </div>
+  );
+}
+```
+
+```tsx
+'use client'; // 이 선언으로 Client Component가 됨
+
+import { useState } from 'react';
+
+export function Counter() {
+  const [count, setCount] = useState(0);
+  return (
+    <button onClick={() => setCount(c => c + 1)}>
+      Count: {count}
+    </button>
+  );
+}
+```
+
+Astro는 **파일 하나에 모든 관심사를 모으는** 방식이고, Next.js는 **Server/Client를 파일 단위로 분리**하는 방식입니다. 개인적으로는 `.astro`의 frontmatter 구분이 서버/클라이언트 경계를 더 명확하게 느끼게 해줬습니다.
+
+---
+
+## Islands vs Hydration: 가장 근본적인 차이
+
+이 부분이 제가 마이그레이션하면서 가장 크게 체감한 차이입니다.
+
+### Astro의 Island Architecture
+
+Astro는 페이지 전체를 정적 HTML로 렌더링하고, **인터랙션이 필요한 부분만** 독립된 "섬(Island)"으로 hydrate합니다.
+
+```astro
+---
+import Header from './Header.astro';              // 정적 HTML, JS 0
+import ImageCarousel from './Carousel.tsx';        // React
+import Reviews from './Reviews.vue';               // Vue도 가능!
+---
+
+<!-- JS 없는 정적 HTML -->
+<Header />
+
+<!-- 페이지 로드 시 즉시 hydrate -->
+<ImageCarousel client:load images={images} />
+
+<!-- 뷰포트에 보일 때 hydrate -->
+<Reviews client:visible productId={id} />
+
+<!-- 브라우저가 idle 상태일 때 hydrate -->
+<RelatedProducts client:idle />
+```
+
+`client:*` 지시어가 핵심입니다.
+
+- `client:load` — 페이지 로드 시 즉시 hydrate
+- `client:idle` — 브라우저가 여유로울 때 hydrate
+- `client:visible` — 뷰포트에 들어올 때 hydrate
+- `client:only="react"` — 클라이언트에서만 렌더링 (SSR 건너뜀)
+
+이 블로그에서도 대부분의 컴포넌트는 `.astro` 파일로 JS 없이 렌더링하고, 댓글 컴포넌트만 `client:idle`로 필요할 때 로드합니다.
+
+<aside data-type="info">
+**React 아일랜드 컴포넌트를 제거한 효과**
+
+마이그레이션 전에는 게시글 목록을 React 컴포넌트(`PostListIsland.tsx`)로 렌더링하고 있었습니다. `client:load`로 전체 목록을 hydrate하고 있었는데, 사실 이 컴포넌트에는 클라이언트 인터랙션이 전혀 없었습니다. 정렬과 필터링을 서버에서 하고 결과만 보여주면 되니까요.
+
+Astro 컴포넌트로 전환하면서 해당 페이지의 JavaScript가 **완전히 0**이 되었습니다.
+</aside>
+
+### Next.js의 Server Components + Streaming
+
+Next.js는 React Server Components를 기본으로 사용하고, `Suspense`로 로딩 순서를 제어합니다.
+
+```tsx
+import { Suspense } from 'react';
+
+export default function ProductPage() {
+  return (
+    <div>
+      {/* Server Component — hydration 불필요 */}
+      <Header />
+      <ProductInfo />
+
+      {/* 준비되면 스트리밍 */}
+      <Suspense fallback={<CarouselSkeleton />}>
+        <ImageCarousel />
+      </Suspense>
+
+      <Suspense fallback={<ReviewsSkeleton />}>
+        <Reviews />
+      </Suspense>
+    </div>
+  );
+}
+```
+
+두 접근 방식 모두 "필요한 곳에만 JS를 보내자"라는 목표는 같지만, 단위가 다릅니다.
+
+Astro는 **컴포넌트 단위**로 hydration을 제어하고, Next.js는 **파일 단위**(`'use client'`)로 Server/Client를 나눕니다. 블로그처럼 인터랙션이 적은 사이트에서는 Astro의 방식이 더 직관적이었습니다.
+
+---
+
+## 라우팅
+
+둘 다 파일 기반 라우팅이지만, 구조가 다릅니다.
+
+### Astro — 파일명이 곧 라우트
+
+```
+src/pages/
+├── index.astro           → /
+├── about.astro           → /about
+├── posts/
+│   └── [slug].astro      → /posts/:slug
+└── page/
+    └── [page].astro      → /page/:page
+```
+
+정적 빌드(SSG)에서는 `getStaticPaths`로 빌드 타임에 경로를 생성합니다.
+
+```astro
+---
+export async function getStaticPaths() {
+  const posts = await getCollection('blog');
+  return posts.map(post => ({
+    params: { slug: post.slug },
+    props: { post },  // 데이터를 props로 직접 전달
+  }));
+}
+
+const { post } = Astro.props;
+---
+
+<article>
+  <h1>{post.data.title}</h1>
+</article>
+```
+
+`getStaticPaths`에서 `props`로 데이터를 넘길 수 있는 게 편했습니다.  
+Next.js의 `generateStaticParams`는 params만 반환하고, 데이터는 컴포넌트에서 다시 가져와야 합니다.
+
+### Next.js — 디렉토리 기반 + 레이아웃 중첩
+
+```
+app/
+├── page.tsx              → /
+├── about/
+│   └── page.tsx          → /about
+├── posts/
+│   ├── [slug]/
+│   │   └── page.tsx      → /posts/:slug
+│   └── layout.tsx        → 포스트 전용 레이아웃
+```
+
+```tsx
+// 정적 경로 생성 — params만 반환
+export async function generateStaticParams() {
+  const posts = await getPosts();
+  return posts.map(post => ({ slug: post.slug }));
+}
+
+// params가 Promise (Next.js 15+)
+export default async function Page({
+  params
+}: {
+  params: Promise<{ slug: string }>
+}) {
+  const { slug } = await params;
+  const post = await getPost(slug); // 데이터를 다시 가져옴
+  return <article><h1>{post.title}</h1></article>;
+}
+```
+
+Next.js의 강점은 `layout.tsx`입니다.  
+디렉토리에 `layout.tsx`를 두면 하위 라우트 전체에 자동으로 레이아웃이 적용되고, 페이지 전환 시 레이아웃은 리렌더링되지 않습니다.
+
+Astro는 레이아웃을 매번 `import`해서 감싸야 합니다.
+
+```astro
+---
+import BaseLayout from '@/layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="About">
+  <h1>About Me</h1>
+</BaseLayout>
+```
+
+자동 중첩 레이아웃은 Next.js가 확실히 편합니다. 다만 이 블로그는 `BaseLayout` 하나로 거의 모든 페이지를 감싸고 있어서, 실제로는 큰 불편을 느끼지 못했습니다.
+
+---
+
+## 데이터 페칭
+
+### Astro — frontmatter에서 바로 `await`
+
+```astro
+---
+import { getCollection } from 'astro:content';
+
+// Content Collections — 타입 안전한 로컬 콘텐츠
+const posts = await getCollection('blog', ({ data }) =>
+  data.published !== false
+);
+
+// 외부 API도 그냥 await
+const response = await fetch('https://api.example.com/posts');
+const data = await response.json();
+
+// 병렬 페칭
+const [users, comments] = await Promise.all([
+  fetch('/api/users').then(r => r.json()),
+  fetch('/api/comments').then(r => r.json()),
+]);
+---
+```
+
+Astro의 Content Collections는 Zod 스키마로 frontmatter를 검증해주기 때문에, MDX 파일에 필드를 빠뜨리면 **빌드 타임에 에러**가 납니다. 실제로 `date` 필드를 빼먹고 빌드해서 바로 잡은 적이 있는데, 배포 전에 걸러주니 안심이 됩니다.
+
+### Next.js — Server Components + 캐시 제어
+
+```tsx
+export default async function Page() {
+  // 기본: 캐시됨
+  const posts = await fetch('https://api.example.com/posts')
+    .then(r => r.json());
+
+  // 캐시 안 함 (항상 최신)
+  const live = await fetch('/api/live', { cache: 'no-store' });
+
+  // ISR: 10초마다 재검증
+  const data = await fetch('/api/data', {
+    next: { revalidate: 10 }
+  });
+}
+```
+
+Next.js의 강점은 **캐시 전략의 세밀함**입니다.  
+`revalidate`, `no-store`, `use cache` + `cacheLife` 등으로 라우트마다 다른 캐싱 전략을 적용할 수 있습니다.
+
+```tsx
+import { cacheLife } from 'next/cache';
+
+async function CachedProducts() {
+  'use cache';
+  cacheLife('hours');
+
+  const products = await db.query('SELECT * FROM products');
+  return <ProductList products={products} />;
+}
+```
+
+블로그에서는 빌드 타임에 모든 콘텐츠가 결정되므로 이런 세밀한 캐시 제어가 필요 없었습니다.  
+하지만 E-commerce나 SaaS를 만든다면 이 부분이 Next.js를 선택하는 결정적 이유가 될 겁니다.
+
+---
+
+## 실제로 마이그레이션하며 느낀 것들
+
+### 성능 변화: 숫자로 보기
+
+마이그레이션 전후에 [PageSpeed Insights](https://pagespeed.web.dev/analysis?url=https%3A%2F%2Fbbinya1224.github.io%2F)로 메인 페이지를 측정했습니다.
+
+| | Next.js (Before) | Astro (After) | 변화 |
+|---|---|---|---|
+| 데스크톱 성능 | 66 | **98** | +32 |
+| 모바일 성능 | 45 | **87** | +42 |
+| 접근성 | 86 | **96** | +10 |
+| 권장사항 | 96 | **100** | +4 |
+| SEO | 100 | **100** | - |
+
+**Before (Next.js)**
+
+![Next.js 데스크톱 Lighthouse 결과 — 성능 66점](/img/posts/20260302/lighthouse_before_desktop.png)
+![Next.js 모바일 Lighthouse 결과 — 성능 45점](/img/posts/20260302/lighthouse_before_mobile.png)
+
+**After (Astro)**
+
+![Astro 데스크톱 Lighthouse 결과 — 성능 98점](/img/posts/20260302/lighthouse_after_desktop.png)
+![Astro 모바일 Lighthouse 결과 — 성능 87점](/img/posts/20260302/lighthouse_after_mobile.png)
+
+모바일 성능이 45에서 87로 거의 두 배 가까이 올랐습니다.  
+가장 큰 원인은 JavaScript 번들의 차이입니다. Next.js에서는 React 런타임과 hydration 코드가 모든 페이지에 포함되었는데, Astro에서는 인터랙션이 없는 페이지에 JS가 아예 전송되지 않습니다.
+
+### 좋았던 점
+
+**빌드가 빠르고 설정이 간결합니다.**
+94개 페이지가 17초 만에 빌드됩니다. `astro.config.mjs`도 간결하고, Next.js에서 신경 써야 했던 캐시 전략이나 렌더링 모드 설정이 필요 없습니다. 정적 사이트에 집중할 수 있습니다.
+
+**프레임워크 종속에서 벗어났습니다.**
+Astro 컴포넌트로 대부분의 UI를 처리하고, 필요한 곳에만 React 아일랜드를 쓰니 React에 대한 의존도가 낮아졌습니다.
+
+### 아쉬운 점
+
+**아일랜드 간 상태 공유가 번거롭습니다.**
+Astro의 아일랜드는 각각 독립된 React 트리입니다. Next.js에서는 Context API로 간단히 공유하던 상태를 Astro에서는 직접 우회해야 합니다.  
+이 블로그에서는 다크모드 상태를 React 아일랜드에 전달하기 위해 `MutationObserver`로 `<html>`의 class 변경을 감시하는 방식을 씁니다.
+
+```ts
+// useDarkMode.ts — DOM을 관찰해서 다크모드 상태를 동기화
+useEffect(() => {
+  const observer = new MutationObserver(() =>
+    setDark(isDark(document.documentElement)),
+  );
+  observer.observe(document.documentElement, {
+    attributes: true,
+    attributeFilter: ['class'],
+  });
+  return () => observer.disconnect();
+}, []);
+```
+
+Next.js였으면 `ThemeProvider` 하나로 끝날 일인데, 아일랜드는 각각 독립된 `createRoot()`로 마운트되기 때문에 React Context를 공유할 수 없습니다.  
+다만 이 블로그에서는 다크모드 하나만 공유하면 되고, Astro 쪽에서 `<html>`의 class를 토글하면 React 아일랜드는 읽기만 하면 되는 단방향 흐름이라 MutationObserver로 충분했습니다.
+
+<aside data-type="info">
+**아일랜드 간 상태 공유가 더 필요하다면: Nanostores**
+
+Astro에서 공식 권장하는 대안은 [Nanostores](https://github.com/nanostores/nanostores)입니다. 프레임워크에 독립적인 경량 상태 관리 라이브러리로, React, Vue, Svelte 아일랜드 어디서든 동일한 store를 구독할 수 있습니다.
+
+```ts
+// stores/theme.ts
+import { atom } from 'nanostores';
+export const $isDark = atom(false);
+
+// 어떤 아일랜드에서든 동일한 상태를 구독
+import { useStore } from '@nanostores/react';
+const dark = useStore($isDark);
+```
+
+공유할 상태가 늘어나면 도입을 고려할 것 같습니다.
+</aside>
+
+**`.astro` 파일의 타입 경험이 아쉽습니다.**
+Astro 5부터 `getStaticPaths` 반환값에서 `Astro.props` 타입이 추론되고, `InferGetStaticPropsType` 헬퍼도 제공됩니다.  
+하지만 `.astro` 템플릿 영역은 `.tsx`만큼 IDE 지원이 촘촘하지 않습니다. 자동완성이나 리팩터링 도구가 JSX보다 느리거나 빠지는 경우가 있어서, React 컴포넌트를 작성할 때와 체감 차이가 있습니다.
+
+**라우트별 에러 처리가 제한적입니다.**
+Next.js는 `error.tsx`, `not-found.tsx`로 라우트마다 세밀한 에러 처리가 가능하고, `Suspense` + `ErrorBoundary` 조합으로 비동기 상태를 선언적으로 다룰 수 있습니다.  
+Astro에서는 `404.astro` 정도만 가능하고, 컴포넌트 레벨의 에러 바운더리는 직접 구현해야 합니다.
+
+---
+
+## 언제 무엇을 선택할까
+
+| Astro가 맞는 경우 | Next.js가 맞는 경우 |
+|---|---|
+| 블로그, 포트폴리오, 문서 사이트 | SaaS 대시보드, E-commerce |
+| 콘텐츠 중심 정적 사이트 | 복잡한 인터랙션이 많은 앱 |
+| JavaScript를 최소화하고 싶을 때 | React 생태계를 전부 활용할 때 |
+| 여러 UI 프레임워크를 혼용할 때 | 캐싱/ISR 세밀 제어가 필요할 때 |
+
+둘 다 좋은 프레임워크입니다.
+
+"내가 만드는 게 콘텐츠 사이트인가, 애플리케이션인가" 의 기준을 잡는게 좋을것 같습니다.  
+예를들어, 블로그를 만든다면 Astro, 사용자 인터랙션이 핵심인 서비스라면 Next.js가 좀 더 적합하다고 생각이 들고 있습니다.
+
+---
+
+## 참고
+
+- [State of JavaScript 2025 — Meta-Frameworks](https://2025.stateofjs.com/en-US/libraries/meta-frameworks/)
+- [Why Astro?](https://docs.astro.build/en/concepts/why-astro/)
+- [Astro Islands](https://docs.astro.build/en/concepts/islands/)
+- [Share state between islands](https://docs.astro.build/en/recipes/sharing-state-islands/)
+- [Islands Architecture](https://www.patterns.dev/vanilla/islands-architecture/)
