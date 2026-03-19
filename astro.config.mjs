@@ -10,6 +10,10 @@ import rehypeExternalLinks from 'rehype-external-links';
 export default defineConfig({
   output: 'static',
   site: 'https://bbinya1224.github.io',
+  trailingSlash: 'never',
+  build: {
+    format: 'file',
+  },
   integrations: [
     react(),
     mdx(),
